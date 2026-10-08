@@ -144,7 +144,10 @@ country header (`x-vercel-ip-country` or `cf-ipcountry`).
 ## Adding a debate
 
 1. Add an entry to `DEBATES` in `src/lib/debates.ts` (names, colours, shirt
-   numbers, copy, SEO).
+   numbers, copy, SEO). Optionally add `artwork`: a landscape image split down
+   the middle (first option on the left), placed in `src/assets/debates/`. It
+   becomes the vote board's background; without it the board shows the shirt
+   numbers.
 2. Insert the matching rows (same slugs) in a new migration:
 
    ```sql
@@ -169,6 +172,7 @@ src/components/debate/   arena (vote + reveal), share panel, results board, edit
 src/lib/                 debate registry, results maths, formatting, SEO helpers
 src/lib/server/          Supabase client, vote processing, network/IP handling
 src/lib/card/            share card and OG image renderer
+src/assets/debates/      vote board artwork
 supabase/migrations/     schema, functions, access control, launch debate
 supabase/tests/          SQL assertions
 tests/                   unit tests (Vitest)

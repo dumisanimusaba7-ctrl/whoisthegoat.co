@@ -7,6 +7,10 @@
  * `debate_options` rows with the same slugs.
  */
 
+import type { StaticImageData } from "next/image";
+
+import messiVsRonaldoArtwork from "@/assets/debates/messi-vs-ronaldo.jpg";
+
 export type Sport = "football" | "basketball" | "tennis" | "boxing" | "formula-1";
 
 export type DebateOption = {
@@ -17,7 +21,8 @@ export type DebateOption = {
   /** Used in calls to action and headlines: "VOTE MESSI". */
   shortName: string;
   country: { code: string; name: string };
-  /** The shirt number the player is synonymous with. */
+  /** The shirt number the player is synonymous with (share cards, and the
+   * vote board when the debate has no artwork). */
   number: string;
   /** Accent colour. Used sparingly: bars, chips and the shirt number. */
   color: string;
@@ -37,6 +42,16 @@ export type Debate = {
   question: string;
   /** Two-sided face-off. The data layer supports more options; the arena UI is built for two. */
   options: [DebateOption, DebateOption];
+  /**
+   * Optional background for the vote board, split down the middle to match
+   * the two sides (first option on the left). Without it, the board shows
+   * each player's shirt number instead.
+   */
+  artwork?: {
+    image: StaticImageData;
+    /** CSS object-position, to keep faces in frame as the board crops. */
+    position?: string;
+  };
   seo: { title: string; description: string; keywords: string[] };
   intro: string[];
   taleOfTheTape: TaleOfTheTapeRow[];
@@ -86,6 +101,7 @@ export const DEBATES: Debate[] = [
         ],
       },
     ],
+    artwork: { image: messiVsRonaldoArtwork, position: "50% 22%" },
     seo: {
       title: "Messi vs Ronaldo: Who Is the GOAT? Vote Now",
       description:

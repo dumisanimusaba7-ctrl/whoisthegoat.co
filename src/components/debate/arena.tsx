@@ -1,11 +1,12 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
 
 import { InlineScript } from "@/components/inline-script";
 import { AnimatedNumber } from "@/components/ui/animated-number";
 import { LiveDot } from "@/components/ui/live-dot";
-import { getOption, SPORT_LABELS, type DebateOption } from "@/lib/debates";
+import { getOption, SPORT_LABELS, type Debate, type DebateOption } from "@/lib/debates";
 import { countryFlag, formatCount, pluralize } from "@/lib/format";
 import { optionPercentages, type DebateResults } from "@/lib/results";
 import { prevotedScript } from "@/lib/vote-storage";
@@ -80,7 +81,8 @@ export function Arena({ banner }: { banner?: ReactNode }) {
       </div>
 
       <div className="relative mx-auto mt-8 max-w-6xl sm:mt-10 sm:px-6">
-        <div className="relative grid grid-cols-2 border-y border-white/10 sm:border-x">
+        <div className="relative grid grid-cols-2 overflow-hidden border-y border-white/10 sm:border-x">
+          {debate.artwork ? <BoardArtwork artwork={debate.artwork} revealed={revealed} /> : null}
           {debate.options.map((option, index) => (
             <Side
               key={option.slug}
@@ -88,6 +90,7 @@ export function Arena({ banner }: { banner?: ReactNode }) {
               align={index === 0 ? "start" : "end"}
               vote={vote}
               percent={percents[index]}
+              showNumber={!debate.artwork}
               disabled={busy || vote.phase === "checking"}
               onVote={castVote}
             />
@@ -123,11 +126,37 @@ export function Arena({ banner }: { banner?: ReactNode }) {
   );
 }
 
+/**
+ * The debate's artwork behind both halves of the board, split at the seam.
+ * Decorative: names, flags and results are all in the text above it.
+ */
+function BoardArtwork({ artwork, revealed }: { artwork: NonNullable<Debate["artwork"]>; revealed: boolean }) {
+  return (
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+      <Image
+        src={artwork.image}
+        alt=""
+        fill
+        placeholder="blur"
+        loading="eager"
+        fetchPriority="high"
+        sizes="(min-width: 1200px) 1104px, (min-width: 640px) calc(100vw - 48px), 100vw"
+        className={`object-cover transition-opacity duration-700 ${revealed ? "opacity-60" : ""}`}
+        style={{ objectPosition: artwork.position ?? "50% 50%" }}
+      />
+      {/* Scrims keep the flags (top) and names, buttons and results (bottom) legible. */}
+      <div className="absolute inset-x-0 top-0 h-1/3 bg-linear-to-b from-ink/70 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-3/4 bg-linear-to-t from-ink via-ink/70 to-transparent" />
+    </div>
+  );
+}
+
 function Side({
   option,
   align,
   vote,
   percent,
+  showNumber,
   disabled,
   onVote,
 }: {
@@ -135,6 +164,8 @@ function Side({
   align: "start" | "end";
   vote: VoteState;
   percent: number;
+  /** Shirt number behind the player, used when the debate has no artwork. */
+  showNumber: boolean;
   disabled: boolean;
   onVote: (choice: string) => void;
 }) {
@@ -147,16 +178,18 @@ function Side({
 
   return (
     <div
-      className={`relative flex min-h-[19.5rem] flex-col overflow-hidden px-4 pb-5 pt-5 sm:min-h-[24rem] sm:p-8 ${end ? "items-end text-right" : ""}`}
+      className={`relative flex min-h-[19.5rem] flex-col overflow-hidden px-4 pb-5 pt-5 sm:min-h-[24rem] sm:p-8 lg:min-h-[28rem] ${end ? "items-end text-right" : ""}`}
       style={{ "--accent": option.color, "--on-accent": option.onColor } as CSSProperties}
     >
       <span aria-hidden="true" className="absolute inset-x-0 top-0 h-1" style={{ background: option.color }} />
-      <span
-        aria-hidden="true"
-        className={`ghost-number absolute top-3 transition-opacity duration-700 ${end ? "right-2 sm:right-6" : "left-2 sm:left-6"} ${revealed ? "opacity-30" : ""}`}
-      >
-        {option.number}
-      </span>
+      {showNumber ? (
+        <span
+          aria-hidden="true"
+          className={`ghost-number absolute top-3 transition-opacity duration-700 ${end ? "right-2 sm:right-6" : "left-2 sm:left-6"} ${revealed ? "opacity-30" : ""}`}
+        >
+          {option.number}
+        </span>
+      ) : null}
 
       <p className="type-label relative flex items-center gap-1.5 text-white/85">
         <span aria-hidden="true" className="text-[0.95rem] leading-none tracking-normal">
@@ -166,7 +199,7 @@ function Side({
       </p>
 
       <div className={`relative mt-auto transition-opacity duration-500 ${dimmed ? "opacity-45" : ""}`}>
-        <p className="text-[0.8rem] font-bold uppercase tracking-[0.1em] text-mute-dark [font-stretch:112.5%] sm:text-base">
+        <p className="text-[0.8rem] font-bold uppercase tracking-[0.1em] text-white/75 [font-stretch:112.5%] sm:text-base">
           {option.firstName}
         </p>
         <p className="player-name type-display mt-1">{option.shortName}</p>
