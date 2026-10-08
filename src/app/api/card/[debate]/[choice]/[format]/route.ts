@@ -6,7 +6,8 @@ import { edgeCacheHeaders } from "@/lib/server/request";
 import { loadCardResults } from "@/lib/server/card-results";
 
 /**
- * Personal share card: /api/card/messi-vs-ronaldo/messi/story
+ * Personal share card: /api/card/messi-vs-ronaldo/messi/post (4:5) or
+ * /og (the link preview for the sharer's link).
  *
  * The figures on the card are always read from the database here; nothing
  * in the URL can change them.

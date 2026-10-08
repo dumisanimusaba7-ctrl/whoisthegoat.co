@@ -1,22 +1,24 @@
 import "server-only";
 
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
+
 import { ImageResponse } from "next/og";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
+import sharp from "sharp";
 
 import { MARK_PATH, MARK_VIEWBOX } from "@/components/brand/logo-paths";
 import type { Debate, DebateOption } from "@/lib/debates";
-import { formatCount, formatPercent, pluralize } from "@/lib/format";
+import { formatPercent } from "@/lib/format";
 import { optionPercentages, votesFor, type DebateResults } from "@/lib/results";
 import { SITE_DOMAIN } from "@/lib/site";
 
 import { CARD_FONTS } from "./fonts";
 
 export const CARD_FORMATS = {
-  /** Instagram / WhatsApp / Snapchat Stories, TikTok */
-  story: { width: 1080, height: 1920 },
-  /** Feed posts on Instagram and X */
+  /** The share card: 4:5, for feed posts, stories and chats. */
   post: { width: 1080, height: 1350 },
-  /** Link previews */
+  /** Link previews (Open Graph, X, WhatsApp). */
   og: { width: 1200, height: 630 },
 } as const;
 
@@ -28,22 +30,38 @@ export function isCardFormat(value: string): value is CardFormat {
 
 const INK = "#0A0C14";
 const WHITE = "#FFFFFF";
-const MUTED = "#8B90A0";
-const RULE = "rgba(255,255,255,0.14)";
+const MUTED = "#A3A8B6";
+const RULE = "rgba(255,255,255,0.18)";
 
-type Stats = {
-  total: number;
-  countries: number;
-  percents: [number, number];
-};
+/** Percentages only: the cards never show vote counts. */
+type Stats = { percents: [number, number] };
 
 function statsFrom(debate: Debate, results: DebateResults | null): Stats | null {
   if (!results || results.total <= 0) return null;
   const [a, b] = debate.options;
-  const [pa, pb] = optionPercentages(results.options, [a.slug, b.slug]);
   // Only percentages that come from real counts are shown.
   if (votesFor(results.options, a.slug) + votesFor(results.options, b.slug) <= 0) return null;
-  return { total: results.total, countries: results.countries.count, percents: [pa, pb] };
+  return { percents: optionPercentages(results.options, [a.slug, b.slug]) as [number, number] };
+}
+
+// Photos are embedded as data URLs, read once per server instance. The files
+// are shipped with the image routes by `outputFileTracingIncludes` in
+// next.config.ts, so the bundler needn't trace this path.
+const images = new Map<string, Promise<string | null>>();
+
+function loadImage(path: string): Promise<string | null> {
+  let image = images.get(path);
+  if (!image) {
+    image = readFile(join(/* turbopackIgnore: true */ process.cwd(), path))
+      .then((data) => `data:image/jpeg;base64,${data.toString("base64")}`)
+      .catch((error) => {
+        console.error(`[card] couldn't read ${path}:`, error);
+        images.delete(path);
+        return null;
+      });
+    images.set(path, image);
+  }
+  return image;
 }
 
 /** Largest font size (px) at which an uppercase name fits the given width. */
@@ -76,8 +94,8 @@ function SplitBar({ debate, stats, height, labelSize }: { debate: Debate; stats:
   const [a, b] = debate.options;
   const [pa, pb] = stats.percents;
   return (
-    <div style={{ display: "flex", flexDirection: "column", width: "100%", gap: labelSize * 0.6 }}>
-      <div style={{ display: "flex", width: "100%", height, background: "rgba(255,255,255,0.08)" }}>
+    <div style={{ display: "flex", flexDirection: "column", width: "100%", gap: labelSize * 0.5 }}>
+      <div style={{ display: "flex", width: "100%", height, background: "rgba(255,255,255,0.12)" }}>
         <div style={{ display: "flex", width: `${pa}%`, height: "100%", background: a.color }} />
         <div style={{ display: "flex", width: `${pb}%`, height: "100%", background: b.color }} />
       </div>
@@ -89,213 +107,227 @@ function SplitBar({ debate, stats, height, labelSize }: { debate: Debate; stats:
   );
 }
 
-function totalsLine(stats: Stats): string {
-  const votes = `${formatCount(stats.total)} ${pluralize(stats.total, "VOTE", "VOTES")}`;
-  return stats.countries > 0
-    ? `${votes} · ${formatCount(stats.countries)} ${pluralize(stats.countries, "COUNTRY", "COUNTRIES")}`
-    : votes;
-}
-
-function Frame({ children, padding }: { children: ReactNode; padding: number }) {
+function Canvas({ children }: { children: ReactNode }) {
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        width: "100%",
-        height: "100%",
-        background: INK,
-        color: WHITE,
-        padding,
-        position: "relative",
-        fontFamily: "Text",
-      }}
-    >
+    <div style={{ display: "flex", position: "relative", width: "100%", height: "100%", background: INK, color: WHITE, fontFamily: "Text", overflow: "hidden" }}>
       {children}
     </div>
   );
 }
 
-function GhostNumber({ value, size, right, top }: { value: string; size: number; right: number; top: number }) {
+/** A full-size layer: photo, scrim or the content on top. */
+function Layer({ children, style }: { children?: ReactNode; style?: CSSProperties }) {
+  return <div style={{ display: "flex", position: "absolute", top: 0, left: 0, right: 0, bottom: 0, ...style }}>{children}</div>;
+}
+
+/** Stand-in for a missing photo: the shirt number, large and faint. */
+function GhostNumber({ value, size }: { value: string; size: number }) {
   return (
-    <div
-      style={{
-        position: "absolute",
-        right,
-        top,
-        display: "flex",
-        fontFamily: "Display",
-        fontSize: size,
-        lineHeight: 1,
-        color: "rgba(255,255,255,0.045)",
-      }}
-    >
-      {value}
-    </div>
+    <Layer style={{ alignItems: "center", justifyContent: "center" }}>
+      <div style={{ display: "flex", fontFamily: "Display", fontSize: size, lineHeight: 1, color: "rgba(255,255,255,0.06)" }}>{value}</div>
+    </Layer>
   );
 }
 
-/** "I VOTED MESSI" card in the tall Story or Post format. */
-function VoteCardTall({ debate, option, stats, format }: { debate: Debate; option: DebateOption; stats: Stats | null; format: "story" | "post" }) {
-  const { width } = CARD_FORMATS[format];
-  const story = format === "story";
-  const pad = story ? 88 : 72;
-  const inner = width - pad * 2;
+/** "I VOTED RONALDO" share card, 4:5, over the player's photo. */
+function VoteCard({ debate, option, stats, photo }: { debate: Debate; option: DebateOption; stats: Stats | null; photo: string | null }) {
+  const { width, height } = CARD_FORMATS.post;
+  const pad = 64;
   const index = debate.options.findIndex((o) => o.slug === option.slug);
   const percent = stats ? stats.percents[index] : null;
   const name = option.shortName.toUpperCase();
 
   return (
-    <Frame padding={pad}>
-      <GhostNumber value={option.number} size={story ? 1250 : 980} right={story ? -60 : -50} top={story ? 180 : 110} />
+    <Canvas>
+      {photo ? (
+        // eslint-disable-next-line @next/next/no-img-element -- rendered to an image, not the DOM
+        <img src={photo} width={width} height={height} alt="" style={{ position: "absolute", top: 0, left: 0 }} />
+      ) : (
+        <GhostNumber value={option.number} size={980} />
+      )}
+      {/* Scrims: brand legible at the top, figures at the bottom; the player stays clear in between. */}
+      <Layer style={{ backgroundImage: "linear-gradient(to bottom, rgba(10,12,20,0.82) 0%, rgba(10,12,20,0) 20%, rgba(10,12,20,0) 46%, rgba(10,12,20,0.86) 70%, rgba(10,12,20,0.97) 100%)" }} />
+      <div style={{ display: "flex", position: "absolute", top: 0, left: 0, right: 0, height: 12, background: option.color }} />
 
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: story ? 40 : 30, borderBottom: `2px solid ${RULE}` }}>
-        <Brand size={story ? 64 : 54} />
-        <div style={{ display: "flex", fontFamily: "Wide", fontSize: story ? 22 : 20, letterSpacing: "0.12em", color: MUTED }}>
-          {debate.title.toUpperCase()}
+      <Layer style={{ flexDirection: "column", padding: `${pad + 12}px ${pad}px ${pad}px` }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <Brand size={52} />
+          <div style={{ display: "flex", fontFamily: "Wide", fontSize: 20, letterSpacing: "0.12em", color: WHITE }}>
+            {debate.title.toUpperCase()}
+          </div>
         </div>
-      </div>
 
-      <div style={{ display: "flex", flexDirection: "column", marginTop: story ? 150 : 70 }}>
-        <div style={{ display: "flex", fontFamily: "Wide", fontSize: story ? 38 : 32, letterSpacing: "0.1em", color: MUTED }}>
-          {debate.question.toUpperCase()}
-        </div>
-        <div style={{ display: "flex", fontFamily: "Wide", fontSize: story ? 64 : 52, letterSpacing: "0.06em", color: option.color, marginTop: story ? 56 : 36 }}>
-          I VOTED
-        </div>
-        <div style={{ display: "flex", fontFamily: "Display", fontSize: fitDisplay(name, inner, story ? 360 : 280), lineHeight: 0.86, marginTop: story ? 10 : 6 }}>
-          {name}
-        </div>
-        <div style={{ display: "flex", fontFamily: "Text", fontWeight: 700, fontSize: story ? 34 : 30, letterSpacing: "0.06em", color: MUTED, marginTop: story ? 26 : 18 }}>
-          {`${option.name.toUpperCase()} · ${option.country.name.toUpperCase()}`}
-        </div>
-      </div>
+        <div style={{ display: "flex", flexGrow: 1 }} />
 
-      <div style={{ display: "flex", flexDirection: "column", marginTop: story ? 130 : 56 }}>
+        <div style={{ display: "flex", fontFamily: "Wide", fontSize: 44, letterSpacing: "0.05em" }}>
+          <div style={{ display: "flex", color: option.color }}>I VOTED</div>
+          <div style={{ display: "flex", marginLeft: 18 }}>{name}</div>
+        </div>
+
         {stats && percent !== null ? (
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ display: "flex", fontFamily: "Display", fontSize: story ? 250 : 180, lineHeight: 0.8, color: option.color }}>
-              {formatPercent(percent)}
+            <div style={{ display: "flex", alignItems: "flex-end", marginTop: 14 }}>
+              <div style={{ display: "flex", fontFamily: "Display", fontSize: 220, lineHeight: 0.8, color: option.color }}>
+                {formatPercent(percent)}
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", fontFamily: "Wide", fontSize: 34, lineHeight: 1.1, letterSpacing: "0.04em", marginLeft: 28, paddingBottom: 6 }}>
+                <div style={{ display: "flex" }}>OF THE WORLD</div>
+                <div style={{ display: "flex" }}>AGREES</div>
+              </div>
             </div>
-            <div style={{ display: "flex", fontFamily: "Wide", fontSize: story ? 46 : 38, letterSpacing: "0.05em", marginTop: story ? 30 : 22 }}>
-              OF THE WORLD AGREES
-            </div>
-            <div style={{ display: "flex", marginTop: story ? 70 : 44 }}>
-              <SplitBar debate={debate} stats={stats} height={story ? 22 : 18} labelSize={story ? 30 : 26} />
-            </div>
-            <div style={{ display: "flex", fontFamily: "Wide", fontSize: story ? 28 : 24, letterSpacing: "0.1em", color: MUTED, marginTop: story ? 44 : 30 }}>
-              {totalsLine(stats)}
+            <div style={{ display: "flex", marginTop: 40 }}>
+              <SplitBar debate={debate} stats={stats} height={16} labelSize={26} />
             </div>
           </div>
         ) : (
-          <div style={{ display: "flex", fontFamily: "Wide", fontSize: story ? 46 : 38, letterSpacing: "0.05em" }}>
-            THE WORLD DECIDES.
+          <div style={{ display: "flex", fontFamily: "Display", fontSize: fitDisplay("THE WORLD DECIDES", width - pad * 2, 140), lineHeight: 0.9, marginTop: 16 }}>
+            THE WORLD DECIDES
           </div>
         )}
-      </div>
 
-      <div style={{ display: "flex", flexGrow: 1 }} />
-
-      <div style={{ display: "flex", flexDirection: "column", paddingTop: story ? 44 : 32, borderTop: `2px solid ${RULE}` }}>
-        <div style={{ display: "flex", fontFamily: "Wide", fontSize: story ? 30 : 26, letterSpacing: "0.1em", color: MUTED }}>
-          WHO’S YOUR GOAT?
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 40, paddingTop: 28, borderTop: `2px solid ${RULE}`, fontFamily: "Wide", fontSize: 24, letterSpacing: "0.1em" }}>
+          <div style={{ display: "flex", color: MUTED }}>WHO’S YOUR GOAT?</div>
+          <div style={{ display: "flex" }}>{`VOTE AT ${SITE_DOMAIN.toUpperCase()}`}</div>
         </div>
-        <div style={{ display: "flex", fontFamily: "Wide", fontSize: story ? 48 : 40, letterSpacing: "0.04em", marginTop: 10 }}>
-          {`VOTE AT ${SITE_DOMAIN.toUpperCase()}`}
-        </div>
-      </div>
-    </Frame>
+      </Layer>
+    </Canvas>
   );
 }
 
-/** "I VOTED MESSI" card in the landscape link-preview format. */
-function VoteCardWide({ debate, option, stats }: { debate: Debate; option: DebateOption; stats: Stats | null }) {
+/** The same card as a landscape link preview: figures on the left, photo on the right. */
+function VoteCardWide({ debate, option, stats, photo }: { debate: Debate; option: DebateOption; stats: Stats | null; photo: string | null }) {
+  const { width, height } = CARD_FORMATS.og;
+  // The photo keeps its 4:5 shape at full height.
+  const photoWidth = Math.round((height * 4) / 5);
+  const textWidth = width - photoWidth;
+  const pad = 56;
   const index = debate.options.findIndex((o) => o.slug === option.slug);
   const percent = stats ? stats.percents[index] : null;
   const name = option.shortName.toUpperCase();
-  return (
-    <Frame padding={64}>
-      <GhostNumber value={option.number} size={760} right={-30} top={-90} />
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Brand size={46} />
-        <div style={{ display: "flex", fontFamily: "Wide", fontSize: 18, letterSpacing: "0.14em", color: MUTED }}>
-          {debate.question.toUpperCase()}
-        </div>
-      </div>
-      <div style={{ display: "flex", flexGrow: 1, alignItems: "flex-end", justifyContent: "space-between", gap: 48 }}>
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <div style={{ display: "flex", fontFamily: "Wide", fontSize: 40, letterSpacing: "0.06em", color: option.color }}>I VOTED</div>
-          <div style={{ display: "flex", fontFamily: "Display", fontSize: fitDisplay(name, 560, 230), lineHeight: 0.86, marginTop: 6 }}>{name}</div>
-        </div>
-        {stats && percent !== null ? (
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-            <div style={{ display: "flex", fontFamily: "Display", fontSize: 150, lineHeight: 0.85, color: option.color }}>{formatPercent(percent)}</div>
-            <div style={{ display: "flex", fontFamily: "Wide", fontSize: 26, letterSpacing: "0.05em", marginTop: 14 }}>OF THE WORLD AGREES</div>
-            <div style={{ display: "flex", fontFamily: "Wide", fontSize: 18, letterSpacing: "0.1em", color: MUTED, marginTop: 14 }}>{totalsLine(stats)}</div>
-          </div>
-        ) : null}
-      </div>
-    </Frame>
-  );
-}
 
-/** Debate preview used when a debate link is shared. */
-function DebateCard({ debate, stats }: { debate: Debate; stats: Stats | null }) {
-  const [a, b] = debate.options;
-  // Both names plus "VS" share one line across the 1,072px content width.
-  const nameSize = fitDisplay(a.shortName + b.shortName, 1072 - 120, 150);
   return (
-    <Frame padding={64}>
-      <div style={{ display: "flex", alignItems: "center" }}>
-        <Brand size={46} />
+    <Canvas>
+      <div style={{ display: "flex", position: "absolute", top: 0, right: 0, width: photoWidth, height }}>
+        {photo ? (
+          // eslint-disable-next-line @next/next/no-img-element -- rendered to an image, not the DOM
+          <img src={photo} width={photoWidth} height={height} alt="" />
+        ) : (
+          <GhostNumber value={option.number} size={560} />
+        )}
+        {/* Blend the photo's left edge into the panel. */}
+        <Layer style={{ backgroundImage: "linear-gradient(to right, rgba(10,12,20,1) 0%, rgba(10,12,20,0) 22%)" }} />
       </div>
-      <div style={{ display: "flex", flexDirection: "column", marginTop: 64 }}>
-        <div style={{ display: "flex", fontFamily: "Wide", fontSize: 30, letterSpacing: "0.1em", color: MUTED }}>
-          {debate.question.toUpperCase()}
-        </div>
-        <div style={{ display: "flex", alignItems: "flex-end", gap: 26, marginTop: 14 }}>
-          {[a, b].map((option, i) => (
-            <div key={option.slug} style={{ display: "flex", alignItems: "flex-end", gap: 26 }}>
-              {i === 1 ? (
-                <div style={{ display: "flex", fontFamily: "Wide", fontSize: 34, color: MUTED, paddingBottom: 18 }}>VS</div>
-              ) : null}
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <div style={{ display: "flex", fontFamily: "Display", fontSize: nameSize, lineHeight: 0.86 }}>{option.shortName.toUpperCase()}</div>
-                <div style={{ display: "flex", height: 10, marginTop: 14, background: option.color }} />
-              </div>
+      <div style={{ display: "flex", position: "absolute", top: 0, left: 0, right: 0, height: 10, background: option.color }} />
+
+      <div style={{ display: "flex", flexDirection: "column", position: "absolute", top: 0, left: 0, bottom: 0, width: textWidth, padding: `${pad + 6}px ${pad}px ${pad - 8}px` }}>
+        <Brand size={40} />
+        <div style={{ display: "flex", flexGrow: 1 }} />
+        <div style={{ display: "flex", fontFamily: "Wide", fontSize: 30, letterSpacing: "0.06em", color: option.color }}>I VOTED</div>
+        <div style={{ display: "flex", fontFamily: "Display", fontSize: fitDisplay(name, textWidth - pad * 2, 150), lineHeight: 0.86, marginTop: 6 }}>{name}</div>
+        {stats && percent !== null ? (
+          <div style={{ display: "flex", flexDirection: "column", marginTop: 26 }}>
+            <div style={{ display: "flex", alignItems: "flex-end" }}>
+              <div style={{ display: "flex", fontFamily: "Display", fontSize: 104, lineHeight: 0.8, color: option.color }}>{formatPercent(percent)}</div>
+              <div style={{ display: "flex", fontFamily: "Wide", fontSize: 22, letterSpacing: "0.04em", marginLeft: 20, paddingBottom: 4 }}>OF THE WORLD AGREES</div>
             </div>
-          ))}
-        </div>
-      </div>
-      <div style={{ display: "flex", flexGrow: 1 }} />
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 26, borderTop: `2px solid ${RULE}` }}>
-        <div style={{ display: "flex", fontFamily: "Wide", fontSize: 22, letterSpacing: "0.1em", color: stats ? WHITE : MUTED }}>
-          {stats ? totalsLine(stats) : "THE WORLD DECIDES."}
-        </div>
-        <div style={{ display: "flex", fontFamily: "Wide", fontSize: 22, letterSpacing: "0.1em" }}>
+            <div style={{ display: "flex", marginTop: 26 }}>
+              <SplitBar debate={debate} stats={stats} height={10} labelSize={18} />
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: "flex", fontFamily: "Wide", fontSize: 26, letterSpacing: "0.05em", marginTop: 22 }}>THE WORLD DECIDES.</div>
+        )}
+        <div style={{ display: "flex", fontFamily: "Wide", fontSize: 20, letterSpacing: "0.1em", color: MUTED, marginTop: 28 }}>
           {`VOTE AT ${SITE_DOMAIN.toUpperCase()}`}
         </div>
       </div>
-    </Frame>
+    </Canvas>
   );
 }
 
-export function renderCard(options: {
+/** Link preview for a debate: the face-off artwork with the live split. */
+function DebateCard({ debate, stats, artwork }: { debate: Debate; stats: Stats | null; artwork: string | null }) {
+  const { width } = CARD_FORMATS.og;
+  const [a, b] = debate.options;
+  const pad = 56;
+  // Both names plus "VS" share one line when there are no figures to show.
+  const nameSize = fitDisplay(a.shortName + b.shortName, width - pad * 2 - 120, 130);
+  return (
+    <Canvas>
+      {artwork ? (
+        // The artwork is 1500×827: scaled to the card's width it's 662px tall, so it's cropped slightly at the top.
+        // eslint-disable-next-line @next/next/no-img-element -- rendered to an image, not the DOM
+        <img src={artwork} width={width} height={662} alt="" style={{ position: "absolute", left: 0, top: -8 }} />
+      ) : null}
+      <Layer style={{ backgroundImage: "linear-gradient(to bottom, rgba(10,12,20,0.7) 0%, rgba(10,12,20,0) 26%, rgba(10,12,20,0) 40%, rgba(10,12,20,0.9) 74%, rgba(10,12,20,0.97) 100%)" }} />
+      <div style={{ display: "flex", position: "absolute", top: 0, left: 0, width: width / 2, height: 10, background: a.color }} />
+      <div style={{ display: "flex", position: "absolute", top: 0, right: 0, width: width / 2, height: 10, background: b.color }} />
+
+      <Layer style={{ flexDirection: "column", padding: `${pad}px ${pad}px ${pad - 8}px` }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <Brand size={42} />
+          <div style={{ display: "flex", fontFamily: "Wide", fontSize: 20, letterSpacing: "0.12em" }}>{debate.question.toUpperCase()}</div>
+        </div>
+        <div style={{ display: "flex", flexGrow: 1 }} />
+        {stats ? (
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+              {[a, b].map((option, i) => (
+                <div key={option.slug} style={{ display: "flex", flexDirection: "column", alignItems: i === 0 ? "flex-start" : "flex-end" }}>
+                  <div style={{ display: "flex", fontFamily: "Wide", fontSize: 24, letterSpacing: "0.06em" }}>{option.shortName.toUpperCase()}</div>
+                  <div style={{ display: "flex", fontFamily: "Display", fontSize: 120, lineHeight: 0.82, marginTop: 8, color: option.color }}>{formatPercent(stats.percents[i])}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ display: "flex", width: "100%", height: 12, marginTop: 22, background: "rgba(255,255,255,0.12)" }}>
+              <div style={{ display: "flex", width: `${stats.percents[0]}%`, height: "100%", background: a.color }} />
+              <div style={{ display: "flex", width: `${stats.percents[1]}%`, height: "100%", background: b.color }} />
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: "flex", alignItems: "flex-end", gap: 26 }}>
+            <div style={{ display: "flex", fontFamily: "Display", fontSize: nameSize, lineHeight: 0.86 }}>{a.shortName.toUpperCase()}</div>
+            <div style={{ display: "flex", fontFamily: "Wide", fontSize: 30, color: MUTED, paddingBottom: 14 }}>VS</div>
+            <div style={{ display: "flex", fontFamily: "Display", fontSize: nameSize, lineHeight: 0.86 }}>{b.shortName.toUpperCase()}</div>
+          </div>
+        )}
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 26, fontFamily: "Wide", fontSize: 20, letterSpacing: "0.1em" }}>
+          <div style={{ display: "flex", color: MUTED }}>THE WORLD DECIDES.</div>
+          <div style={{ display: "flex" }}>{`VOTE AT ${SITE_DOMAIN.toUpperCase()}`}</div>
+        </div>
+      </Layer>
+    </Canvas>
+  );
+}
+
+export async function renderCard(options: {
   debate: Debate;
   /** The option the sharer voted for; omit for the debate preview. */
   option?: DebateOption;
   results: DebateResults | null;
   format: CardFormat;
   headers?: Record<string, string>;
-}): ImageResponse {
+}): Promise<Response> {
   const { debate, option, results, format, headers } = options;
   const stats = statsFrom(debate, results);
-  const size = CARD_FORMATS[format];
 
   let element: ReactNode;
-  if (!option) element = <DebateCard debate={debate} stats={stats} />;
-  else if (format === "og") element = <VoteCardWide debate={debate} option={option} stats={stats} />;
-  else element = <VoteCardTall debate={debate} option={option} stats={stats} format={format} />;
+  if (!option) {
+    const artwork = debate.artwork?.file ? await loadImage(debate.artwork.file) : null;
+    element = <DebateCard debate={debate} stats={stats} artwork={artwork} />;
+  } else {
+    const photo = option.cardPhoto ? await loadImage(`assets/cards/${option.cardPhoto}`) : null;
+    element =
+      format === "og" ? (
+        <VoteCardWide debate={debate} option={option} stats={stats} photo={photo} />
+      ) : (
+        <VoteCard debate={debate} option={option} stats={stats} photo={photo} />
+      );
+  }
 
-  return new ImageResponse(element, { ...size, fonts: CARD_FONTS, headers });
+  const png = await new ImageResponse(element, { ...CARD_FORMATS[format], fonts: CARD_FONTS }).arrayBuffer();
+  // Photo cards as PNG run to 1–2.5 MB; as JPEG they're a few hundred KB,
+  // small enough for chat apps to show them in link previews.
+  const jpeg = await sharp(Buffer.from(png)).jpeg({ quality: 84, mozjpeg: true, progressive: true }).toBuffer();
+  return new Response(new Uint8Array(jpeg), { headers: { "Content-Type": "image/jpeg", ...headers } });
 }

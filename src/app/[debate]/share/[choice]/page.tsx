@@ -40,6 +40,7 @@ export async function generateMetadata({ params }: PageProps<"/[debate]/share/[c
     url: `/api/card/${debate.slug}/${option.slug}/og`,
     width: 1200,
     height: 630,
+    type: "image/jpeg",
     alt: `I voted ${option.name}. ${debate.question}`,
   };
   return debateMetadata(debate, `/${debate.slug}`, {

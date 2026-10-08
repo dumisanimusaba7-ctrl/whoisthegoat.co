@@ -90,9 +90,20 @@ describe("setup check", () => {
         { name: "VOTE_HASH_SECRET", status: "problem", detail: "Only 5 characters" },
       ],
       ready: false,
+      sharing: true,
     });
     expect(report).toContain("Deployment: preview · branch main · commit abc1234");
     expect(report).toMatch(/PROBLEM\s+VOTE_HASH_SECRET\s+Only 5 characters/);
     expect(report).toContain("Voting is NOT ready.");
+  });
+
+  it("says when voting works but shared links don't", () => {
+    const report = formatSetupReport({
+      deployment: { environment: "production", branch: null, commit: null },
+      checks: [{ name: "Share links", status: "problem", detail: "https://whoisthegoat.co isn't reachable yet" }],
+      ready: true,
+      sharing: false,
+    });
+    expect(report).toContain("Voting is ready, but shared links won't work yet");
   });
 });

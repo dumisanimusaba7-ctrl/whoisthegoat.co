@@ -1,6 +1,10 @@
 import "server-only";
 
+import { lookup } from "node:dns/promises";
+
+import { DEBATES } from "@/lib/debates";
 import { formatCount, pluralize } from "@/lib/format";
+import { getSiteUrl } from "@/lib/site";
 
 import { configSources, isDatabaseConfigured, MIN_VOTE_HASH_SECRET_LENGTH, serverConfig } from "./config";
 import { getSupabase } from "./supabase";
@@ -236,7 +240,63 @@ async function checkVoting(): Promise<Check> {
   }
 }
 
-export async function runSetupCheck(): Promise<{ deployment: Deployment; checks: Check[]; ready: boolean }> {
+/**
+ * Shared links and their preview images use the site's public address, not
+ * the address this page was opened on. Checks that address resolves, then
+ * fetches a preview image from it the way a chat app or social network would.
+ */
+async function checkShareLinks(requestHost: string | null): Promise<Check> {
+  const name = "Share links";
+  const site = getSiteUrl();
+  const source = process.env.NEXT_PUBLIC_SITE_URL ? "NEXT_PUBLIC_SITE_URL" : "Vercel's production address";
+  if (["localhost", "127.0.0.1"].includes(site.hostname)) {
+    return { name, status: "info", detail: `Links point to ${site.origin} (local only)` };
+  }
+
+  const useThisHost =
+    requestHost && requestHost !== site.host
+      ? ` Until then, set NEXT_PUBLIC_SITE_URL to https://${requestHost} and redeploy.`
+      : "";
+  try {
+    await lookup(site.hostname);
+  } catch {
+    return {
+      name,
+      status: "problem",
+      detail: `Links and preview images use ${site.origin} (from ${source}), which isn't reachable yet, so shared links won't open or show an image. Connect the domain in Vercel → Settings → Domains.${useThisHost}`,
+    };
+  }
+
+  const debate = DEBATES[0];
+  const preview = new URL(`/api/card/${debate.slug}/${debate.options[0].slug}/og`, site);
+  try {
+    const response = await fetch(preview, { cache: "no-store", signal: AbortSignal.timeout(10_000) });
+    const type = response.headers.get("content-type") ?? "";
+    if (!response.ok || !type.startsWith("image/")) {
+      const protectedHint =
+        response.status === 401 || response.status === 403
+          ? " The address is password-protected (Vercel → Settings → Deployment Protection), so apps can't load previews from it."
+          : "";
+      return {
+        name,
+        status: "problem",
+        detail: `The preview image at ${preview.href} answered HTTP ${response.status}${type ? ` (${type.split(";")[0]})` : ""}.${protectedHint}${useThisHost}`,
+      };
+    }
+    const kb = Math.round((await response.arrayBuffer()).byteLength / 1024);
+    return { name, status: "ok", detail: `Links use ${site.origin}; preview images load (${kb} KB)` };
+  } catch (error) {
+    return {
+      name,
+      status: "problem",
+      detail: `Couldn't load the preview image at ${preview.href}: ${String(error).slice(0, 120)}.${useThisHost}`,
+    };
+  }
+}
+
+export async function runSetupCheck(
+  requestHost: string | null = null,
+): Promise<{ deployment: Deployment; checks: Check[]; ready: boolean; sharing: boolean }> {
   const deployment = currentDeployment();
   const settings = [
     checkSupabaseUrl(serverConfig.supabaseUrl, deployment.environment),
@@ -245,12 +305,15 @@ export async function runSetupCheck(): Promise<{ deployment: Deployment; checks:
   ];
 
   const canReachDatabase = isDatabaseConfigured() && settings[0].status === "ok";
-  const database: Check[] = canReachDatabase
-    ? await Promise.all([checkResults(), checkVoting()])
-    : [
-        { name: "Database: results", status: "skipped", detail: "Fix SUPABASE_URL and SUPABASE_SECRET_KEY first." },
-        { name: "Database: voting", status: "skipped", detail: "Fix SUPABASE_URL and SUPABASE_SECRET_KEY first." },
-      ];
+  const [database, shareLinks] = await Promise.all([
+    canReachDatabase
+      ? Promise.all([checkResults(), checkVoting()])
+      : ([
+          { name: "Database: results", status: "skipped", detail: "Fix SUPABASE_URL and SUPABASE_SECRET_KEY first." },
+          { name: "Database: voting", status: "skipped", detail: "Fix SUPABASE_URL and SUPABASE_SECRET_KEY first." },
+        ] satisfies Check[]),
+    checkShareLinks(requestHost),
+  ]);
 
   const extras: Check[] = [
     { name: "Bot protection", status: "info", detail: serverConfig.botProtection ? "On (Vercel BotID)" : "Off" },
@@ -261,12 +324,18 @@ export async function runSetupCheck(): Promise<{ deployment: Deployment; checks:
     },
   ];
 
-  const checks = [...settings, ...database, ...extras];
-  const ready = checks.every((check) => check.status === "ok" || check.status === "info");
-  return { deployment, checks, ready };
+  const voting = [...settings, ...database];
+  const ready = voting.every((check) => check.status === "ok");
+  const sharing = shareLinks.status !== "problem";
+  return { deployment, checks: [...voting, shareLinks, ...extras], ready, sharing };
 }
 
-export function formatSetupReport({ deployment, checks, ready }: Awaited<ReturnType<typeof runSetupCheck>>): string {
+export function formatSetupReport({
+  deployment,
+  checks,
+  ready,
+  sharing,
+}: Awaited<ReturnType<typeof runSetupCheck>>): string {
   const where = [
     `Deployment: ${deployment.environment}`,
     deployment.branch ? `branch ${deployment.branch}` : null,
@@ -279,9 +348,11 @@ export function formatSetupReport({ deployment, checks, ready }: Awaited<ReturnT
   const width = Math.max(...checks.map((check) => check.name.length));
   const rows = checks.map((check) => `${label[check.status].padEnd(8)} ${check.name.padEnd(width)}  ${check.detail}`);
 
-  const verdict = ready
-    ? "Voting is ready."
-    : "Voting is NOT ready. Fix the PROBLEM lines, then redeploy (Vercel only applies variable changes to new deployments).";
+  const verdict = !ready
+    ? "Voting is NOT ready. Fix the PROBLEM lines, then redeploy (Vercel only applies variable changes to new deployments)."
+    : sharing
+      ? "Voting is ready."
+      : "Voting is ready, but shared links won't work yet: see Share links above.";
 
   return ["WHOISTHEGOAT.CO setup check", where, "", ...rows, "", verdict, ""].join("\n");
 }

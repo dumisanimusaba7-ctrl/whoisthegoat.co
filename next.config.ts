@@ -15,6 +15,11 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   poweredByHeader: false,
+  // Fonts and photos the image routes read from disk at request time.
+  outputFileTracingIncludes: {
+    "/api/card/**": ["./assets/**/*"],
+    "/api/og/**": ["./assets/**/*", "./src/assets/debates/**/*"],
+  },
   turbopack: {
     rules: {
       "*.css": {

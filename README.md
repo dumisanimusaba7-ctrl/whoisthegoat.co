@@ -18,7 +18,7 @@ the vote database.
 - **Supabase** (Postgres): votes, counters and all vote logic live in SQL functions
 - **Vercel**: hosting, edge cache, geolocation, BotID
 - **Tailwind CSS v4**, self-hosted **Archivo** variable font
-- `next/og` for share cards and link previews
+- `next/og` for share cards and link previews, encoded to JPEG with `sharp`
 - **Vitest** for unit tests, plain SQL assertions for the database
 
 ## How it works
@@ -27,7 +27,7 @@ the vote database.
 Browser ──► CDN (static pages, prerendered, revalidated every 30s)
    │
    ├─► GET  /api/results/:debate        edge-cached 5s, polled by open pages
-   ├─► GET  /api/card/:debate/:choice/:format   PNG share card, edge-cached 60s
+   ├─► GET  /api/card/:debate/:choice/post|og   share card (4:5) / its link preview, JPEG, edge-cached 60s
    ├─► GET  /api/og/:debate             link-preview image, edge-cached 5 min
    └─► POST /api/vote                   never cached
             │  origin check → BotID → cookie voter id → HMAC(voter), HMAC(network)
@@ -171,7 +171,10 @@ country header (`x-vercel-ip-country` or `cf-ipcountry`).
    numbers. Optionally add `figure: { kit, celebration }` to each option: the
    kit colours dress the runner that plays on the voter's result bar, and
    `celebration` picks its finish (`"siu"` or `"knee-slide"`). Options without
-   a figure reveal with the bars alone.
+   a figure reveal with the bars alone. Optionally add `cardPhoto`: a 1080×1350
+   (4:5) JPEG in `assets/cards/` for that player's share card and link preview.
+   Use photos you have the rights to publish. To show the artwork in the
+   debate's link preview, also set `artwork.file` to its path.
 2. Insert the matching rows (same slugs) in a new migration:
 
    ```sql

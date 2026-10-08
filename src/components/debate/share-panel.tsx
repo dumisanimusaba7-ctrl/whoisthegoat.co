@@ -8,13 +8,6 @@ import { optionPercentages } from "@/lib/results";
 
 import { useDebate } from "./debate-provider";
 
-type Format = "story" | "post";
-
-const FORMATS: { id: Format; label: string; hint: string; ratio: string }[] = [
-  { id: "story", label: "Story", hint: "9:16, for Instagram, WhatsApp, TikTok and Snapchat stories", ratio: "aspect-[9/16]" },
-  { id: "post", label: "Post", hint: "4:5, for feed posts and X", ratio: "aspect-[4/5]" },
-];
-
 type LoadedCard = { src: string; url: string; file: File } | { src: string; error: true };
 
 /**
@@ -26,12 +19,12 @@ type LoadedCard = { src: string; url: string; file: File } | { src: string; erro
 export function SharePanel() {
   const { debate, siteUrl, results, vote } = useDebate();
   const option = vote.choice ? getOption(debate, vote.choice) : undefined;
-  const [format, setFormat] = useState<Format>("story");
   const [card, setCard] = useState<LoadedCard | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  const src = option ? `/api/card/${debate.slug}/${option.slug}/${format}` : null;
-  const filename = option ? `whoisthegoat-${option.slug}-${format}.png` : "whoisthegoat.png";
+  // One 4:5 card: it fits feed posts as is, and stories and chats show it whole.
+  const src = option ? `/api/card/${debate.slug}/${option.slug}/post` : null;
+  const filename = option ? `whoisthegoat-${option.slug}.jpg` : "whoisthegoat.jpg";
 
   useEffect(() => {
     if (!src) return;
@@ -45,7 +38,7 @@ export function SharePanel() {
       .then((blob) => {
         if (cancelled) return;
         objectUrl = URL.createObjectURL(blob);
-        setCard({ src, url: objectUrl, file: new File([blob], filename, { type: "image/png" }) });
+        setCard({ src, url: objectUrl, file: new File([blob], filename, { type: "image/jpeg" }) });
       })
       .catch(() => {
         if (!cancelled) setCard({ src, error: true });
@@ -69,7 +62,13 @@ export function SharePanel() {
   const failed = Boolean(current && "error" in current);
 
   const index = debate.options.findIndex((o) => o.slug === option.slug);
-  const percent = results && results.total > 0 ? optionPercentages(results.options, debate.options.map((o) => o.slug))[index] : null;
+  const percent =
+    results && results.total > 0
+      ? optionPercentages(
+          results.options,
+          debate.options.map((o) => o.slug),
+        )[index]
+      : null;
   const shareUrl = `${siteUrl}/${debate.slug}/share/${option.slug}`;
   const shareText =
     percent !== null
@@ -103,7 +102,6 @@ export function SharePanel() {
 
   const xHref = `https://x.com/intent/post?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
   const waHref = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`;
-  const activeFormat = FORMATS.find((f) => f.id === format) ?? FORMATS[0];
 
   return (
     <section id="share" aria-labelledby="share-title" className="bg-paper">
@@ -113,31 +111,9 @@ export function SharePanel() {
             Share your vote
           </h2>
           <p className="mt-3 max-w-md leading-relaxed text-ink/75">
-            Your pick, and how much of the world agrees with you, on one card. Made for your story or the group chat.
+            Your pick, and how much of the world agrees with you, on one card. Post it to your story or feed, or send it
+            to the group chat. Shared links show the card too.
           </p>
-
-          <fieldset className="mt-8">
-            <legend className="type-label text-mute">Card size</legend>
-            <div className="mt-2 inline-flex border border-ink">
-              {FORMATS.map((f) => (
-                <label
-                  key={f.id}
-                  className={`flex h-11 cursor-pointer items-center px-5 text-sm font-semibold transition-colors duration-[var(--duration-micro)] has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 ${format === f.id ? "bg-ink text-white" : "text-ink hover:bg-paper-2"}`}
-                >
-                  <input
-                    type="radio"
-                    name="card-format"
-                    value={f.id}
-                    checked={format === f.id}
-                    onChange={() => setFormat(f.id)}
-                    className="sr-only"
-                  />
-                  {f.label}
-                </label>
-              ))}
-            </div>
-            <p className="mt-2 text-sm text-mute">{activeFormat.hint}</p>
-          </fieldset>
 
           <div className="mt-8 grid gap-3 sm:max-w-md sm:grid-cols-2">
             <button type="button" onClick={share} className="btn btn-dark h-13">
@@ -154,10 +130,20 @@ export function SharePanel() {
             <button type="button" onClick={copyLink} className="link inline-flex min-h-11 items-center">
               Copy link
             </button>
-            <a href={xHref} target="_blank" rel="noopener noreferrer" className="link inline-flex min-h-11 items-center">
+            <a
+              href={xHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="link inline-flex min-h-11 items-center"
+            >
               Post on X
             </a>
-            <a href={waHref} target="_blank" rel="noopener noreferrer" className="link inline-flex min-h-11 items-center">
+            <a
+              href={waHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="link inline-flex min-h-11 items-center"
+            >
               WhatsApp
             </a>
             <span role="status" className="font-normal text-mute">
@@ -167,9 +153,9 @@ export function SharePanel() {
         </div>
 
         <figure className="mx-auto w-full max-w-[20rem] lg:max-w-none">
-          <div className={`relative w-full overflow-hidden bg-ink ${activeFormat.ratio}`}>
+          <div className="relative aspect-[4/5] w-full overflow-hidden bg-ink">
             {ready ? (
-              // eslint-disable-next-line @next/next/no-img-element -- generated PNG served as a blob URL
+              // eslint-disable-next-line @next/next/no-img-element -- generated image served as a blob URL
               <img
                 key={ready.url}
                 src={ready.url}

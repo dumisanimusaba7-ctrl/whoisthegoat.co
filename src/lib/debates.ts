@@ -36,6 +36,9 @@ export type DebateOption = {
   caseFor: string[];
   /** The figure that runs the result bar after a vote; omit for bars only. */
   figure?: { kit: Kit; celebration: CelebrationKind };
+  /** Photo for the share card and link preview: a 1080×1350 (4:5) JPEG in
+   * assets/cards/. Without one, the card shows the shirt number instead. */
+  cardPhoto?: string;
 };
 
 export type TaleOfTheTapeRow = { label: string; values: [string, string] };
@@ -56,6 +59,8 @@ export type Debate = {
     image: StaticImageData;
     /** CSS object-position, to keep faces in frame as the board crops. */
     position?: string;
+    /** The same image as a path from the project root, for the link-preview image. */
+    file?: string;
   };
   seo: { title: string; description: string; keywords: string[] };
   intro: string[];
@@ -96,6 +101,7 @@ export const DEBATES: Debate[] = [
             boots: "#e9edf2",
           },
         },
+        cardPhoto: "messi.jpg",
         caseFor: [
           "Eight Ballon d’Or awards, the most in the history of the prize.",
           "World Cup winner in 2022, and the only player to win the tournament’s Golden Ball twice (2014, 2022).",
@@ -127,6 +133,7 @@ export const DEBATES: Debate[] = [
             boots: "#d9dde3",
           },
         },
+        cardPhoto: "ronaldo.jpg",
         caseFor: [
           "Five Ballon d’Or awards and five Champions League titles, won with Manchester United and Real Madrid.",
           "The all-time leading scorer in Champions League history.",
@@ -135,7 +142,11 @@ export const DEBATES: Debate[] = [
         ],
       },
     ],
-    artwork: { image: messiVsRonaldoArtwork, position: "50% 22%" },
+    artwork: {
+      image: messiVsRonaldoArtwork,
+      position: "50% 22%",
+      file: "src/assets/debates/messi-vs-ronaldo.jpg",
+    },
     seo: {
       title: "Messi vs Ronaldo: Who Is the GOAT? Vote Now",
       description:

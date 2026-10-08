@@ -8,6 +8,7 @@ export function debateOgImage(debate: Debate) {
     url: `/api/og/${debate.slug}`,
     width: 1200,
     height: 630,
+    type: "image/jpeg",
     alt: `${debate.question} ${debate.title}: the world decides. Vote at ${SITE_NAME}.`,
   };
 }
