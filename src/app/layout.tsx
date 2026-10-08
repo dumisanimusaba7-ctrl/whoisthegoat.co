@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { ADSENSE_CLIENT, adsEnabled } from "@/lib/ads";
 import { absoluteUrl, getSiteUrl, SITE_DESCRIPTION, SITE_NAME } from "@/lib/site";
+import { voteTestMode } from "@/lib/test-mode";
 
 import { archivo } from "./fonts";
 import "./globals.css";
@@ -56,6 +57,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           Skip to content
         </a>
         <SiteHeader />
+        {voteTestMode ? (
+          <p role="status" className="bg-warning px-4 py-2.5 text-center text-sm font-semibold text-ink">
+            Test mode is on: this browser can vote again and again, and every vote is counted. Turn it off before
+            launch.
+          </p>
+        ) : null}
         <main id="main" className="flex-1">
           {children}
         </main>

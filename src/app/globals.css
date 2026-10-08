@@ -13,6 +13,8 @@
   --color-mute: #5b6070;
   --color-mute-dark: #8f94a3;
   --color-error: #ff8a80;
+  /* Notices that must not be missed, e.g. test mode. */
+  --color-warning: #ffd400;
 
   --font-sans: var(--font-archivo), "Helvetica Neue", Helvetica, Arial, sans-serif;
 

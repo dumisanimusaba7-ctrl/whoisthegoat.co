@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { checkBotId } from "botid/server";
 import { NextResponse, type NextRequest } from "next/server";
 
@@ -6,6 +8,7 @@ import { isVotingConfigured, serverConfig } from "@/lib/server/config";
 import { clientCountry, clientIp, networkKey } from "@/lib/server/network";
 import { isSameOriginRequest, NO_STORE, readJsonBody } from "@/lib/server/request";
 import { castVote, resolveVoterId, VOTER_COOKIE, VOTER_COOKIE_MAX_AGE } from "@/lib/server/vote";
+import { voteTestMode } from "@/lib/test-mode";
 import type { VoteRejected, VoteResponse } from "@/lib/vote-api";
 
 const REJECTIONS: Record<VoteRejected["status"], { status: number; message: string }> = {
@@ -50,7 +53,10 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const voter = resolveVoterId(request.cookies.get(VOTER_COOKIE)?.value);
+  // In test mode every vote counts as a new voter, and no cookie is left behind.
+  const voter = voteTestMode
+    ? { id: randomUUID(), isNew: false }
+    : resolveVoterId(request.cookies.get(VOTER_COOKIE)?.value);
   const ip = clientIp(request.headers);
 
   let result;

@@ -9,6 +9,7 @@ import { AnimatedNumber } from "@/components/ui/animated-number";
 import { getOption, type Debate, type DebateOption } from "@/lib/debates";
 import { formatCount, pluralize } from "@/lib/format";
 import { optionPercentages, type DebateResults } from "@/lib/results";
+import { voteTestMode } from "@/lib/test-mode";
 import { prevotedScript } from "@/lib/vote-storage";
 
 import { useDebate, type VoteState } from "./debate-provider";
@@ -56,7 +57,7 @@ export function Arena({ banner }: { banner?: ReactNode }) {
       style={{ "--chars": Math.max(a.shortName.length, b.shortName.length) } as CSSProperties}
       suppressHydrationWarning
     >
-      <InlineScript html={prevotedScript(debate.slug, id, [a.slug, b.slug])} />
+      {voteTestMode ? null : <InlineScript html={prevotedScript(debate.slug, id, [a.slug, b.slug])} />}
 
       <div className="mx-auto max-w-6xl px-4 pt-8 sm:px-6 sm:pt-12">
         {banner}
@@ -257,7 +258,7 @@ function VoteCount({ results, unavailable }: { results: DebateResults | null; un
 
 /** After voting: the result bars (where the celebration plays), then sharing. */
 function RevealStrip({ results, celebrate }: { results: DebateResults | null; celebrate: boolean }) {
-  const { debate, vote } = useDebate();
+  const { debate, vote, resetVote } = useDebate();
   const ref = useRef<HTMLDivElement>(null);
   const kind = vote.choice ? getOption(debate, vote.choice)?.figure?.celebration : undefined;
 
@@ -289,12 +290,26 @@ function RevealStrip({ results, celebrate }: { results: DebateResults | null; ce
             </>
           ) : null}
         </p>
-        <a href="#share" className="btn btn-light w-full sm:w-auto">
-          Share your vote
-          <svg aria-hidden="true" viewBox="0 0 12 12" className="size-3" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M6 1.5v9M2 6.5l4 4 4-4" />
-          </svg>
-        </a>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          {voteTestMode ? (
+            <button
+              type="button"
+              onClick={() => {
+                resetVote();
+                ref.current?.closest("section")?.scrollIntoView({ block: "start" });
+              }}
+              className="btn btn-outline w-full text-white sm:w-auto"
+            >
+              Vote again
+            </button>
+          ) : null}
+          <a href="#share" className="btn btn-light w-full sm:w-auto">
+            Share your vote
+            <svg aria-hidden="true" viewBox="0 0 12 12" className="size-3" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M6 1.5v9M2 6.5l4 4 4-4" />
+            </svg>
+          </a>
+        </div>
       </div>
     </div>
   );

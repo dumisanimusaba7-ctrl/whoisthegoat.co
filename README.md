@@ -120,6 +120,20 @@ npm run check      # lint + typecheck + unit tests
 npm run build && npm start
 ```
 
+## Testing before launch
+
+- **Vote more than once.** Set `NEXT_PUBLIC_VOTE_TEST_MODE=1` and redeploy. Each
+  vote then counts as a new voter, nothing is remembered between page loads, and
+  the result has a "Vote again" button. A yellow notice on every page says test
+  mode is on. Network rate limits still apply (`VOTE_LIMIT_PER_MINUTE`). Remove
+  the variable and redeploy before launch. Without test mode, a private window
+  is a new voter: close it and open a new one to vote again.
+- **Clear test votes.** Run `supabase/reset_votes.sql` in the SQL Editor. It
+  deletes every vote on the debate and resets the counters and rate limits, so
+  only use it before launch. Pages catch up within about a minute. A browser
+  that voted outside test mode still remembers its vote: clear the site's data
+  in the browser to see the vote buttons again.
+
 ## Deploying to Vercel
 
 1. Import the repository into Vercel (framework preset: Next.js).

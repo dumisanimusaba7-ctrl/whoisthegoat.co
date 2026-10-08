@@ -6,6 +6,7 @@ import { useLiveResults } from "@/hooks/use-live-results";
 import type { Debate } from "@/lib/debates";
 import type { DebateResults } from "@/lib/results";
 import { isVoteAccepted, type VoteResponse } from "@/lib/vote-api";
+import { voteTestMode } from "@/lib/test-mode";
 import { readStoredVote, writeStoredVote } from "@/lib/vote-storage";
 
 export type VotePhase =
@@ -37,6 +38,8 @@ type DebateContextValue = {
   resultsUnavailable: boolean;
   vote: VoteState;
   castVote: (choice: string) => Promise<void>;
+  /** Test mode only: back to the vote buttons. */
+  resetVote: () => void;
 };
 
 const DebateContext = createContext<DebateContextValue | null>(null);
@@ -92,10 +95,13 @@ export function DebateProvider({
   const [vote, setVote] = useState<VoteState>(INITIAL_VOTE);
 
   useEffect(() => {
-    const stored = readStoredVote(
-      debate.slug,
-      debate.options.map((o) => o.slug),
-    );
+    // Test mode always opens on the vote buttons.
+    const stored = voteTestMode
+      ? null
+      : readStoredVote(
+          debate.slug,
+          debate.options.map((o) => o.slug),
+        );
     // Browser storage is only readable after hydration.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setVote((v) =>
@@ -130,7 +136,9 @@ export function DebateProvider({
       }
 
       applyTotals(data.total, data.options);
-      writeStoredVote(debate.slug, { choice: data.choice, country: data.country, at: new Date().toISOString() });
+      if (!voteTestMode) {
+        writeStoredVote(debate.slug, { choice: data.choice, country: data.country, at: new Date().toISOString() });
+      }
       setVote({
         phase: "voted",
         choice: data.choice,
@@ -144,9 +152,11 @@ export function DebateProvider({
     [debate.slug, applyTotals],
   );
 
+  const resetVote = useCallback(() => setVote({ ...INITIAL_VOTE, phase: "open" }), []);
+
   const value = useMemo<DebateContextValue>(
-    () => ({ debate, siteUrl, results, resultsUnavailable: unavailable, vote, castVote }),
-    [debate, siteUrl, results, unavailable, vote, castVote],
+    () => ({ debate, siteUrl, results, resultsUnavailable: unavailable, vote, castVote, resetVote }),
+    [debate, siteUrl, results, unavailable, vote, castVote, resetVote],
   );
 
   return <DebateContext.Provider value={value}>{children}</DebateContext.Provider>;
