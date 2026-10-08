@@ -1,0 +1,34 @@
+import Link from "next/link";
+
+import { LogoLockup } from "@/components/brand/logo";
+
+const NAV = [
+  { href: "/debates", label: "Debates" },
+  { href: "/results", label: "Results" },
+];
+
+export function SiteHeader() {
+  return (
+    <header className="sticky top-0 z-40 border-b border-white/10 bg-ink text-white">
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4 sm:h-16 sm:px-6">
+        <Link href="/" aria-label="WHOISTHEGOAT.CO home" className="-ml-1 flex items-center p-1">
+          <LogoLockup />
+        </Link>
+        <nav aria-label="Main">
+          <ul className="flex items-center gap-1 sm:gap-2">
+            {NAV.map((item) => (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className="type-label flex h-10 items-center px-2.5 text-white/75 transition-colors hover:text-white sm:px-3"
+                >
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+    </header>
+  );
+}
