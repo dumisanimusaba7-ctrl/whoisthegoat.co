@@ -47,11 +47,11 @@ const websiteJsonLd = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={archivo.variable}>
+    <html lang="en" className={archivo.variable} data-scroll-behavior="smooth">
       <body className="flex min-h-dvh flex-col">
         <a
           href="#main"
-          className="type-label sr-only z-50 bg-white px-4 py-3 text-ink focus:not-sr-only focus:fixed focus:left-3 focus:top-3"
+          className="sr-only z-50 bg-white px-4 py-3 text-sm font-semibold text-ink focus:not-sr-only focus:fixed focus:left-3 focus:top-3"
         >
           Skip to content
         </a>

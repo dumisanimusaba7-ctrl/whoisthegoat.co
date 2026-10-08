@@ -9,6 +9,9 @@
 
 import type { StaticImageData } from "next/image";
 
+import type { Kit } from "@/components/celebration/figure";
+import type { CelebrationKind } from "@/components/celebration/timeline";
+
 import messiVsRonaldoArtwork from "@/assets/debates/messi-vs-ronaldo.jpg";
 
 export type Sport = "football" | "basketball" | "tennis" | "boxing" | "formula-1";
@@ -31,6 +34,8 @@ export type DebateOption = {
   /** Canonical reference for structured data (schema.org `sameAs`). */
   wikipedia: string;
   caseFor: string[];
+  /** The figure that runs the result bar after a vote; omit for bars only. */
+  figure?: { kit: Kit; celebration: CelebrationKind };
 };
 
 export type TaleOfTheTapeRow = { label: string; values: [string, string] };
@@ -76,6 +81,21 @@ export const DEBATES: Debate[] = [
         color: "#75AADB",
         onColor: "#0A0C14",
         wikipedia: "https://en.wikipedia.org/wiki/Lionel_Messi",
+        figure: {
+          celebration: "knee-slide",
+          kit: {
+            skin: "#e2b08e",
+            hair: "#3b2a20",
+            beard: "#4b3527",
+            shirt: "#f7f8fa",
+            stripes: "#6cace4",
+            trim: "#14161c",
+            shorts: "#eef0f3",
+            socks: "#f4f5f7",
+            sockBand: "#6cace4",
+            boots: "#e9edf2",
+          },
+        },
         caseFor: [
           "Eight Ballon d’Or awards, the most in the history of the prize.",
           "World Cup winner in 2022, and the only player to win the tournament’s Golden Ball twice (2014, 2022).",
@@ -93,6 +113,20 @@ export const DEBATES: Debate[] = [
         color: "#E8322A",
         onColor: "#FFFFFF",
         wikipedia: "https://en.wikipedia.org/wiki/Cristiano_Ronaldo",
+        figure: {
+          celebration: "siu",
+          kit: {
+            skin: "#c88c69",
+            hair: "#17110e",
+            shirt: "#d62b2b",
+            trim: "#0f5a3a",
+            shorts: "#0f6b40",
+            shortsTrim: "#101114",
+            socks: "#d62b2b",
+            sockBand: "#0f5a3a",
+            boots: "#d9dde3",
+          },
+        },
         caseFor: [
           "Five Ballon d’Or awards and five Champions League titles, won with Manchester United and Real Madrid.",
           "The all-time leading scorer in Champions League history.",

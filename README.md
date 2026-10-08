@@ -147,7 +147,10 @@ country header (`x-vercel-ip-country` or `cf-ipcountry`).
    numbers, copy, SEO). Optionally add `artwork`: a landscape image split down
    the middle (first option on the left), placed in `src/assets/debates/`. It
    becomes the vote board's background; without it the board shows the shirt
-   numbers.
+   numbers. Optionally add `figure: { kit, celebration }` to each option: the
+   kit colours dress the runner that plays on the voter's result bar, and
+   `celebration` picks its finish (`"siu"` or `"knee-slide"`). Options without
+   a figure reveal with the bars alone.
 2. Insert the matching rows (same slugs) in a new migration:
 
    ```sql
@@ -168,7 +171,8 @@ The data layer supports any number of options; the arena layout is built for two
 ```
 src/app/                 routes: /, /[debate], /[debate]/results, /[debate]/share/[choice],
                          /debates, /results, /privacy, API routes, metadata routes
-src/components/debate/   arena (vote + reveal), share panel, results board, editorial
+src/components/debate/   arena (vote + reveal), result bars, share panel, country breakdown, editorial
+src/components/celebration/  result-bar runner: SVG kit figure, pose maths, celebration timeline
 src/lib/                 debate registry, results maths, formatting, SEO helpers
 src/lib/server/          Supabase client, vote processing, network/IP handling
 src/lib/card/            share card and OG image renderer

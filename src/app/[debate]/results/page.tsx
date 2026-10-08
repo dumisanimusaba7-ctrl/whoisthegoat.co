@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { ViewTransition } from "react";
 
 import { AdSlot } from "@/components/ads/ad-slot";
 import { DebateProvider } from "@/components/debate/debate-provider";
@@ -24,7 +25,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps<"/[debate]/results">): Promise<Metadata> {
   const debate = getDebate((await params).debate);
   if (!debate) return { title: "Page not found" };
-  const title = `${debate.title} Results: Live Global Vote`;
+  const title = `${debate.title} Results by Country`;
   const description = `Live results of the world’s ${debate.title} vote: the global split, total votes and the breakdown country by country, updated in real time.`;
   const image = debateOgImage(debate);
   return {
@@ -42,18 +43,20 @@ export default async function DebateResultsPage({ params }: PageProps<"/[debate]
   const results = await getPageResults(debate.slug);
 
   return (
-    <>
-      <DebateProvider debate={debate} siteUrl={getSiteUrl().origin} initialResults={results}>
-        <ResultsView />
-      </DebateProvider>
-      <AdSlot placement="results" className="border-t border-rule" />
-      <HowItWorks />
-      <JsonLd
-        data={breadcrumbJsonLd([
-          { name: "Results", path: "/results" },
-          { name: debate.title, path: `/${debate.slug}/results` },
-        ])}
-      />
-    </>
+    <ViewTransition enter="page" exit="page" default="none">
+      <div>
+        <DebateProvider debate={debate} siteUrl={getSiteUrl().origin} initialResults={results}>
+          <ResultsView />
+        </DebateProvider>
+        <AdSlot placement="results" className="border-t border-rule" />
+        <HowItWorks />
+        <JsonLd
+          data={breadcrumbJsonLd([
+            { name: "Results", path: "/results" },
+            { name: debate.title, path: `/${debate.slug}/results` },
+          ])}
+        />
+      </div>
+    </ViewTransition>
   );
 }

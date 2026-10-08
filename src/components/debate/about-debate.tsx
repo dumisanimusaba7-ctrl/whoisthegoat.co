@@ -7,13 +7,12 @@ export function AboutDebate({ debate }: { debate: Debate }) {
   const [a, b] = debate.options;
   return (
     <section id="about" aria-labelledby="about-title" className="border-t border-rule bg-paper">
-      <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
-        <p className="type-label text-mute">About the debate</p>
-        <h2 id="about-title" className="type-headline mt-3 max-w-3xl text-4xl sm:text-6xl">
-          Two careers. One question.
+      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
+        <h2 id="about-title" className="type-title">
+          About the debate
         </h2>
 
-        <div className="mt-10 grid gap-12 lg:grid-cols-12 lg:gap-16">
+        <div className="mt-8 grid gap-12 lg:grid-cols-12 lg:gap-16">
           <div className="space-y-5 text-lg leading-relaxed text-ink/80 lg:col-span-5">
             {debate.intro.map((paragraph) => (
               <p key={paragraph.slice(0, 32)}>{paragraph}</p>
@@ -22,7 +21,7 @@ export function AboutDebate({ debate }: { debate: Debate }) {
 
           <div className="lg:col-span-7">
             <table className="w-full border-collapse">
-              <caption className="type-label mb-4 text-left text-mute">Tale of the tape</caption>
+              <caption className="mb-4 text-left text-sm font-semibold text-mute">Major honours</caption>
               <thead>
                 <tr className="border-b-2 border-ink">
                   <th scope="col" className="pb-3 text-left">
@@ -43,7 +42,7 @@ export function AboutDebate({ debate }: { debate: Debate }) {
                     return (
                       <tr key={row.label} className="border-b border-rule">
                         <td className="type-display w-1/4 py-4 pr-3 text-left text-4xl sm:text-5xl">{row.values[0]}</td>
-                        <th scope="row" className="type-label px-2 py-4 text-center font-bold text-mute">
+                        <th scope="row" className="type-label px-2 py-4 text-center font-medium text-mute">
                           {row.label}
                         </th>
                         <td className="type-display w-1/4 py-4 pl-3 text-right text-4xl sm:text-5xl">{row.values[1]}</td>
@@ -54,7 +53,7 @@ export function AboutDebate({ debate }: { debate: Debate }) {
                   return (
                     <Fragment key={row.label}>
                       <tr>
-                        <th scope="colgroup" colSpan={3} className="type-label pt-5 text-center font-bold text-mute">
+                        <th scope="colgroup" colSpan={3} className="type-label pt-5 text-center font-medium text-mute">
                           {row.label}
                         </th>
                       </tr>
@@ -68,16 +67,16 @@ export function AboutDebate({ debate }: { debate: Debate }) {
                 })}
               </tbody>
             </table>
-            <p className="mt-3 text-sm text-mute">Major honours as of {debate.factsAsOf}.</p>
+            <p className="mt-3 text-sm text-mute">As of {debate.factsAsOf}.</p>
           </div>
         </div>
 
-        <div className="mt-16 grid gap-px bg-rule sm:grid-cols-2">
+        <div className="mt-14 grid gap-px bg-rule sm:grid-cols-2">
           {debate.options.map((option) => (
             <article key={option.slug} className="bg-paper py-8 sm:px-8 sm:first:pl-0 sm:last:pr-0">
               <span aria-hidden="true" className="block h-1 w-10" style={{ background: option.color }} />
-              <h3 className="type-headline mt-5 text-2xl sm:text-3xl">The case for {option.shortName}</h3>
-              <ul className="mt-5 space-y-3 text-base leading-relaxed text-ink/80">
+              <h3 className="mt-5 text-lg font-bold">The case for {option.shortName}</h3>
+              <ul className="mt-4 space-y-3 leading-relaxed text-ink/80">
                 {option.caseFor.map((point) => (
                   <li key={point} className="flex gap-3">
                     <span aria-hidden="true" className="mt-2.5 size-1.5 shrink-0 bg-ink" />
@@ -95,7 +94,7 @@ export function AboutDebate({ debate }: { debate: Debate }) {
 
 function PlayerHeading({ name, color, align = "start" }: { name: string; color: string; align?: "start" | "end" }) {
   return (
-    <span className={`type-label flex items-center gap-2 text-sm text-ink ${align === "end" ? "justify-end" : ""}`}>
+    <span className={`flex items-center gap-2 text-sm font-semibold text-ink ${align === "end" ? "justify-end" : ""}`}>
       <span aria-hidden="true" className="size-2.5" style={{ background: color }} />
       {name}
     </span>

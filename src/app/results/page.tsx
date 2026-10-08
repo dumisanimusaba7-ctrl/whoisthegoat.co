@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ViewTransition } from "react";
 
-import { SplitBar } from "@/components/debate/split-bar";
+import { ResultBars } from "@/components/debate/result-bars";
 import { PageHero } from "@/components/layout/page-hero";
 import { DEBATES, SPORT_LABELS, type Debate } from "@/lib/debates";
 import { formatCount, formatPercent, pluralize } from "@/lib/format";
@@ -10,66 +11,65 @@ import { getPageResults } from "@/lib/server/results";
 
 export const metadata: Metadata = {
   title: "Results",
-  description: "The world’s verdicts: live global results for every debate on WHOISTHEGOAT.CO, with the split country by country.",
+  description: "Results for every debate on WHOISTHEGOAT.CO: the global split and how each country voted.",
   alternates: { canonical: "/results" },
 };
 
 export default function ResultsIndexPage() {
   return (
-    <>
-      <PageHero kicker="Results" title="The world’s verdicts">
-        Every debate, every vote, counted live. Open a debate for the full country-by-country breakdown.
-      </PageHero>
-      <section className="bg-paper">
-        <ul className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
-          {DEBATES.map((debate) => (
-            <ResultRow key={debate.slug} debate={debate} />
-          ))}
-        </ul>
-      </section>
-    </>
+    <ViewTransition enter="page" exit="page" default="none">
+      <div>
+        <PageHero title="Results">Where every debate stands. Open one for the country-by-country split.</PageHero>
+        <div className="bg-paper">
+          <ul className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+            {DEBATES.map((debate) => (
+              <ResultRow key={debate.slug} debate={debate} />
+            ))}
+          </ul>
+        </div>
+      </div>
+    </ViewTransition>
   );
 }
 
 async function ResultRow({ debate }: { debate: Debate }) {
   const results = await getPageResults(debate.slug);
-  const [a, b] = debate.options;
-  const percents = (results ? optionPercentages(results.options, [a.slug, b.slug]) : [0, 0]) as [number, number];
+  const percents = results ? optionPercentages(results.options, debate.options.map((o) => o.slug)) : null;
 
   return (
     <li className="border-t-2 border-ink py-8">
-      <p className="type-label text-mute">{SPORT_LABELS[debate.sport]}</p>
-      <h2 className="type-display mt-2 text-5xl sm:text-6xl">
-        <Link href={`/${debate.slug}/results`} className="hover:underline hover:decoration-4 hover:underline-offset-8">
-          {debate.title}
-        </Link>
-      </h2>
-      {results && results.total > 0 ? (
+      <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+        <h2 className="type-display text-5xl sm:text-6xl">
+          <Link href={`/${debate.slug}/results`} className="transition-opacity duration-[var(--duration-micro)] hover:opacity-70">
+            {debate.title}
+          </Link>
+        </h2>
+        <p className="text-mute">
+          {SPORT_LABELS[debate.sport]}
+          {results && results.total > 0
+            ? ` · ${formatCount(results.total)} ${pluralize(results.total, "vote")} from ${formatCount(results.countries.count)} ${pluralize(results.countries.count, "country", "countries")}`
+            : null}
+        </p>
+      </div>
+
+      {results && results.total > 0 && percents ? (
         <>
-          <div className="mt-6 flex items-end justify-between gap-4">
+          <div className="mt-6 flex justify-between gap-4">
             {debate.options.map((option, i) => (
-              <p key={option.slug} className={i === 1 ? "text-right" : ""}>
-                <span className="type-label block text-mute">{option.shortName}</span>
-                <span className="type-display text-4xl sm:text-5xl">{formatPercent(percents[i])}</span>
+              <p key={option.slug} className="type-display text-4xl sm:text-5xl">
+                {formatPercent(percents[i])}
+                <span className="sr-only"> {option.name}</span>
               </p>
             ))}
           </div>
-          <SplitBar options={debate.options} percents={percents} size="h-3" track="bg-ink/10" className="mt-4 text-paper" />
-          <p className="type-label mt-4 text-mute">
-            {formatCount(results.total)} {pluralize(results.total, "vote")} ·{" "}
-            {formatCount(results.countries.count)} {pluralize(results.countries.count, "country", "countries")}
-          </p>
+          <ResultBars debate={debate} results={results} tone="light" className="mt-4" />
         </>
       ) : (
-        <p className="mt-4 text-lg text-ink/75">
-          {results ? "Voting is open and the first votes are on their way." : "Live results are loading on the debate page."}
-        </p>
+        <p className="mt-4 text-ink/75">{results ? "Voting is open. No votes yet." : "Results are loading on the debate page."}</p>
       )}
-      <Link
-        href={`/${debate.slug}/results`}
-        className="type-label mt-6 inline-flex h-12 items-center gap-2 border border-ink px-5 transition-colors hover:bg-paper-2"
-      >
-        Full results <span aria-hidden="true">→</span>
+
+      <Link href={`/${debate.slug}/results`} className="link mt-6 inline-flex min-h-11 items-center text-sm font-semibold">
+        Full results and countries
       </Link>
     </li>
   );

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { ViewTransition } from "react";
 
 import { AdSlot } from "@/components/ads/ad-slot";
 import { AboutDebate } from "@/components/debate/about-debate";
@@ -29,18 +30,20 @@ export default async function DebatePage({ params }: PageProps<"/[debate]">) {
   if (!debate) notFound();
 
   return (
-    <>
-      <DebateExperience debate={debate} />
-      <AboutDebate debate={debate} />
-      <AdSlot placement="editorial" className="border-t border-rule" />
-      <HowItWorks />
-      <JsonLd data={debateJsonLd(debate, `/${debate.slug}`)} />
-      <JsonLd
-        data={breadcrumbJsonLd([
-          { name: "Debates", path: "/debates" },
-          { name: debate.title, path: `/${debate.slug}` },
-        ])}
-      />
-    </>
+    <ViewTransition enter="page" exit="page" default="none">
+      <div>
+        <DebateExperience debate={debate} />
+        <AboutDebate debate={debate} />
+        <AdSlot placement="editorial" className="border-t border-rule" />
+        <HowItWorks />
+        <JsonLd data={debateJsonLd(debate, `/${debate.slug}`)} />
+        <JsonLd
+          data={breadcrumbJsonLd([
+            { name: "Debates", path: "/debates" },
+            { name: debate.title, path: `/${debate.slug}` },
+          ])}
+        />
+      </div>
+    </ViewTransition>
   );
 }

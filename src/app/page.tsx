@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ViewTransition } from "react";
 
 import { AdSlot } from "@/components/ads/ad-slot";
 import { AboutDebate } from "@/components/debate/about-debate";
@@ -17,12 +18,14 @@ export const metadata: Metadata = debateMetadata(debate, "/", {
 
 export default function HomePage() {
   return (
-    <>
-      <DebateExperience debate={debate} />
-      <AboutDebate debate={debate} />
-      <AdSlot placement="editorial" className="border-t border-rule" />
-      <HowItWorks />
-      <JsonLd data={debateJsonLd(debate, "/")} />
-    </>
+    <ViewTransition enter="page" exit="page" default="none">
+      <div>
+        <DebateExperience debate={debate} />
+        <AboutDebate debate={debate} />
+        <AdSlot placement="editorial" className="border-t border-rule" />
+        <HowItWorks />
+        <JsonLd data={debateJsonLd(debate, "/")} />
+      </div>
+    </ViewTransition>
   );
 }

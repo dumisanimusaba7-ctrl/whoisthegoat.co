@@ -3,16 +3,16 @@
 import Image from "next/image";
 import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
 
+import { CELEBRATION_TIMING, OTHER_BAR_MS } from "@/components/celebration/timeline";
 import { InlineScript } from "@/components/inline-script";
 import { AnimatedNumber } from "@/components/ui/animated-number";
-import { LiveDot } from "@/components/ui/live-dot";
-import { getOption, SPORT_LABELS, type Debate, type DebateOption } from "@/lib/debates";
-import { countryFlag, formatCount, pluralize } from "@/lib/format";
+import { getOption, type Debate, type DebateOption } from "@/lib/debates";
+import { formatCount, pluralize } from "@/lib/format";
 import { optionPercentages, type DebateResults } from "@/lib/results";
 import { prevotedScript } from "@/lib/vote-storage";
 
 import { useDebate, type VoteState } from "./debate-provider";
-import { SplitBar } from "./split-bar";
+import { ResultBars } from "./result-bars";
 
 /**
  * The face-off: question, both players, one-tap voting, and the reveal of
@@ -28,6 +28,7 @@ export function Arena({ banner }: { banner?: ReactNode }) {
   const revealed = vote.phase === "voted";
   const busy = vote.phase === "submitting";
   const percents = (results ? optionPercentages(results.options, [a.slug, b.slug]) : [0, 0]) as [number, number];
+  const chosen = vote.choice ? getOption(debate, vote.choice) : undefined;
 
   // The pre-paint script hides the buttons for returning voters. If storage
   // turned out not to hold a usable vote, bring them back.
@@ -40,8 +41,11 @@ export function Arena({ banner }: { banner?: ReactNode }) {
     if (vote.revealedNow) headingRef.current?.focus({ preventScroll: true });
   }, [vote.revealedNow]);
 
-  const chars = Math.max(a.shortName.length, b.shortName.length);
-  const chosen = vote.choice ? getOption(debate, vote.choice) : undefined;
+  // The numbers count up in step with the bars: the chosen side lands when
+  // its player reaches the result.
+  const kind = chosen?.figure?.celebration;
+  const countUp = (option: DebateOption) =>
+    option.slug === chosen?.slug && kind ? CELEBRATION_TIMING[kind].arrive : OTHER_BAR_MS;
 
   return (
     <section
@@ -49,30 +53,28 @@ export function Arena({ banner }: { banner?: ReactNode }) {
       ref={sectionRef}
       aria-labelledby={`${id}-title`}
       className="arena relative isolate overflow-hidden bg-ink text-white"
-      style={{ "--chars": chars } as CSSProperties}
+      style={{ "--chars": Math.max(a.shortName.length, b.shortName.length) } as CSSProperties}
       suppressHydrationWarning
     >
       <InlineScript html={prevotedScript(debate.slug, id, [a.slug, b.slug])} />
 
       <div className="mx-auto max-w-6xl px-4 pt-8 sm:px-6 sm:pt-12">
         {banner}
-        <p className="type-label flex items-center gap-2 text-mute-dark">
-          <LiveDot />
-          <span>Live global vote · {SPORT_LABELS[debate.sport]}</span>
-        </p>
+        <p className="type-label text-mute-dark">{debate.title}</p>
         <h1
+          key={revealed ? "result" : "question"}
           id={`${id}-title`}
           ref={headingRef}
           tabIndex={-1}
-          className="type-headline mt-4 text-[2.6rem] outline-none sm:text-6xl lg:text-[4.75rem]"
+          className={`type-headline mt-3 text-[2.6rem] outline-none sm:text-6xl lg:text-[4.75rem] ${vote.revealedNow ? "animate-enter" : ""}`}
         >
           {revealed ? "The world has spoken" : debate.question}
         </h1>
         <p className="mt-3 text-base text-mute-dark sm:text-lg">
           {revealed && chosen ? (
             <>
-              You voted <strong className="font-bold text-white">{chosen.name}</strong>.
-              {vote.alreadyVoted ? " You’d already voted from this browser, so your original vote stands." : null}
+              You voted <span className="font-semibold text-white">{chosen.name}</span>.
+              {vote.alreadyVoted ? " You’d already voted from this browser, so that vote stands." : null}
             </>
           ) : (
             "The world decides."
@@ -90,6 +92,7 @@ export function Arena({ banner }: { banner?: ReactNode }) {
               align={index === 0 ? "start" : "end"}
               vote={vote}
               percent={percents[index]}
+              countUpMs={countUp(option)}
               showNumber={!debate.artwork}
               disabled={busy || vote.phase === "checking"}
               onVote={castVote}
@@ -98,7 +101,7 @@ export function Arena({ banner }: { banner?: ReactNode }) {
           <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-white/10" />
           <span
             aria-hidden="true"
-            className="type-label absolute left-1/2 top-[42%] grid size-10 -translate-x-1/2 -translate-y-1/2 place-items-center border border-white/20 bg-ink text-[0.7rem] text-white sm:size-14 sm:text-xs"
+            className="type-overline absolute left-1/2 top-[42%] grid size-10 -translate-x-1/2 -translate-y-1/2 place-items-center border border-white/20 bg-ink text-white sm:size-14 sm:text-xs"
           >
             VS
           </span>
@@ -106,17 +109,13 @@ export function Arena({ banner }: { banner?: ReactNode }) {
       </div>
 
       {vote.error ? (
-        <p role="alert" className="mx-auto mt-5 max-w-6xl px-4 text-center text-sm font-semibold text-[#ff8a80] sm:px-6">
+        <p role="alert" className="animate-enter mx-auto mt-5 max-w-6xl px-4 text-sm font-semibold text-error sm:px-6">
           {vote.error}
         </p>
       ) : null}
 
-      <div className="mx-auto max-w-6xl px-4 pb-8 pt-5 sm:px-6 sm:pb-12 sm:pt-7">
-        {revealed ? (
-          <RevealStrip results={results} percents={percents} animate={vote.revealedNow} />
-        ) : (
-          <LiveStrip results={results} unavailable={resultsUnavailable} />
-        )}
+      <div className="mx-auto max-w-6xl px-4 pb-10 pt-6 sm:px-6 sm:pb-14">
+        {revealed ? <RevealStrip results={results} celebrate={vote.revealedNow} /> : <VoteCount results={results} unavailable={resultsUnavailable} />}
       </div>
 
       <p className="sr-only" aria-live="polite">
@@ -128,7 +127,7 @@ export function Arena({ banner }: { banner?: ReactNode }) {
 
 /**
  * The debate's artwork behind both halves of the board, split at the seam.
- * Decorative: names, flags and results are all in the text above it.
+ * Decorative: names, countries and results are all in the text above it.
  */
 function BoardArtwork({ artwork, revealed }: { artwork: NonNullable<Debate["artwork"]>; revealed: boolean }) {
   return (
@@ -141,10 +140,10 @@ function BoardArtwork({ artwork, revealed }: { artwork: NonNullable<Debate["artw
         loading="eager"
         fetchPriority="high"
         sizes="(min-width: 1200px) 1104px, (min-width: 640px) calc(100vw - 48px), 100vw"
-        className={`object-cover transition-opacity duration-700 ${revealed ? "opacity-60" : ""}`}
+        className={`object-cover transition-opacity duration-[var(--duration-large)] ease-out ${revealed ? "opacity-60" : ""}`}
         style={{ objectPosition: artwork.position ?? "50% 50%" }}
       />
-      {/* Scrims keep the flags (top) and names, buttons and results (bottom) legible. */}
+      {/* Scrims keep the labels (top) and names, buttons and results (bottom) legible. */}
       <div className="absolute inset-x-0 top-0 h-1/3 bg-linear-to-b from-ink/70 to-transparent" />
       <div className="absolute inset-x-0 bottom-0 h-3/4 bg-linear-to-t from-ink via-ink/70 to-transparent" />
     </div>
@@ -156,6 +155,7 @@ function Side({
   align,
   vote,
   percent,
+  countUpMs,
   showNumber,
   disabled,
   onVote,
@@ -164,6 +164,7 @@ function Side({
   align: "start" | "end";
   vote: VoteState;
   percent: number;
+  countUpMs: number;
   /** Shirt number behind the player, used when the debate has no artwork. */
   showNumber: boolean;
   disabled: boolean;
@@ -173,7 +174,7 @@ function Side({
   const revealed = vote.phase === "voted";
   const pending = vote.pending === option.slug;
   // While a vote is in flight the other side steps back. After the reveal both
-  // sides are shown equally: the platform doesn't take sides.
+  // sides are shown equally: the site doesn't take sides.
   const dimmed = vote.phase === "submitting" && !pending;
 
   return (
@@ -185,35 +186,28 @@ function Side({
       {showNumber ? (
         <span
           aria-hidden="true"
-          className={`ghost-number absolute top-3 transition-opacity duration-700 ${end ? "right-2 sm:right-6" : "left-2 sm:left-6"} ${revealed ? "opacity-30" : ""}`}
+          className={`ghost-number absolute top-3 transition-opacity duration-[var(--duration-large)] ${end ? "right-2 sm:right-6" : "left-2 sm:left-6"} ${revealed ? "opacity-30" : ""}`}
         >
           {option.number}
         </span>
       ) : null}
 
-      <p className="type-label relative flex items-center gap-1.5 text-white/85">
-        <span aria-hidden="true" className="text-[0.95rem] leading-none tracking-normal">
-          {countryFlag(option.country.code)}
-        </span>
-        {option.country.name}
-      </p>
+      <p className="type-overline relative text-white/80">{option.country.name}</p>
 
-      <div className={`relative mt-auto transition-opacity duration-500 ${dimmed ? "opacity-45" : ""}`}>
-        <p className="text-[0.8rem] font-bold uppercase tracking-[0.1em] text-white/75 [font-stretch:112.5%] sm:text-base">
-          {option.firstName}
-        </p>
+      <div className={`relative mt-auto transition-opacity duration-[var(--duration-ui)] ${dimmed ? "opacity-40" : ""}`}>
+        <p className="text-sm font-semibold text-white/75 sm:text-base">{option.firstName}</p>
         <p className="player-name type-display mt-1">{option.shortName}</p>
       </div>
 
       {revealed ? (
-        <div className="relative mt-3 sm:mt-5">
+        <div className={`relative mt-3 sm:mt-5 ${vote.revealedNow ? "animate-enter" : ""}`}>
           <p className="player-percent type-display" style={{ color: option.color }}>
-            <AnimatedNumber value={percent} from={vote.revealedNow ? 0 : undefined} format="percent" />
+            <AnimatedNumber value={percent} from={vote.revealedNow ? 0 : undefined} duration={countUpMs} format="percent" />
           </p>
           {/* Rendered on both sides (hidden on one) so the two names stay level. */}
           <p
             aria-hidden={vote.choice !== option.slug || undefined}
-            className={`type-label mt-2 inline-flex items-center gap-1.5 text-white ${vote.choice === option.slug ? "" : "invisible"}`}
+            className={`type-overline mt-2 inline-flex items-center gap-1.5 text-white ${vote.choice === option.slug ? "" : "invisible"}`}
           >
             <svg aria-hidden="true" viewBox="0 0 12 12" className="size-3" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M2 6.5 5 9.5 10 3" />
@@ -228,7 +222,7 @@ function Side({
             onClick={() => onVote(option.slug)}
             disabled={disabled}
             aria-busy={pending || undefined}
-            className={`type-label flex h-14 w-full items-center justify-center gap-2 bg-white text-[0.78rem] text-ink transition-[background-color,color,opacity] duration-200 hover:bg-[var(--accent)] hover:text-[var(--on-accent)] focus-visible:outline-white active:scale-[0.99] disabled:cursor-default sm:h-16 sm:text-sm ${pending ? "bg-[var(--accent)] text-[var(--on-accent)]" : ""} ${dimmed ? "opacity-40" : ""}`}
+            className={`btn btn-light h-14 w-full text-base sm:h-16 ${pending ? "!bg-[var(--accent)] !text-[var(--on-accent)]" : ""} ${dimmed ? "opacity-40" : ""}`}
           >
             {pending ? "Counting…" : `Vote ${option.shortName}`}
           </button>
@@ -238,78 +232,69 @@ function Side({
   );
 }
 
-function LiveStrip({ results, unavailable }: { results: DebateResults | null; unavailable: boolean }) {
-  let content: ReactNode;
+/** Before voting: the size of the vote so far. The number moving is the only signal it's live. */
+function VoteCount({ results, unavailable }: { results: DebateResults | null; unavailable: boolean }) {
+  let content: ReactNode = null;
   if (results && results.total > 0) {
     content = (
       <>
-        <strong className="tabular text-[0.8rem] text-white sm:text-sm">
+        <span className="tabular font-semibold text-white">
           <AnimatedNumber value={results.total} format="count" />
-        </strong>
-        <span>{pluralize(results.total, "vote")} cast</span>
-        {results.countries.count > 0 ? (
-          <>
-            <span aria-hidden="true">·</span>
-            <span>
-              {formatCount(results.countries.count)} {pluralize(results.countries.count, "country", "countries")}
-            </span>
-          </>
-        ) : null}
+        </span>{" "}
+        {pluralize(results.total, "vote")}
+        {results.countries.count > 0
+          ? ` from ${formatCount(results.countries.count)} ${pluralize(results.countries.count, "country", "countries")}`
+          : null}
       </>
     );
   } else if (results) {
-    content = <span>Voting is open. Be the first to vote.</span>;
+    content = "No votes yet. Be the first.";
   } else if (unavailable) {
-    content = <span>Live count reconnecting…</span>;
-  } else {
-    content = <span className="skeleton-dark inline-block h-3 w-44" aria-label="Loading live count" />;
+    content = "The vote count is unavailable right now.";
   }
-
-  return (
-    <p className="type-label flex min-h-5 flex-wrap items-center justify-center gap-x-2.5 gap-y-1 text-mute-dark">
-      <LiveDot />
-      <span className="text-white">Live</span>
-      <span aria-hidden="true">·</span>
-      {content}
-    </p>
-  );
+  return <p className="type-label min-h-5 text-mute-dark">{content}</p>;
 }
 
-function RevealStrip({ results, percents, animate }: { results: DebateResults | null; percents: [number, number]; animate: boolean }) {
-  const { debate } = useDebate();
+/** After voting: the result bars (where the celebration plays), then sharing. */
+function RevealStrip({ results, celebrate }: { results: DebateResults | null; celebrate: boolean }) {
+  const { debate, vote } = useDebate();
+  const ref = useRef<HTMLDivElement>(null);
+  const kind = vote.choice ? getOption(debate, vote.choice)?.figure?.celebration : undefined;
+
+  // On short screens the bars sit below the fold: bring them into view so
+  // the result (and the celebration) is actually seen.
+  useEffect(() => {
+    if (!celebrate || !ref.current) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    ref.current.scrollIntoView({ block: "nearest", behavior: reduce ? "auto" : "smooth" });
+  }, [celebrate]);
+
   return (
-    <div>
-      <SplitBar options={debate.options} percents={percents} animateIn={animate} size="h-3 sm:h-4" />
-      <div className="mt-5 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="flex items-baseline gap-2">
-            <strong className="type-display text-4xl text-white sm:text-5xl">
-              {results ? <AnimatedNumber value={results.total} format="count" from={animate ? 0 : undefined} /> : "—"}
-            </strong>
-            <span className="type-label text-mute-dark">{pluralize(results?.total ?? 0, "vote")} worldwide</span>
-          </p>
-          <p className="type-label mt-2 flex items-center gap-2 text-mute-dark">
-            <LiveDot />
-            <span>Live</span>
-            {results && results.countries.count > 0 ? (
-              <span>
-                · <span className="tabular text-white">{formatCount(results.countries.count)}</span>{" "}
-                {pluralize(results.countries.count, "country", "countries")} voting
-              </span>
-            ) : null}
-          </p>
-        </div>
-        <div>
-          <a
-            href="#share"
-            className="type-label flex h-12 w-full items-center justify-center gap-2 bg-white px-5 text-ink transition-colors hover:bg-paper-2 sm:w-auto"
-          >
-            Share your vote
-            <svg aria-hidden="true" viewBox="0 0 12 12" className="size-3" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M6 1.5v9M2 6.5l4 4 4-4" />
-            </svg>
-          </a>
-        </div>
+    <div ref={ref}>
+      <ResultBars debate={debate} results={results} choice={vote.choice} celebrate={celebrate} withFigure />
+      <div
+        className={`mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between ${celebrate ? "animate-enter" : ""}`}
+        style={celebrate && kind ? { animationDelay: `${CELEBRATION_TIMING[kind].end - 150}ms` } : undefined}
+      >
+        <p className="type-label text-mute-dark">
+          {results ? (
+            <>
+              <span className="tabular font-semibold text-white">
+                <AnimatedNumber value={results.total} format="count" />
+              </span>{" "}
+              {pluralize(results.total, "vote")}
+              {results.countries.count > 0
+                ? ` from ${formatCount(results.countries.count)} ${pluralize(results.countries.count, "country", "countries")}`
+                : null}
+            </>
+          ) : null}
+        </p>
+        <a href="#share" className="btn btn-light w-full sm:w-auto">
+          Share your vote
+          <svg aria-hidden="true" viewBox="0 0 12 12" className="size-3" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M6 1.5v9M2 6.5l4 4 4-4" />
+          </svg>
+        </a>
       </div>
     </div>
   );

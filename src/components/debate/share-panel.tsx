@@ -11,8 +11,8 @@ import { useDebate } from "./debate-provider";
 type Format = "story" | "post";
 
 const FORMATS: { id: Format; label: string; hint: string; ratio: string }[] = [
-  { id: "story", label: "Story", hint: "9:16 · Instagram, WhatsApp, TikTok, Snapchat", ratio: "aspect-[9/16]" },
-  { id: "post", label: "Post", hint: "4:5 · Feed posts and X", ratio: "aspect-[4/5]" },
+  { id: "story", label: "Story", hint: "9:16, for Instagram, WhatsApp, TikTok and Snapchat stories", ratio: "aspect-[9/16]" },
+  { id: "post", label: "Post", hint: "4:5, for feed posts and X", ratio: "aspect-[4/5]" },
 ];
 
 type LoadedCard = { src: string; url: string; file: File } | { src: string; error: true };
@@ -106,25 +106,23 @@ export function SharePanel() {
   const activeFormat = FORMATS.find((f) => f.id === format) ?? FORMATS[0];
 
   return (
-    <section id="share" aria-labelledby="share-title" className="scroll-mt-16 bg-paper">
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:gap-16">
+    <section id="share" aria-labelledby="share-title" className="bg-paper">
+      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:gap-20">
         <div className="flex flex-col">
-          <p className="type-label text-mute">Your card</p>
-          <h2 id="share-title" className="type-headline mt-3 text-4xl sm:text-5xl">
+          <h2 id="share-title" className="type-title">
             Share your vote
           </h2>
-          <p className="mt-4 max-w-md text-lg leading-relaxed text-ink/75">
-            Your pick, and how much of the world agrees, in one card. Post it to your story or send it to the group chat
-            that still hasn’t settled it.
+          <p className="mt-3 max-w-md leading-relaxed text-ink/75">
+            Your pick, and how much of the world agrees with you, on one card. Made for your story or the group chat.
           </p>
 
           <fieldset className="mt-8">
-            <legend className="type-label text-mute">Format</legend>
-            <div className="mt-3 inline-flex border border-ink">
+            <legend className="type-label text-mute">Card size</legend>
+            <div className="mt-2 inline-flex border border-ink">
               {FORMATS.map((f) => (
                 <label
                   key={f.id}
-                  className={`type-label flex h-11 cursor-pointer items-center px-5 transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 ${format === f.id ? "bg-ink text-white" : "text-ink hover:bg-paper-2"}`}
+                  className={`flex h-11 cursor-pointer items-center px-5 text-sm font-semibold transition-colors duration-[var(--duration-micro)] has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 ${format === f.id ? "bg-ink text-white" : "text-ink hover:bg-paper-2"}`}
                 >
                   <input
                     type="radio"
@@ -142,54 +140,51 @@ export function SharePanel() {
           </fieldset>
 
           <div className="mt-8 grid gap-3 sm:max-w-md sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={share}
-              className="type-label flex h-14 items-center justify-center gap-2 bg-ink text-sm text-white transition-colors hover:bg-ink-3"
-            >
+            <button type="button" onClick={share} className="btn btn-dark h-13">
               <ShareIcon />
               Share card
             </button>
-            <a
-              href={ready?.url ?? src}
-              download={filename}
-              className="type-label flex h-14 items-center justify-center gap-2 border border-ink text-sm text-ink transition-colors hover:bg-paper-2"
-            >
+            <a href={ready?.url ?? src} download={filename} className="btn btn-outline h-13 text-ink">
               <DownloadIcon />
-              Download card
+              Download
             </a>
           </div>
 
-          <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-semibold">
-            <button type="button" onClick={copyLink} className="underline decoration-rule underline-offset-4 hover:decoration-ink">
+          <div className="mt-3 flex flex-wrap items-center gap-x-5 text-sm font-semibold">
+            <button type="button" onClick={copyLink} className="link inline-flex min-h-11 items-center">
               Copy link
             </button>
-            <a href={xHref} target="_blank" rel="noopener noreferrer" className="underline decoration-rule underline-offset-4 hover:decoration-ink">
+            <a href={xHref} target="_blank" rel="noopener noreferrer" className="link inline-flex min-h-11 items-center">
               Post on X
             </a>
-            <a href={waHref} target="_blank" rel="noopener noreferrer" className="underline decoration-rule underline-offset-4 hover:decoration-ink">
-              Send on WhatsApp
+            <a href={waHref} target="_blank" rel="noopener noreferrer" className="link inline-flex min-h-11 items-center">
+              WhatsApp
             </a>
-            <span role="status" className="text-mute">
-              {notice}
+            <span role="status" className="font-normal text-mute">
+              {notice ? <span className="animate-enter inline-block">{notice}</span> : null}
             </span>
           </div>
         </div>
 
-        <figure className="mx-auto w-full max-w-[22rem] lg:max-w-none">
+        <figure className="mx-auto w-full max-w-[20rem] lg:max-w-none">
           <div className={`relative w-full overflow-hidden bg-ink ${activeFormat.ratio}`}>
             {ready ? (
               // eslint-disable-next-line @next/next/no-img-element -- generated PNG served as a blob URL
-              <img src={ready.url} alt={`Share card: I voted ${option.name}. ${percent !== null ? `${formatPercent(percent)} of the world agrees.` : ""}`} className="animate-rise-in size-full object-cover" />
+              <img
+                key={ready.url}
+                src={ready.url}
+                alt={`Share card: I voted ${option.name}. ${percent !== null ? `${formatPercent(percent)} of the world agrees.` : ""}`}
+                className="size-full object-cover [animation:fade-in_var(--duration-ui)_var(--ease-out)_both]"
+              />
             ) : failed ? (
               <div className="grid size-full place-items-center p-6 text-center text-sm text-mute-dark">
-                The card couldn’t be generated right now. Try again in a moment.
+                The card couldn’t be made just now. Try again in a moment.
               </div>
             ) : (
-              <div className="skeleton-dark size-full" aria-label="Generating your card" role="img" />
+              <div className="skeleton-dark size-full" aria-label="Making your card" role="img" />
             )}
           </div>
-          <figcaption className="type-label mt-3 text-mute">Live figures at the time you share</figcaption>
+          <figcaption className="mt-3 text-sm text-mute">Figures on the card refresh every minute.</figcaption>
         </figure>
       </div>
     </section>

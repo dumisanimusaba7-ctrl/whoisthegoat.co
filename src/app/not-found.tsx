@@ -7,14 +7,11 @@ export default function NotFound() {
   return (
     <section className="bg-ink text-white">
       <div className="mx-auto flex min-h-[60vh] max-w-6xl flex-col justify-center px-4 py-20 sm:px-6">
-        <p className="type-label text-mute-dark">404</p>
-        <h1 className="type-headline mt-4 text-5xl sm:text-7xl">Out of bounds</h1>
-        <p className="mt-4 max-w-md text-lg text-mute-dark">That page doesn’t exist. The vote does.</p>
-        <Link
-          href="/"
-          className="type-label mt-8 inline-flex h-12 w-fit items-center gap-2 bg-white px-5 text-ink transition-colors hover:bg-paper-2"
-        >
-          Cast your vote <span aria-hidden="true">→</span>
+        <p className="type-label tabular text-mute-dark">404</p>
+        <h1 className="type-headline mt-3 text-5xl sm:text-6xl">Page not found</h1>
+        <p className="mt-4 max-w-md text-lg text-mute-dark">There’s nothing at this address.</p>
+        <Link href="/" className="btn btn-light mt-8 w-fit">
+          Go to the vote
         </Link>
       </div>
     </section>

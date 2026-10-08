@@ -21,13 +21,16 @@ export function SiteFooter() {
               <LogoMark className="h-14 w-auto self-start" />
               <LogoWordmark className="h-6 w-auto" />
             </Link>
-            <p className="type-label mt-4 text-mute-dark">{SITE_TAGLINE}</p>
+            <p className="mt-4 text-sm text-mute-dark">{SITE_TAGLINE}</p>
           </div>
           <nav aria-label="Footer">
-            <ul className="flex flex-wrap gap-x-6 gap-y-3">
+            <ul className="flex flex-wrap gap-x-6">
               {LINKS.map((link) => (
                 <li key={link.href}>
-                  <Link href={link.href} className="type-label text-white/75 transition-colors hover:text-white">
+                  <Link
+                    href={link.href}
+                    className="inline-flex min-h-11 items-center text-sm font-medium text-white/65 transition-colors duration-[var(--duration-micro)] hover:text-white"
+                  >
                     {link.label}
                   </Link>
                 </li>

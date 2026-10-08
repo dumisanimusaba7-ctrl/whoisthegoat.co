@@ -31,7 +31,7 @@ export function AdSlot({ placement, className = "" }: { placement: AdPlacement; 
 
   return (
     <aside aria-label="Advertisement" className={`mx-auto max-w-6xl px-4 py-8 sm:px-6 ${className}`}>
-      <p className="type-label mb-2 text-center text-[0.6rem] text-mute">Advertisement</p>
+      <p className="mb-2 text-center text-xs text-mute">Advertisement</p>
       <ins
         className="adsbygoogle block min-h-[120px] w-full"
         style={{ display: "block" }}

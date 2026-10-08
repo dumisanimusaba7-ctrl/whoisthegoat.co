@@ -3,24 +3,24 @@
 import { AdSlot } from "@/components/ads/ad-slot";
 
 import { useDebate } from "./debate-provider";
-import { ResultsBoard } from "./results-board";
+import { CountryBreakdown } from "./results-board";
 import { SharePanel } from "./share-panel";
 
-/** Everything revealed once you've voted: your card, the live stats, the countries. */
+/** Revealed once you've voted: your share card, then how each country voted. */
 export function PostVote() {
   const { debate, results, resultsUnavailable, vote } = useDebate();
   if (vote.phase !== "voted") return null;
 
   return (
-    <div className="animate-rise-in">
+    <div className={vote.revealedNow ? "animate-enter" : undefined}>
       <SharePanel />
       <div className="border-t border-rule bg-paper">
-        <ResultsBoard
+        <CountryBreakdown
           debate={debate}
           results={results}
           unavailable={resultsUnavailable}
           highlightCountry={vote.country}
-          countryLimit={10}
+          limit={10}
           showFullResultsLink
         />
       </div>

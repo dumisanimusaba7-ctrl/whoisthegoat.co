@@ -151,8 +151,8 @@ function VoteCardTall({ debate, option, stats, format }: { debate: Debate; optio
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: story ? 40 : 30, borderBottom: `2px solid ${RULE}` }}>
         <Brand size={story ? 64 : 54} />
-        <div style={{ display: "flex", fontFamily: "Wide", fontSize: story ? 22 : 20, letterSpacing: "0.14em", color: MUTED }}>
-          LIVE GLOBAL VOTE
+        <div style={{ display: "flex", fontFamily: "Wide", fontSize: story ? 22 : 20, letterSpacing: "0.12em", color: MUTED }}>
+          {debate.title.toUpperCase()}
         </div>
       </div>
 
@@ -246,12 +246,8 @@ function DebateCard({ debate, stats }: { debate: Debate; stats: Stats | null }) 
   const nameSize = fitDisplay(a.shortName + b.shortName, 1072 - 120, 150);
   return (
     <Frame padding={64}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div style={{ display: "flex", alignItems: "center" }}>
         <Brand size={46} />
-        <div style={{ display: "flex", alignItems: "center", gap: 12, fontFamily: "Wide", fontSize: 18, letterSpacing: "0.14em", color: MUTED }}>
-          <div style={{ display: "flex", width: 12, height: 12, borderRadius: 6, background: "#E8322A" }} />
-          LIVE GLOBAL VOTE
-        </div>
       </div>
       <div style={{ display: "flex", flexDirection: "column", marginTop: 64 }}>
         <div style={{ display: "flex", fontFamily: "Wide", fontSize: 30, letterSpacing: "0.1em", color: MUTED }}>

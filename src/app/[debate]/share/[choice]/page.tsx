@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { ViewTransition } from "react";
 
 import { AboutDebate } from "@/components/debate/about-debate";
 import { DebateExperience } from "@/components/debate/debate-experience";
@@ -56,17 +57,19 @@ export default async function SharedVotePage({ params }: PageProps<"/[debate]/sh
   const { debate, option } = found;
 
   const banner = (
-    <p className="type-label mb-6 inline-flex items-center gap-2 border border-white/15 px-3 py-2 text-white">
+    <p className="mb-6 flex items-center gap-2 text-sm text-white/80">
       <span aria-hidden="true" className="size-2" style={{ background: option.color }} />
-      {option.shortName} just got a vote. Who gets yours?
+      Someone voted {option.shortName}. Who gets yours?
     </p>
   );
 
   return (
-    <>
-      <DebateExperience debate={debate} banner={banner} />
-      <AboutDebate debate={debate} />
-      <HowItWorks />
-    </>
+    <ViewTransition enter="page" exit="page" default="none">
+      <div>
+        <DebateExperience debate={debate} banner={banner} />
+        <AboutDebate debate={debate} />
+        <HowItWorks />
+      </div>
+    </ViewTransition>
   );
 }
