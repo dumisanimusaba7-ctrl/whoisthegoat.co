@@ -42,7 +42,8 @@ export const configSources = {
 };
 
 export const serverConfig = {
-  supabaseUrl: (supabaseUrl?.value ?? "").replace(/\/+$/, ""),
+  // The client adds /rest/v1 itself; Supabase shows the URL both with and without it.
+  supabaseUrl: (supabaseUrl?.value ?? "").replace(/\/+$/, "").replace(/\/rest\/v1$/i, ""),
   supabaseSecretKey: supabaseSecretKey?.value ?? "",
   /** HMAC key for voter and network hashes. Rotating it lets everyone vote again. */
   voteHashSecret: voteHashSecret?.value ?? "",
