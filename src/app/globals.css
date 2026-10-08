@@ -263,6 +263,106 @@
   animation: shimmer 1.4s linear infinite;
 }
 
+/* ── Trophy cabinet ──────────────────────────────────────────────────────── */
+
+@keyframes trophy-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.94);
+  }
+}
+
+/* A band of light crossing the metal, in the trophy's own 48-unit grid. */
+@keyframes trophy-gleam {
+  from {
+    transform: translateX(0) skewX(-18deg);
+  }
+  to {
+    transform: translateX(78px) skewX(-18deg);
+  }
+}
+
+/* The same sweep under another name, so hovering can restart it. */
+@keyframes trophy-gleam-again {
+  from {
+    transform: translateX(0) skewX(-18deg);
+  }
+  to {
+    transform: translateX(78px) skewX(-18deg);
+  }
+}
+
+@keyframes grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+.trophy {
+  overflow: visible;
+  transition: transform var(--duration-ui) var(--ease-out);
+}
+
+.trophy-gleam {
+  transform-box: view-box;
+  transform-origin: 0 0;
+  transform: skewX(-18deg);
+}
+
+/* On load (the cabinet's opening shelf): rise in turn, then catch the light. */
+.trophy-intro {
+  animation: trophy-rise 560ms var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 70ms + 200ms);
+}
+
+.trophy-intro .trophy-gleam {
+  animation: trophy-gleam 900ms var(--ease-in-out) both;
+  animation-delay: calc(var(--i, 0) * 70ms + 700ms);
+}
+
+.grow-intro {
+  animation: grow 900ms var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 70ms + 250ms);
+}
+
+/* Scroll reveals: a section holds still until it comes into view. */
+[data-reveal="pending"] .reveal-up,
+[data-reveal="pending"] .trophy {
+  opacity: 0;
+}
+
+[data-reveal="pending"] .reveal-grow {
+  transform: scaleX(0);
+}
+
+[data-reveal="shown"] .reveal-up {
+  animation: enter var(--duration-large) var(--ease-out) both;
+}
+
+[data-reveal="shown"] .trophy {
+  animation: trophy-rise 520ms var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 40ms + 120ms);
+}
+
+[data-reveal="shown"] .trophy .trophy-gleam {
+  animation: trophy-gleam 900ms var(--ease-in-out) both;
+  animation-delay: calc(var(--i, 0) * 40ms + 560ms);
+}
+
+[data-reveal="shown"] .reveal-grow {
+  animation: grow 900ms var(--ease-out) 150ms both;
+}
+
+@media (hover: hover) {
+  .trophy:hover {
+    transform: translateY(-3px);
+  }
+
+  .trophy:hover .trophy-gleam {
+    animation: trophy-gleam-again 700ms var(--ease-in-out);
+  }
+}
+
 /* Route changes: content crossfades, the header stays put. */
 ::view-transition {
   pointer-events: none;
@@ -301,6 +401,14 @@
   ::view-transition-group(*),
   ::view-transition-old(*),
   ::view-transition-new(*) {
+    animation: none !important;
+  }
+
+  /* Delayed entrances would otherwise sit invisible for their delay. */
+  .trophy,
+  .trophy-intro,
+  .trophy-gleam,
+  .grow-intro {
     animation: none !important;
   }
 }

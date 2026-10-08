@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { Fragment } from "react";
 
 import type { Debate } from "@/lib/debates";
+import { hasCabinet } from "@/lib/trophies";
 
 /** Editorial context for the debate: intro, tale of the tape, the case for each side. */
 export function AboutDebate({ debate }: { debate: Debate }) {
@@ -67,7 +69,14 @@ export function AboutDebate({ debate }: { debate: Debate }) {
                 })}
               </tbody>
             </table>
-            <p className="mt-3 text-sm text-mute">As of {debate.factsAsOf}.</p>
+            <p className="mt-3 flex flex-wrap items-center justify-between gap-x-6 gap-y-1 text-sm text-mute">
+              As of {debate.factsAsOf}.
+              {hasCabinet(debate.slug) ? (
+                <Link href={`/${debate.slug}/trophies`} className="link inline-flex min-h-11 items-center font-semibold text-ink">
+                  Every trophy, side by side
+                </Link>
+              ) : null}
+            </p>
           </div>
         </div>
 

@@ -11,10 +11,12 @@ import {
   easeOutBack,
   easeOutCubic,
   grounded,
-  KNEEL_POSE,
   mixPose,
   runPose,
+  SIU_AIR,
+  SIU_GATHER,
   SIU_POSE,
+  SKY_POSE,
   SLIDE_POSE,
   STANDING,
   type Pose,
@@ -24,8 +26,8 @@ export type CelebrationKind = "siu" | "knee-slide";
 
 /** When the runner reaches the result, and when the whole moment is over (ms). */
 export const CELEBRATION_TIMING: Record<CelebrationKind, { arrive: number; end: number }> = {
-  siu: { arrive: 1000, end: 1900 },
-  "knee-slide": { arrive: 1250, end: 1800 },
+  siu: { arrive: 1000, end: 1950 },
+  "knee-slide": { arrive: 1250, end: 2000 },
 };
 
 /** Fill time for the bar of the option that wasn't chosen. */
@@ -34,7 +36,7 @@ export const OTHER_BAR_MS = 1000;
 /** Where each celebration comes to rest; also shown to returning voters. */
 export const FINAL_POSE: Record<CelebrationKind, Pose> = {
   siu: grounded(SIU_POSE),
-  "knee-slide": grounded(KNEEL_POSE),
+  "knee-slide": grounded(SKY_POSE),
 };
 
 export type Frame = {
@@ -94,36 +96,10 @@ export function createTimeline(kind: CelebrationKind, options: Options): Timelin
 
 /* ------------------------------------------------------------------------- */
 
-const CROUCH: Pose = {
-  ...STANDING,
-  lean: 20,
-  head: 4,
-  hipN: 24,
-  kneeN: 52,
-  hipF: -8,
-  kneeF: 48,
-  shoulderN: -46,
-  elbowN: 30,
-  shoulderF: -34,
-  elbowF: 30,
-};
-
-const TUCK: Pose = {
-  ...STANDING,
-  lean: 4,
-  head: -4,
-  hipN: 30,
-  kneeN: 62,
-  hipF: 12,
-  kneeF: 56,
-  shoulderN: 70,
-  elbowN: 10,
-  shoulderF: -60,
-  elbowF: 10,
-  turn: 0.5,
-};
-
-/** Ronaldo: run to the result, jump and turn to camera, land the Siu. */
+/**
+ * Ronaldo: run to the result, plant, jump and turn his back to the camera
+ * in the air, then land the Siu: feet wide, arms thrust down and out.
+ */
 function siuTimeline({ target, trackPx, figurePx }: Options): Timeline {
   const { arrive, end } = CELEBRATION_TIMING.siu;
   const stride = new Stride(trackPx, figurePx);
@@ -143,41 +119,46 @@ function siuTimeline({ target, trackPx, figurePx }: Options): Timeline {
       }
 
       const s = t - arrive;
-      const PLANT = 110;
-      const JUMP = 300;
-      const AIR = 22;
+      const GATHER = 130;
+      const JUMP = 360;
+      const AIR = 24;
 
-      // 1. Plant and load up.
-      if (s < PLANT) {
-        const u = easeOutCubic(s / PLANT);
-        return { pos: target, pose: grounded(mixPose(arrivalPose, CROUCH, u)), dust: null, streak: null, done: false };
+      // 1. Last step planted: knees load, arms swing back.
+      if (s < GATHER) {
+        const u = easeOutCubic(s / GATHER);
+        return { pos: target, pose: grounded(mixPose(arrivalPose, SIU_GATHER, u)), dust: null, streak: null, done: false };
       }
 
-      // 2. Jump and turn to face the camera.
-      if (s < PLANT + JUMP) {
-        const u = (s - PLANT) / JUMP;
-        const body = u < 0.5 ? mixPose(CROUCH, TUCK, easeOutCubic(u * 2)) : mixPose(TUCK, SIU_POSE, easeInOutCubic((u - 0.5) * 2));
-        const turn = clamp01((u - 0.2) / 0.55);
+      // 2. Spring up with the arms, turn away from the camera at the top,
+      //    and open the legs to land wide.
+      if (s < GATHER + JUMP) {
+        const u = (s - GATHER) / JUMP;
+        const rising = u < 0.45;
+        const body = rising
+          ? mixPose(SIU_GATHER, SIU_AIR, easeOutCubic(u / 0.45))
+          : mixPose(SIU_AIR, { ...SIU_POSE, shoulderN: SIU_AIR.shoulderN, shoulderF: SIU_AIR.shoulderF }, easeInOutCubic((u - 0.45) / 0.55));
+        const turn = easeInOutCubic(clamp01((u - 0.1) / 0.5));
         const lift = AIR * 4 * u * (1 - u);
         const pose = grounded({ ...body, turn });
         return { pos: target, pose: { ...pose, y: pose.y - lift }, dust: null, streak: null, done: false };
       }
 
-      // 3. Land: a short compression, arms snapping down and out.
-      const l = s - PLANT - JUMP;
-      const impact = 1 - easeOutCubic(clamp01(l / 180));
-      const arms = easeOutBack(clamp01(l / 260), 1.6);
+      // 3. Land: knees give, then the arms are thrust down and out, a touch
+      //    past their final angle before they settle.
+      const l = s - GATHER - JUMP;
+      const impact = 1 - easeOutCubic(clamp01(l / 170));
+      const thrust = easeOutBack(clamp01(l / 240), 1.7);
       const pose = grounded({
         ...SIU_POSE,
-        shoulderN: 60 + (SIU_POSE.shoulderN - 60) * arms,
-        shoulderF: -60 + (SIU_POSE.shoulderF + 60) * arms,
-        kneeN: SIU_POSE.kneeN + 14 * impact,
-        kneeF: SIU_POSE.kneeF - 14 * impact,
+        shoulderN: SIU_AIR.shoulderN + (SIU_POSE.shoulderN - SIU_AIR.shoulderN) * thrust,
+        shoulderF: SIU_AIR.shoulderF + (SIU_POSE.shoulderF - SIU_AIR.shoulderF) * thrust,
+        kneeN: SIU_POSE.kneeN + 22 * impact,
+        kneeF: SIU_POSE.kneeF - 22 * impact,
       });
       return {
         pos: target,
-        pose: { ...pose, squash: 1 - 0.09 * impact },
-        dust: l < 420 ? l / 420 : null,
+        pose: { ...pose, squash: 1 - 0.08 * impact },
+        dust: l < 440 ? l / 440 : null,
         streak: null,
         done: t >= end,
       };
@@ -185,13 +166,17 @@ function siuTimeline({ target, trackPx, figurePx }: Options): Timeline {
   };
 }
 
-/** Messi: run, drop to the knees, slide to the result, arms up. */
+/**
+ * Messi: run, drop onto the knees and slide to the result, then rise up on
+ * the knees with both index fingers pointing to the sky.
+ */
 function kneeSlideTimeline({ target, trackPx, figurePx }: Options): Timeline {
   const { arrive, end } = CELEBRATION_TIMING["knee-slide"];
   const RUN = 800;
   const SLIDE = arrive - RUN;
   const ACCEL = 0.35; // share of the run spent accelerating
   const K = 2.4; // slide deceleration exponent
+  const RISE = 480;
 
   // Pick the run speed so the slide starts at the speed the run ends at.
   const v = target / (RUN * (1 - ACCEL / 2) + SLIDE / K);
@@ -219,28 +204,29 @@ function kneeSlideTimeline({ target, trackPx, figurePx }: Options): Timeline {
       if (t < arrive) {
         const w = (t - RUN) / SLIDE;
         const pos = runEnd + slideLen * (1 - Math.pow(1 - w, K));
-        // Drop onto the knees, lean back into the slide, arms opening as it slows.
-        const drop = easeOutCubic(clamp01(w / 0.3));
-        const open = easeInOutCubic(clamp01((w - 0.35) / 0.65));
-        const base = mixPose(mixPose(dropPose, SLIDE_POSE, drop), KNEEL_POSE, open);
+        // Drop onto the knees and lean back into the slide as the arms open.
+        const drop = easeOutCubic(clamp01(w / 0.32));
         return {
           pos,
-          pose: grounded(base),
+          pose: grounded(mixPose(dropPose, SLIDE_POSE, drop)),
           dust: null,
           streak: { from: runEnd, to: pos, alpha: 0.55 },
           done: false,
         };
       }
 
-      // Stopped: the upper body carries on for a moment, then settles.
+      // Stopped: sit up and raise both arms, fingers to the sky, with a
+      // little give in the body as the momentum dies away.
       const h = t - arrive;
-      const rock = Math.exp(-h / 150) * Math.sin(h / 70);
+      const up = easeOutBack(clamp01(h / RISE), 1.3);
+      const body = easeOutCubic(clamp01(h / RISE));
+      const rock = Math.exp(-h / 180) * Math.sin(h / 75);
       const pose = grounded({
-        ...KNEEL_POSE,
-        lean: KNEEL_POSE.lean + 9 * rock,
-        head: KNEEL_POSE.head + 5 * rock,
-        shoulderN: KNEEL_POSE.shoulderN - 10 * rock,
-        shoulderF: KNEEL_POSE.shoulderF + 10 * rock,
+        ...mixPose(SLIDE_POSE, SKY_POSE, body),
+        shoulderN: SLIDE_POSE.shoulderN + (SKY_POSE.shoulderN - SLIDE_POSE.shoulderN) * up,
+        shoulderF: SLIDE_POSE.shoulderF + (SKY_POSE.shoulderF - SLIDE_POSE.shoulderF) * up,
+        lean: SLIDE_POSE.lean + (SKY_POSE.lean - SLIDE_POSE.lean) * body + 5 * rock,
+        point: clamp01((h - RISE * 0.45) / (RISE * 0.4)),
       });
       const fade = clamp01(1 - h / 380);
       return {

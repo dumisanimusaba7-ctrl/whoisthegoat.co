@@ -169,13 +169,17 @@ country header (`x-vercel-ip-country` or `cf-ipcountry`).
    the middle (first option on the left), placed in `src/assets/debates/`. It
    becomes the vote board's background; without it the board shows the shirt
    numbers. Optionally add `figure: { kit, celebration }` to each option: the
-   kit colours dress the runner that plays on the voter's result bar, and
-   `celebration` picks its finish (`"siu"` or `"knee-slide"`). Options without
-   a figure reveal with the bars alone. Optionally add `cardPhoto`: a 1080×1350
+   kit (colours, sleeves, shirt number, hair) dresses the player who runs in
+   from their end of the result bar, and `celebration` picks the finish
+   (`"siu"` or `"knee-slide"`). Options without a figure reveal with the bar
+   alone. Optionally add `cardPhoto`: a 1080×1350
    (4:5) JPEG in `assets/cards/` for that player's share card and link preview.
    Use photos you have the rights to publish. To show the artwork in the
    debate's link preview, also set `artwork.file` to its path.
-2. Insert the matching rows (same slugs) in a new migration:
+2. Optionally add a trophy cabinet in `src/lib/trophies.ts` (honours grouped
+   by category, individual awards, records). The `/:debate/trophies` page,
+   its totals, the navigation link and the sitemap entry follow from it.
+3. Insert the matching rows (same slugs) in a new migration:
 
    ```sql
    insert into public.debates (slug, title, sport, status, opened_at)
@@ -197,6 +201,7 @@ src/app/                 routes: /, /[debate], /[debate]/results, /[debate]/shar
                          /debates, /results, /privacy, API routes, metadata routes
 src/components/debate/   arena (vote + reveal), result bars, share panel, country breakdown, editorial
 src/components/celebration/  result-bar runner: SVG kit figure, pose maths, celebration timeline
+src/components/trophies/  trophy cabinet page, trophy artwork, scroll reveals
 src/lib/                 debate registry, results maths, formatting, SEO helpers
 src/lib/server/          Supabase client, vote processing, network/IP handling
 src/lib/card/            share card and OG image renderer
