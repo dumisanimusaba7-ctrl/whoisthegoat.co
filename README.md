@@ -111,6 +111,11 @@ cp .env.example .env.local
 Without database variables the site still builds and renders. Live figures show as
 unavailable and voting returns a clear "briefly unavailable" message. Nothing is faked.
 
+**Checking a deployment:** open `/api/health` (e.g. `https://whoisthegoat.co/api/health`).
+It lists each setting and what the database answered, marks anything wrong with the
+fix, and ends with "Voting is ready." when all is well (HTTP 200; 503 otherwise, so
+it doubles as an uptime check). It never shows keys or secrets.
+
 ### 3. Run
 
 ```bash
