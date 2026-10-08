@@ -82,7 +82,9 @@ Create a Supabase project, then apply the schema with either:
 
 The migration creates the tables, functions, access rules and the
 `messi-vs-ronaldo` debate, and schedules maintenance with `pg_cron` (enabled on
-Supabase by default). Optional check against the live database:
+Supabase by default). To confirm the setup, run `supabase/check_setup.sql` in
+the SQL Editor: it changes nothing and returns one row per requirement, each
+"ok" or what to fix. Optional deeper test against the live database:
 
 ```bash
 DATABASE_URL="postgres://…" npm run test:db   # runs in a transaction, rolls back
