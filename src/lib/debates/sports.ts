@@ -1,3 +1,5 @@
+import hamiltonVsVerstappenArtwork from "@/assets/debates/hamilton-vs-verstappen.jpg";
+
 import type { Debate } from "./types";
 
 export const LEBRON_VS_JORDAN: Debate = {
@@ -376,6 +378,7 @@ export const HAMILTON_VS_VERSTAPPEN: Debate = {
           numberColor: "#ffffff",
         },
       },
+      cardPhoto: "hamilton.jpg",
       caseFor: [
         "Won seven world championships, in 2008, 2014, 2015, 2017, 2018, 2019 and 2020, level with Michael Schumacher for the most in Formula One history.",
         "Holds the Formula One records for Grand Prix wins (106), pole positions (104) and podiums (208) after the Singapore Grand Prix on 11 October 2026.",
@@ -409,6 +412,7 @@ export const HAMILTON_VS_VERSTAPPEN: Debate = {
           numberColor: "#ffffff",
         },
       },
+      cardPhoto: "verstappen.jpg",
       caseFor: [
         "Won four consecutive world championships with Red Bull, from 2021 to 2024.",
         "Holds the records for most wins in a season, 19 of 22 races in 2023, and most consecutive wins, with 10.",
@@ -417,6 +421,7 @@ export const HAMILTON_VS_VERSTAPPEN: Debate = {
       ],
     },
   ],
+  artwork: { image: hamiltonVsVerstappenArtwork, position: "50% 22%", file: "src/assets/debates/hamilton-vs-verstappen.jpg" },
   seo: {
     title: "Hamilton vs Verstappen: Who Is the Greater F1 Driver? Vote Now",
     description: "Lewis Hamilton or Max Verstappen? Compare world titles, wins, poles and podiums after the 2026 Singapore Grand Prix, then cast your vote.",
