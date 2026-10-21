@@ -57,17 +57,30 @@ state as (
 data as (
   select
     s.*,
-    case when s.debates_tbl is not null then
-      pg_temp.value_of($q$select status from public.debates where slug = 'messi-vs-ronaldo'$q$)
-    end as debate_status,
     case when s.debates_tbl is not null and s.options_tbl is not null then
-      pg_temp.value_of($q$select string_agg(o.slug, ', ' order by o.position)
-                            from public.debate_options o
-                            join public.debates d on d.id = o.debate_id
-                           where d.slug = 'messi-vs-ronaldo'$q$)
-    end as debate_options,
+      pg_temp.value_of($q$
+        select string_agg(e.slug, ', ' order by e.ord)
+          from (values
+            (1, 'messi-vs-ronaldo', 'messi, ronaldo'),
+            (2, 'yamal-vs-mbappe', 'yamal, mbappe'),
+            (3, 'lebron-vs-jordan', 'lebron, jordan'),
+            (4, 'tyson-vs-ali', 'tyson, ali'),
+            (5, 'hamilton-vs-verstappen', 'hamilton, verstappen'),
+            (6, 'khabib-vs-mcgregor', 'khabib, mcgregor'),
+            (7, 'neymar-vs-ronaldinho', 'neymar, ronaldinho'),
+            (8, 'drake-vs-kendrick', 'drake, kendrick'),
+            (9, 'dc-vs-marvel', 'dc, marvel'),
+            (10, 'samsung-vs-apple', 'samsung, apple')
+          ) as e (ord, slug, options)
+         where coalesce((select status from public.debates d where d.slug = e.slug), '') <> 'live'
+            or coalesce((select string_agg(o.slug, ', ' order by o.position)
+                           from public.debate_options o
+                           join public.debates d on d.id = o.debate_id
+                          where d.slug = e.slug), '') <> e.options
+      $q$)
+    end as debates_not_ready,
     case when s.results_fn is not null and s.missing_tables is null then
-      pg_temp.value_of($q$select public.get_debate_results('messi-vs-ronaldo') ->> 'total'$q$)
+      pg_temp.value_of($q$select sum((public.get_debate_results(slug, 0) ->> 'total')::bigint) from public.debates$q$)
     end as total_votes,
     case when s.cron_tbl is not null then
       pg_temp.value_of($q$select count(*) from cron.job where jobname like 'wigoat-%'$q$)::int
@@ -128,25 +141,19 @@ checks (step, item, status, detail) as (
          end
     from data
   union all
-  select 6, 'Messi vs Ronaldo debate',
-         case when debate_status = 'live' then 'ok' else 'fix' end,
+  select 6, 'Debates',
+         case when debates_tbl is not null and options_tbl is not null and debates_not_ready is null then 'ok' else 'fix' end,
          case
-           when debates_tbl is null then 'debates table is missing. Run the setup script.'
-           when debate_status is null then 'Not found. Run the "Launch debate" inserts at the end of the setup script.'
-           when debate_status <> 'live' then 'Status is "' || debate_status || '". Set it to live: update public.debates set status = ''live'' where slug = ''messi-vs-ronaldo'';'
-           else 'Open for voting.'
+           when debates_tbl is null or options_tbl is null then 'debates tables are missing. Run the setup script.'
+           when debates_not_ready like '%messi-vs-ronaldo%'
+             then 'Missing or not live: ' || debates_not_ready || '. Run the "Launch debate" inserts at the end of the setup script, then 20261021120000_more_debates.sql.'
+           when debates_not_ready is not null
+             then 'Missing or not live: ' || debates_not_ready || '. Run supabase/migrations/20261021120000_more_debates.sql.'
+           else 'All 10 debates are live, each with its two options.'
          end
     from data
   union all
-  select 7, 'Debate options',
-         case when debate_options = 'messi, ronaldo' then 'ok' else 'fix' end,
-         case
-           when debate_options = 'messi, ronaldo' then 'messi, ronaldo'
-           else 'Expected "messi, ronaldo", found "' || coalesce(debate_options, 'nothing') || '".'
-         end
-    from data
-  union all
-  select 8, 'Results',
+  select 7, 'Results',
          case when total_votes is not null then 'ok' else 'fix' end,
          case
            when total_votes is not null then total_votes || ' votes counted so far.'
@@ -154,7 +161,7 @@ checks (step, item, status, detail) as (
          end
     from data
   union all
-  select 9, 'Scheduled clean-up',
+  select 8, 'Scheduled clean-up',
          case when coalesce(cron_jobs, 0) >= 2 then 'ok' else 'optional' end,
          case
            when coalesce(cron_jobs, 0) >= 2 then 'Rate-limit and privacy clean-up jobs are scheduled.'

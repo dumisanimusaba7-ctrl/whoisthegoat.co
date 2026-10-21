@@ -51,8 +51,13 @@ export type Pose = {
   turn: number;
   /** Vertical squash at the feet, for landing impact. */
   squash: number;
-  /** Index fingers extended, 0–1. */
-  point: number;
+  /** Index finger extended on each hand, 0–1. */
+  pointN: number;
+  pointF: number;
+  /** The near hand holds the runner's prop (a ball, a microphone), 0–1. */
+  hold: number;
+  /** How far a cape streams out behind, 0 (hanging) – 1 (in flight). */
+  cape: number;
 };
 
 export const STANDING: Pose = {
@@ -74,7 +79,10 @@ export const STANDING: Pose = {
   elbowF: 12,
   turn: 0,
   squash: 1,
-  point: 0,
+  pointN: 0,
+  pointF: 0,
+  hold: 0,
+  cape: 0,
 };
 
 const rad = (deg: number) => (deg * Math.PI) / 180;
@@ -288,5 +296,31 @@ export const SKY_POSE: Pose = {
   elbowN: 8,
   shoulderF: 198,
   elbowF: -6,
-  point: 1,
+  pointN: 1,
+  pointF: 1,
 };
+
+/**
+ * Where a hand is, in figure units (ground at y = 0, x along the run), for
+ * props that leave the hand. Side view; back-view poses keep the torso
+ * upright, which the same maths covers with lean = 0.
+ */
+export function handPosition(pose: Pose, side: "N" | "F"): { x: number; y: number; angle: number } {
+  const back = pose.turn >= 0.5;
+  const lean = back ? 0 : pose.lean;
+  const offset = (back ? 9.5 : 1.5) * (side === "N" ? 1 : -1);
+  const pelvisX = pose.x;
+  const pelvisY = -SKELETON.hipHeight + pose.y;
+  const sy = -SKELETON.torso + SKELETON.shoulderDrop;
+  // Shoulder joint: torso offset rotated by the lean.
+  const l = rad(lean);
+  const shoulderX = pelvisX + offset * Math.cos(l) - sy * Math.sin(l);
+  const shoulderY = pelvisY + offset * Math.sin(l) + sy * Math.cos(l);
+  // A limb hanging down, rotated by `a` degrees in SVG terms, points along (−sin a, cos a).
+  const upper = rad(lean - (side === "N" ? pose.shoulderN : pose.shoulderF));
+  const elbowX = shoulderX - Math.sin(upper) * SKELETON.upperArm;
+  const elbowY = shoulderY + Math.cos(upper) * SKELETON.upperArm;
+  const fore = upper - rad(side === "N" ? pose.elbowN : pose.elbowF);
+  const reach = SKELETON.forearm + 1.4;
+  return { x: elbowX - Math.sin(fore) * reach, y: elbowY + Math.cos(fore) * reach, angle: (fore * 180) / Math.PI };
+}

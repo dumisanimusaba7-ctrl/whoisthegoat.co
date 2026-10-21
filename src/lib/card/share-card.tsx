@@ -122,9 +122,11 @@ function Layer({ children, style }: { children?: ReactNode; style?: CSSPropertie
 
 /** Stand-in for a missing photo: the shirt number, large and faint. */
 function GhostNumber({ value, size }: { value: string; size: number }) {
+  // Sized for two characters; longer marks ("GNX") shrink to fit.
+  const fontSize = (size * 2) / Math.max(2, value.length);
   return (
     <Layer style={{ alignItems: "center", justifyContent: "center" }}>
-      <div style={{ display: "flex", fontFamily: "Display", fontSize: size, lineHeight: 1, color: "rgba(255,255,255,0.06)" }}>{value}</div>
+      <div style={{ display: "flex", fontFamily: "Display", fontSize, lineHeight: 1, color: "rgba(255,255,255,0.06)" }}>{value}</div>
     </Layer>
   );
 }
@@ -143,7 +145,7 @@ function VoteCard({ debate, option, stats, photo }: { debate: Debate; option: De
         // eslint-disable-next-line @next/next/no-img-element -- rendered to an image, not the DOM
         <img src={photo} width={width} height={height} alt="" style={{ position: "absolute", top: 0, left: 0 }} />
       ) : (
-        <GhostNumber value={option.number} size={980} />
+        <GhostNumber value={option.mark} size={980} />
       )}
       {/* Scrims: brand legible at the top, figures at the bottom; the player stays clear in between. */}
       <Layer style={{ backgroundImage: "linear-gradient(to bottom, rgba(10,12,20,0.82) 0%, rgba(10,12,20,0) 20%, rgba(10,12,20,0) 46%, rgba(10,12,20,0.86) 70%, rgba(10,12,20,0.97) 100%)" }} />
@@ -212,7 +214,7 @@ function VoteCardWide({ debate, option, stats, photo }: { debate: Debate; option
           // eslint-disable-next-line @next/next/no-img-element -- rendered to an image, not the DOM
           <img src={photo} width={photoWidth} height={height} alt="" />
         ) : (
-          <GhostNumber value={option.number} size={560} />
+          <GhostNumber value={option.mark} size={560} />
         )}
         {/* Blend the photo's left edge into the panel. */}
         <Layer style={{ backgroundImage: "linear-gradient(to right, rgba(10,12,20,1) 0%, rgba(10,12,20,0) 22%)" }} />

@@ -3,11 +3,11 @@
 import Image from "next/image";
 import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
 
-import { CELEBRATION_TIMING, OTHER_BAR_MS } from "@/components/celebration/timeline";
+import { OTHER_BAR_MS, runnerTiming } from "@/components/celebration/timeline";
 import { InlineScript } from "@/components/inline-script";
 import { AnimatedNumber } from "@/components/ui/animated-number";
 import { getOption, type Debate, type DebateOption } from "@/lib/debates";
-import { formatCount, pluralize } from "@/lib/format";
+import { formatCount, longestWord, pluralize } from "@/lib/format";
 import { optionPercentages, type DebateResults } from "@/lib/results";
 import { voteTestMode } from "@/lib/test-mode";
 import { prevotedScript } from "@/lib/vote-storage";
@@ -27,6 +27,7 @@ export function Arena({ banner }: { banner?: ReactNode }) {
   const headingRef = useRef<HTMLHeadingElement>(null);
 
   const revealed = vote.phase === "voted";
+  const heading = revealed ? "The world has spoken" : debate.question;
   const busy = vote.phase === "submitting";
   const percents = (results ? optionPercentages(results.options, [a.slug, b.slug]) : [0, 0]) as [number, number];
   const chosen = vote.choice ? getOption(debate, vote.choice) : undefined;
@@ -43,10 +44,9 @@ export function Arena({ banner }: { banner?: ReactNode }) {
   }, [vote.revealedNow]);
 
   // The numbers count up in step with the bars: the chosen side lands when
-  // its player reaches the result.
-  const kind = chosen?.figure?.celebration;
-  const countUp = (option: DebateOption) =>
-    option.slug === chosen?.slug && kind ? CELEBRATION_TIMING[kind].arrive : OTHER_BAR_MS;
+  // its runner reaches the result.
+  const timing = chosen?.runner ? runnerTiming(chosen.runner) : null;
+  const countUp = (option: DebateOption) => (option.slug === chosen?.slug && timing ? timing.arrive : OTHER_BAR_MS);
 
   return (
     <section
@@ -67,9 +67,11 @@ export function Arena({ banner }: { banner?: ReactNode }) {
           id={`${id}-title`}
           ref={headingRef}
           tabIndex={-1}
-          className={`type-headline mt-3 text-[2.6rem] outline-none sm:text-6xl lg:text-[4.75rem] ${vote.revealedNow ? "animate-enter" : ""}`}
+          // On phones, long words ("HEAVYWEIGHT?") scale down to fit the line.
+          className={`type-headline mt-3 text-[length:min(2.6rem,calc((100vw-2rem)/(var(--word)*0.8)))] outline-none sm:text-6xl lg:text-[4.75rem] ${vote.revealedNow ? "animate-enter" : ""}`}
+          style={{ "--word": longestWord(heading) } as CSSProperties}
         >
-          {revealed ? "The world has spoken" : debate.question}
+          {heading}
         </h1>
         <p className="mt-3 text-base text-mute-dark sm:text-lg">
           {revealed && chosen ? (
@@ -166,7 +168,7 @@ function Side({
   vote: VoteState;
   percent: number;
   countUpMs: number;
-  /** Shirt number behind the player, used when the debate has no artwork. */
+  /** The option's mark (a shirt number, a record) behind it, used when the debate has no artwork. */
   showNumber: boolean;
   disabled: boolean;
   onVote: (choice: string) => void;
@@ -188,15 +190,18 @@ function Side({
         <span
           aria-hidden="true"
           className={`ghost-number absolute top-3 transition-opacity duration-[var(--duration-large)] ${end ? "right-2 sm:right-6" : "left-2 sm:left-6"} ${revealed ? "opacity-30" : ""}`}
+          style={{ "--mark-chars": option.mark.length } as CSSProperties}
         >
-          {option.number}
+          {option.mark}
         </span>
       ) : null}
 
-      <p className="type-overline relative text-white/80">{option.country.name}</p>
+      <p className="type-overline relative text-white/80">{option.tag}</p>
 
       <div className={`relative mt-auto transition-opacity duration-[var(--duration-ui)] ${dimmed ? "opacity-40" : ""}`}>
-        <p className="text-sm font-semibold text-white/75 sm:text-base">{option.firstName}</p>
+        {option.firstName && option.firstName !== option.shortName ? (
+          <p className="text-sm font-semibold text-white/75 sm:text-base">{option.firstName}</p>
+        ) : null}
         <p className="player-name type-display mt-1">{option.shortName}</p>
       </div>
 
@@ -260,7 +265,8 @@ function VoteCount({ results, unavailable }: { results: DebateResults | null; un
 function RevealStrip({ results, celebrate }: { results: DebateResults | null; celebrate: boolean }) {
   const { debate, vote, resetVote } = useDebate();
   const ref = useRef<HTMLDivElement>(null);
-  const kind = vote.choice ? getOption(debate, vote.choice)?.figure?.celebration : undefined;
+  const runner = vote.choice ? getOption(debate, vote.choice)?.runner : undefined;
+  const timing = runner ? runnerTiming(runner) : null;
 
   // On short screens the bars sit below the fold: bring them into view so
   // the result (and the celebration) is actually seen.
@@ -275,7 +281,7 @@ function RevealStrip({ results, celebrate }: { results: DebateResults | null; ce
       <ResultBars debate={debate} results={results} choice={vote.choice} celebrate={celebrate} withFigure />
       <div
         className={`mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between ${celebrate ? "animate-enter" : ""}`}
-        style={celebrate && kind ? { animationDelay: `${CELEBRATION_TIMING[kind].end - 150}ms` } : undefined}
+        style={celebrate && timing ? { animationDelay: `${timing.end - 150}ms` } : undefined}
       >
         <p className="type-label text-mute-dark">
           {results ? (

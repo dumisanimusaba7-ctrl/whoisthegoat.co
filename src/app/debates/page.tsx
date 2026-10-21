@@ -3,13 +3,14 @@ import Link from "next/link";
 import { ViewTransition } from "react";
 
 import { PageHero } from "@/components/layout/page-hero";
-import { DEBATES, SPORT_LABELS, UPCOMING_DEBATES, type Debate } from "@/lib/debates";
+import { DEBATES, CATEGORY_LABELS, UPCOMING_DEBATES, type Debate } from "@/lib/debates";
 import { formatCount, pluralize } from "@/lib/format";
 import { getPageResults } from "@/lib/server/results";
 
 export const metadata: Metadata = {
   title: "Debates",
-  description: "Sport’s biggest arguments, settled by a public vote. Messi vs Ronaldo is open now, with more debates to follow.",
+  description:
+    "The biggest arguments in sport and culture, settled by a public vote: Messi vs Ronaldo, LeBron vs Jordan, Tyson vs Ali, Drake vs Kendrick and more.",
   alternates: { canonical: "/debates" },
 };
 
@@ -17,7 +18,7 @@ export default function DebatesPage() {
   return (
     <ViewTransition enter="page" exit="page" default="none">
       <div>
-        <PageHero title="Debates">Sport’s longest-running arguments, each put to one public vote.</PageHero>
+        <PageHero title="Debates">The longest-running arguments in sport and culture, each put to one public vote.</PageHero>
 
         <div className="bg-paper">
           <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
@@ -35,7 +36,7 @@ export default function DebatesPage() {
                 {UPCOMING_DEBATES.map((item) => (
                   <li key={item.title} className="flex items-baseline justify-between gap-4 border-b border-rule py-3.5">
                     <span className="font-semibold">{item.title}</span>
-                    <span className="text-sm text-mute">{item.sport}</span>
+                    <span className="text-sm text-mute">{item.category}</span>
                   </li>
                 ))}
               </ul>
@@ -58,7 +59,7 @@ async function DebateRow({ debate }: { debate: Debate }) {
           </Link>
         </h2>
         <p className="mt-3 text-mute">
-          {SPORT_LABELS[debate.sport]} · Open
+          {CATEGORY_LABELS[debate.category]} · Open
           {results && results.total > 0 ? ` · ${formatCount(results.total)} ${pluralize(results.total, "vote")}` : null}
         </p>
       </div>

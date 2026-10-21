@@ -19,6 +19,7 @@ export type CheckStatus = "ok" | "problem" | "skipped" | "info";
 export type Check = { name: string; status: CheckStatus; detail: string };
 
 const SETUP_SCRIPT = "supabase/migrations/20261008120000_voting.sql";
+const DEBATES_SCRIPT = "supabase/migrations/20261021120000_more_debates.sql";
 
 type Deployment = { environment: string; branch: string | null; commit: string | null };
 
@@ -184,31 +185,45 @@ export function explainDatabaseError(error: DatabaseError, httpStatus?: number):
   return `Supabase returned an error: ${raw}`;
 }
 
+/** Every debate on the site needs its rows in the database, open for votes. */
 async function checkResults(): Promise<Check> {
-  const name = "Database: results";
+  const name = "Database: debates";
   try {
-    const { data, error, status } = await getSupabase().rpc("get_debate_results", {
-      p_debate_slug: "messi-vs-ronaldo",
-      p_country_limit: 0,
-    });
-    if (error) return { name, status: "problem", detail: explainDatabaseError(error, status) };
-    if (data === null) {
+    const answers = await Promise.all(
+      DEBATES.map(async (debate) => ({
+        debate,
+        ...(await getSupabase().rpc("get_debate_results", { p_debate_slug: debate.slug, p_country_limit: 0 })),
+      })),
+    );
+    const failed = answers.find((answer) => answer.error);
+    if (failed?.error) return { name, status: "problem", detail: explainDatabaseError(failed.error, failed.status) };
+
+    const missing = answers.filter((answer) => answer.data === null).map((answer) => answer.debate);
+    if (missing.length > 0) {
+      const script = missing.some((debate) => debate.slug === "messi-vs-ronaldo") ? SETUP_SCRIPT : DEBATES_SCRIPT;
       return {
         name,
         status: "problem",
-        detail: `The Messi vs Ronaldo debate isn't in the database. Run the "Launch debate" inserts at the end of ${SETUP_SCRIPT}.`,
+        detail: `Not in the database yet: ${missing.map((debate) => debate.title).join(", ")}. Votes for ${missing.length === 1 ? "it" : "them"} can't be counted until you run ${script} in Supabase → SQL Editor.`,
       };
     }
-    const result = data as { status?: string; total?: number };
-    if (result.status !== "live") {
+
+    const notLive = answers.filter((answer) => (answer.data as { status?: string }).status !== "live");
+    if (notLive.length > 0) {
+      const slugs = notLive.map((answer) => `'${answer.debate.slug}'`).join(", ");
       return {
         name,
         status: "problem",
-        detail: `The debate's status is "${result.status}". Open it with: update public.debates set status = 'live' where slug = 'messi-vs-ronaldo';`,
+        detail: `Not open for voting: ${notLive.map((answer) => answer.debate.title).join(", ")}. Open with: update public.debates set status = 'live' where slug in (${slugs});`,
       };
     }
-    const total = result.total ?? 0;
-    return { name, status: "ok", detail: `Readable: ${formatCount(total)} ${pluralize(total, "vote")} so far` };
+
+    const total = answers.reduce((sum, answer) => sum + ((answer.data as { total?: number }).total ?? 0), 0);
+    return {
+      name,
+      status: "ok",
+      detail: `All ${DEBATES.length} debates are open: ${formatCount(total)} ${pluralize(total, "vote")} so far`,
+    };
   } catch (error) {
     return { name, status: "problem", detail: explainDatabaseError({ message: String(error) }) };
   }
@@ -309,7 +324,7 @@ export async function runSetupCheck(
     canReachDatabase
       ? Promise.all([checkResults(), checkVoting()])
       : ([
-          { name: "Database: results", status: "skipped", detail: "Fix SUPABASE_URL and SUPABASE_SECRET_KEY first." },
+          { name: "Database: debates", status: "skipped", detail: "Fix SUPABASE_URL and SUPABASE_SECRET_KEY first." },
           { name: "Database: voting", status: "skipped", detail: "Fix SUPABASE_URL and SUPABASE_SECRET_KEY first." },
         ] satisfies Check[]),
     checkShareLinks(requestHost),

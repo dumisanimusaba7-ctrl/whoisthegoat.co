@@ -77,12 +77,14 @@ only published once it passes `MIN_COUNTRY_VOTES`. See `/privacy`.
 
 Create a Supabase project, then apply the schema with either:
 
-- **Dashboard:** SQL Editor → paste and run `supabase/migrations/20261008120000_voting.sql`, or
+- **Dashboard:** SQL Editor → paste and run each file in `supabase/migrations/`
+  in order (`20261008120000_voting.sql`, then `20261021120000_more_debates.sql`), or
 - **CLI:** `supabase init` (keep the existing `supabase/` folder), `supabase link --project-ref <ref>`, `supabase db push`.
 
-The migration creates the tables, functions, access rules and the
+The first migration creates the tables, functions, access rules and the
 `messi-vs-ronaldo` debate, and schedules maintenance with `pg_cron` (enabled on
-Supabase by default). To confirm the setup, run `supabase/check_setup.sql` in
+Supabase by default). The second adds the other nine debates; it's safe to run
+again. To confirm the setup, run `supabase/check_setup.sql` in
 the SQL Editor: it changes nothing and returns one row per requirement, each
 "ok" or what to fix. Optional deeper test against the live database:
 
@@ -164,16 +166,21 @@ country header (`x-vercel-ip-country` or `cf-ipcountry`).
 
 ## Adding a debate
 
-1. Add an entry to `DEBATES` in `src/lib/debates.ts` (names, colours, shirt
-   numbers, copy, SEO). Optionally add `artwork`: a landscape image split down
-   the middle (first option on the left), placed in `src/assets/debates/`. It
-   becomes the vote board's background; without it the board shows the shirt
-   numbers. Optionally add `figure: { kit, celebration }` to each option: the
-   kit (colours, sleeves, shirt number, hair) dresses the player who runs in
-   from their end of the result bar, and `celebration` picks the finish
-   (`"siu"` or `"knee-slide"`). Options without a figure reveal with the bar
-   alone. Optionally add `cardPhoto`: a 1080×1350
-   (4:5) JPEG in `assets/cards/` for that player's share card and link preview.
+1. Add an entry in `src/lib/debates/` (football, sports or culture) and list it
+   in `DEBATES` in `src/lib/debates/index.ts`: names, colours, marks (a shirt
+   number, a record, a car number), copy, SEO. Optionally add `artwork`: a
+   landscape image split down the middle (first option on the left), placed in
+   `src/assets/debates/`. It becomes the vote board's background; without it
+   the board shows the marks. Optionally add a `runner` to each option: what
+   comes in from its end of the result bar after a vote. A figure (`kind:
+   "figure"`) is dressed by its `kit` (top, bottoms, shoes, gloves, colours,
+   hair) and finishes with one of the celebrations in
+   `src/components/celebration/timeline.ts` (`"siu"`, `"knee-slide"`, `"304"`,
+   `"chalk-toss"`, `"web-swing"`…); a car (`kind: "car"`) takes a team
+   `livery` and does a `"doughnut"` or `"burnout"`; a phone (`kind: "phone"`)
+   is a `"foldable"` that unfolds or a `"slab"` that wakes. Options without a
+   runner reveal with the bar alone. Optionally add `cardPhoto`: a 1080×1350
+   (4:5) JPEG in `assets/cards/` for that option's share card and link preview.
    Use photos you have the rights to publish. To show the artwork in the
    debate's link preview, also set `artwork.file` to its path.
 2. Optionally add a trophy cabinet in `src/lib/trophies.ts` (honours grouped
@@ -200,13 +207,14 @@ The data layer supports any number of options; the arena layout is built for two
 src/app/                 routes: /, /[debate], /[debate]/results, /[debate]/share/[choice],
                          /debates, /results, /privacy, API routes, metadata routes
 src/components/debate/   arena (vote + reveal), result bars, share panel, country breakdown, editorial
-src/components/celebration/  result-bar runner: SVG kit figure, pose maths, celebration timeline
+src/components/celebration/  result-bar runners (SVG figure, F1 car, phone), poses, celebration timelines
 src/components/trophies/  trophy cabinet page, trophy artwork, scroll reveals
-src/lib/                 debate registry, results maths, formatting, SEO helpers
+src/lib/                 results maths, formatting, SEO helpers
+src/lib/debates/         debate registry: options, copy, kits, liveries
 src/lib/server/          Supabase client, vote processing, network/IP handling
 src/lib/card/            share card and OG image renderer
 src/assets/debates/      vote board artwork
-supabase/migrations/     schema, functions, access control, launch debate
+supabase/migrations/     schema, functions, access control, debates
 supabase/tests/          SQL assertions
 tests/                   unit tests (Vitest)
 assets/fonts/            static Archivo cuts for the image renderer
@@ -216,9 +224,11 @@ docs/LAUNCH.md           launch checklist and social playbook
 
 ## Content
 
-Editorial facts (honours, records) live in `src/lib/debates.ts` with a `factsAsOf`
+Editorial facts (honours, records) live in `src/lib/debates/` with a `factsAsOf`
 date shown on the page. They're current to October 2026; check them after
-milestones such as the Ballon d'Or ceremony.
+milestones: the Ballon d’Or ceremony (26 October 2026) for Yamal vs Mbappé,
+each Grand Prix for Hamilton vs Verstappen (figures are after Singapore,
+11 October 2026), and the iPhone Duo release (23 October 2026).
 
 Fonts: Archivo and Montserrat (used for the wordmark outlines) are licensed under
 the SIL Open Font License.

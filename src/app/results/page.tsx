@@ -4,7 +4,7 @@ import { ViewTransition } from "react";
 
 import { ResultBars } from "@/components/debate/result-bars";
 import { PageHero } from "@/components/layout/page-hero";
-import { DEBATES, SPORT_LABELS, type Debate } from "@/lib/debates";
+import { DEBATES, CATEGORY_LABELS, type Debate } from "@/lib/debates";
 import { formatCount, formatPercent, pluralize } from "@/lib/format";
 import { optionPercentages } from "@/lib/results";
 import { getPageResults } from "@/lib/server/results";
@@ -45,7 +45,7 @@ async function ResultRow({ debate }: { debate: Debate }) {
           </Link>
         </h2>
         <p className="text-mute">
-          {SPORT_LABELS[debate.sport]}
+          {CATEGORY_LABELS[debate.category]}
           {results && results.total > 0
             ? ` · ${formatCount(results.total)} ${pluralize(results.total, "vote")} from ${formatCount(results.countries.count)} ${pluralize(results.countries.count, "country", "countries")}`
             : null}

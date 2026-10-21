@@ -211,7 +211,8 @@
 
 /* Shirt numbers behind each player, for debates without artwork. */
 .ghost-number {
-  font-size: min(32rem, calc(var(--panel-w) * 1.3));
+  /* Sized for two characters; longer marks shrink to fit the panel. */
+  font-size: calc(min(32rem, var(--panel-w) * 1.3) * 2 / max(2, var(--mark-chars, 2)));
   font-weight: 900;
   font-stretch: 62%;
   line-height: 0.8;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { countryFlag, countryName, formatCompact, formatCount, formatPercent, pluralize } from "@/lib/format";
+import { countryFlag, countryName, formatCompact, formatCount, formatPercent, longestWord, pluralize } from "@/lib/format";
 
 describe("format", () => {
   it("formats counts with thousands separators", () => {
@@ -28,5 +28,10 @@ describe("format", () => {
     expect(countryFlag("AR")).toBe("🇦🇷");
     expect(countryFlag("ar")).toBe("");
     expect(countryName("PT")).toBe("Portugal");
+  });
+
+  it("measures the longest word in a headline", () => {
+    expect(longestWord("Who is the greater heavyweight?")).toBe(12);
+    expect(longestWord("Neymar vs Ronaldinho")).toBe(10);
   });
 });

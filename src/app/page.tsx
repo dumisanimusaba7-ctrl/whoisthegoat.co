@@ -5,6 +5,7 @@ import { AdSlot } from "@/components/ads/ad-slot";
 import { AboutDebate } from "@/components/debate/about-debate";
 import { DebateExperience } from "@/components/debate/debate-experience";
 import { HowItWorks } from "@/components/debate/how-it-works";
+import { MoreDebates } from "@/components/debate/more-debates";
 import { JsonLd } from "@/components/json-ld";
 import { getFeaturedDebate } from "@/lib/debates";
 import { debateJsonLd, debateMetadata } from "@/lib/seo";
@@ -22,6 +23,7 @@ export default function HomePage() {
       <div>
         <DebateExperience debate={debate} />
         <AboutDebate debate={debate} />
+        <MoreDebates current={debate.slug} />
         <AdSlot placement="editorial" className="border-t border-rule" />
         <HowItWorks />
         <JsonLd data={debateJsonLd(debate, "/")} />

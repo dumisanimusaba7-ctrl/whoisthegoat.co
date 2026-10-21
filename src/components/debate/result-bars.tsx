@@ -2,9 +2,9 @@
 
 import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 
-import { Figure, type FigureHandle } from "@/components/celebration/figure";
 import { easeOutCubic } from "@/components/celebration/pose";
-import { createTimeline, FINAL_POSE, OTHER_BAR_MS } from "@/components/celebration/timeline";
+import { runnerAnchor, RunnerView, type RunnerHandle } from "@/components/celebration/runner";
+import { createTimeline, OTHER_BAR_MS } from "@/components/celebration/timeline";
 import type { Debate } from "@/lib/debates";
 import { formatCount, pluralize } from "@/lib/format";
 import { optionPercentages, votesFor, type DebateResults } from "@/lib/results";
@@ -12,11 +12,11 @@ import { optionPercentages, votesFor, type DebateResults } from "@/lib/results";
 type Props = {
   debate: Debate;
   results: DebateResults | null;
-  /** The option this browser voted for. Its player stands on the bar. */
+  /** The option this browser voted for. Its runner stands on the bar. */
   choice?: string | null;
   /** A vote was just cast: play the celebration instead of showing the end state. */
   celebrate?: boolean;
-  /** Leave room above the bar for the player figure. */
+  /** Leave room above the bar for the runner (player, car or phone). */
   withFigure?: boolean;
   tone?: "dark" | "light";
   className?: string;
@@ -29,8 +29,8 @@ function prefersReducedMotion(): boolean {
 /**
  * The head-to-head on one bar: the first option fills from the left, the
  * second from the right, each to its share, so they meet at the split.
- * After a vote the chosen player runs in from their end to the split and
- * celebrates there. The animation only ever draws on top of numbers that
+ * After a vote the chosen option's runner (a player, a car, a phone) comes
+ * in from its end to the split and celebrates there. The animation only ever draws on top of numbers that
  * are already final: if it fails or is skipped, the bar simply shows the
  * result.
  */
@@ -39,16 +39,16 @@ export function ResultBars({ debate, results, choice, celebrate = false, withFig
   const percents = results ? optionPercentages(results.options, [a.slug, b.slug]) : [0, 0];
   const chosenIndex = debate.options.findIndex((o) => o.slug === choice);
   const chosen = chosenIndex >= 0 ? debate.options[chosenIndex] : undefined;
-  const figure = withFigure ? chosen?.figure : undefined;
-  // The second option's player starts at the right-hand end and runs left.
+  const runner = withFigure ? chosen?.runner : undefined;
+  // The second option's runner starts at the right-hand end and runs left.
   const fromRight = chosenIndex === 1;
 
   const track = useRef<HTMLDivElement>(null);
   const fills = useRef<(HTMLDivElement | null)[]>([]);
-  const runner = useRef<HTMLDivElement>(null);
+  const lane = useRef<HTMLDivElement>(null);
   const streak = useRef<HTMLDivElement>(null);
-  const figureHandle = useRef<FigureHandle>(null);
-  const [playing, setPlaying] = useState(Boolean(celebrate && figure));
+  const runnerHandle = useRef<RunnerHandle>(null);
+  const [playing, setPlaying] = useState(Boolean(celebrate && runner));
 
   // Read final numbers inside the animation without restarting it.
   const latest = useRef(percents);
@@ -57,7 +57,7 @@ export function ResultBars({ debate, results, choice, celebrate = false, withFig
   });
 
   useLayoutEffect(() => {
-    if (!playing || !figure || chosenIndex < 0) return;
+    if (!playing || !runner || chosenIndex < 0) return;
 
     const finish = () => setPlaying(false);
     if (prefersReducedMotion()) {
@@ -65,18 +65,19 @@ export function ResultBars({ debate, results, choice, celebrate = false, withFig
       return;
     }
 
-    const figureEl = runner.current?.querySelector("svg");
-    if (!track.current || !figureEl || !runner.current) {
+    const drawing = lane.current?.querySelector("svg");
+    if (!track.current || !drawing || !lane.current) {
       finish();
       return;
     }
 
     const other = 1 - chosenIndex;
-    const timeline = createTimeline(figure.celebration, {
-      // How far the player runs: their own share, measured from their end.
+    const timeline = createTimeline(runner, {
+      // How far the runner goes: their own share, measured from their end.
       target: latest.current[chosenIndex] / 100,
       trackPx: track.current.getBoundingClientRect().width,
-      figurePx: figureEl.getBoundingClientRect().height * (92 / 108),
+      // Every runner is drawn 108 units tall.
+      unitPx: drawing.getBoundingClientRect().height / 108,
     });
     const toScreen = (distance: number) => (fromRight ? 1 - distance : distance);
 
@@ -84,9 +85,8 @@ export function ResultBars({ debate, results, choice, celebrate = false, withFig
     let start = 0;
     const draw = (t: number) => {
       const f = timeline.sample(t);
-      runner.current!.style.transform = `translateX(${toScreen(f.pos) * 100}%)`;
-      figureHandle.current?.setPose(f.pose);
-      figureHandle.current?.setDust(f.dust);
+      lane.current!.style.transform = `translateX(${toScreen(f.pos) * 100}%)`;
+      runnerHandle.current?.draw(f);
       const own = fills.current[chosenIndex];
       const rival = fills.current[other];
       if (own) own.style.transform = `scaleX(${f.pos})`;
@@ -115,29 +115,28 @@ export function ResultBars({ debate, results, choice, celebrate = false, withFig
         finish();
       }
     };
-    // First frame before paint, so the end-state figure never flashes.
+    // First frame before paint, so the end state never flashes.
     draw(0);
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [playing, figure, chosenIndex, fromRight]);
+  }, [playing, runner, chosenIndex, fromRight]);
 
   // Once the celebration ends, hand the final state back to React.
   useLayoutEffect(() => {
     if (playing) return;
-    figureHandle.current?.setDust(null);
-    if (figure) figureHandle.current?.setPose(FINAL_POSE[figure.celebration]);
+    runnerHandle.current?.rest();
     if (streak.current) streak.current.style.opacity = "0";
-  }, [playing, figure]);
+  }, [playing, runner]);
 
   const dark = tone === "dark";
   const settle: CSSProperties = { transition: playing ? "none" : "transform var(--duration-large) var(--ease-out)" };
   const scales = playing ? [0, 0] : percents.map((p) => p / 100);
-  // Where the two colours meet, and where the player comes to rest.
+  // Where the two colours meet, and where the runner comes to rest.
   const split = fromRight ? 1 - scales[1] : scales[0];
 
   return (
     <div data-result-bars className={className}>
-      <div className={figure ? "pt-[62px] sm:pt-[86px]" : ""}>
+      <div className={runner ? "pt-[62px] sm:pt-[86px]" : ""}>
         <div
           ref={track}
           role="img"
@@ -154,22 +153,16 @@ export function ResultBars({ debate, results, choice, celebrate = false, withFig
               style={{ background: option.color, transform: `scaleX(${scales[i]})`, ...settle }}
             />
           ))}
-          {figure && chosen ? (
+          {runner && chosen ? (
             <>
               <div ref={streak} aria-hidden="true" className="absolute inset-x-0 top-0 h-[3px] origin-left bg-white opacity-0" />
               <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-full">
-                <div ref={runner} className="w-full" style={{ transform: `translateX(${split * 100}%)`, ...settle }}>
+                <div ref={lane} className="w-full" style={{ transform: `translateX(${split * 100}%)`, ...settle }}>
                   <div
                     className="absolute bottom-0 left-0"
-                    style={{ transform: `translate(-50%, 3.7%)${fromRight ? " scaleX(-1)" : ""}` }}
+                    style={{ transform: `translate(${-100 * runnerAnchor(runner, fromRight)}%, 3.7%)${fromRight ? " scaleX(-1)" : ""}` }}
                   >
-                    <Figure
-                      kit={figure.kit}
-                      pose={FINAL_POSE[figure.celebration]}
-                      handle={figureHandle}
-                      mirrored={fromRight}
-                      className="block h-[64px] w-auto sm:h-[88px]"
-                    />
+                    <RunnerView runner={runner} handle={runnerHandle} mirrored={fromRight} className="block h-[64px] w-auto sm:h-[88px]" />
                   </div>
                 </div>
               </div>

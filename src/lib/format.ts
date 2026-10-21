@@ -37,3 +37,8 @@ export function countryFlag(code: string): string {
   if (!/^[A-Z]{2}$/.test(code)) return "";
   return String.fromCodePoint(...[...code].map((c) => 0x1f1a5 + c.charCodeAt(0)));
 }
+
+/** Length of the longest word, for sizing headlines so no word overflows a phone screen. */
+export function longestWord(text: string): number {
+  return Math.max(...text.split(/\s+/).map((word) => word.length));
+}

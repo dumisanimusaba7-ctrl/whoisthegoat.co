@@ -1,13 +1,15 @@
 import { describe, expect, it } from "vitest";
 
-import { DEBATES } from "@/lib/debates";
-import { categoryCounts, competitionCounts, findCategory, getCabinet, shortSeason, teamTotals } from "@/lib/trophies";
+import { FEATURED_DEBATE_SLUG } from "@/lib/debates";
+import { categoryCounts, competitionCounts, findCategory, getCabinet, hasCabinet, shortSeason, teamTotals } from "@/lib/trophies";
 
 const cabinet = getCabinet("messi-vs-ronaldo")!;
 
 describe("trophy cabinet", () => {
-  it("exists for every debate that links to it", () => {
-    expect(DEBATES.every((debate) => getCabinet(debate.slug))).toBe(true);
+  it("exists for the featured debate, which the header and footer link to", () => {
+    // Other debates link to a cabinet only when hasCabinet() says so.
+    expect(hasCabinet(FEATURED_DEBATE_SLUG)).toBe(true);
+    expect(getCabinet(FEATURED_DEBATE_SLUG)).toBeDefined();
   });
 
   it("counts senior team trophies from the lists", () => {

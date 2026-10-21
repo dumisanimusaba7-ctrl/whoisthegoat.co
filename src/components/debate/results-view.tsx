@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import type { CSSProperties } from "react";
 
 import { AnimatedNumber } from "@/components/ui/animated-number";
 import { getOption } from "@/lib/debates";
-import { formatCount, pluralize } from "@/lib/format";
+import { formatCount, longestWord, pluralize } from "@/lib/format";
 import { optionPercentages } from "@/lib/results";
 
 import { useDebate } from "./debate-provider";
@@ -22,7 +23,11 @@ export function ResultsView() {
       <section aria-labelledby="results-title" className="bg-ink text-white">
         <div className="mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 sm:pb-16 sm:pt-12">
           <p className="type-label text-mute-dark">Results</p>
-          <h1 id="results-title" className="type-headline mt-3 text-[2.6rem] sm:text-6xl">
+          <h1
+            id="results-title"
+            className="type-headline mt-3 text-[length:min(2.6rem,calc((100vw-2rem)/(var(--word)*0.8)))] sm:text-6xl"
+            style={{ "--word": longestWord(debate.title) } as CSSProperties}
+          >
             {debate.title}
           </h1>
           <p className="mt-3 text-base text-mute-dark sm:text-lg">

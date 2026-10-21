@@ -6,6 +6,7 @@ import { AdSlot } from "@/components/ads/ad-slot";
 import { AboutDebate } from "@/components/debate/about-debate";
 import { DebateExperience } from "@/components/debate/debate-experience";
 import { HowItWorks } from "@/components/debate/how-it-works";
+import { MoreDebates } from "@/components/debate/more-debates";
 import { JsonLd } from "@/components/json-ld";
 import { DEBATES, getDebate } from "@/lib/debates";
 import { breadcrumbJsonLd, debateJsonLd, debateMetadata } from "@/lib/seo";
@@ -34,6 +35,7 @@ export default async function DebatePage({ params }: PageProps<"/[debate]">) {
       <div>
         <DebateExperience debate={debate} />
         <AboutDebate debate={debate} />
+        <MoreDebates current={debate.slug} />
         <AdSlot placement="editorial" className="border-t border-rule" />
         <HowItWorks />
         <JsonLd data={debateJsonLd(debate, `/${debate.slug}`)} />

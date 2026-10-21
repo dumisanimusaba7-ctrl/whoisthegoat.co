@@ -46,12 +46,11 @@ export function debateJsonLd(debate: Debate, path: string) {
     description: debate.seo.description,
     url: absoluteUrl(path),
     isPartOf: { "@type": "WebSite", name: SITE_NAME, url: absoluteUrl("/") },
-    about: debate.options.map((option) => ({
-      "@type": "Person",
-      name: option.name,
-      nationality: option.country.name,
-      sameAs: option.wikipedia,
-    })),
+    about: debate.options.map((option) =>
+      option.kind === "person"
+        ? { "@type": "Person", name: option.name, nationality: option.nationality, sameAs: option.wikipedia }
+        : { "@type": "Organization", name: option.name, sameAs: option.wikipedia },
+    ),
   };
 }
 
