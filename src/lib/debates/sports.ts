@@ -1,6 +1,8 @@
 import aliSide from "@/assets/debates/tyson-vs-ali-2.jpg";
 import hamiltonSide from "@/assets/debates/hamilton-vs-verstappen-1.jpg";
+import jordanSide from "@/assets/debates/lebron-vs-jordan-2.jpg";
 import khabibSide from "@/assets/debates/khabib-vs-mcgregor-1.jpg";
+import lebronSide from "@/assets/debates/lebron-vs-jordan-1.jpg";
 import mcgregorSide from "@/assets/debates/khabib-vs-mcgregor-2.jpg";
 import tysonSide from "@/assets/debates/tyson-vs-ali-1.jpg";
 import verstappenSide from "@/assets/debates/hamilton-vs-verstappen-2.jpg";
@@ -49,6 +51,7 @@ export const LEBRON_VS_JORDAN: Debate = {
           boots: "#f4f4f4",
         },
       },
+      cardPhoto: "lebron.jpg",
       caseFor: [
         "Is the NBA’s all-time leading scorer, finishing the 2025–26 season with 43,440 regular-season points, and was the first player to reach 40,000 on 2 March 2024.",
         "Has won four NBA titles and four Finals MVP awards with three franchises: Miami (2012, 2013), Cleveland (2016) and the Los Angeles Lakers (2020).",
@@ -92,6 +95,7 @@ export const LEBRON_VS_JORDAN: Debate = {
           boots: "#1a1a1a",
         },
       },
+      cardPhoto: "jordan.jpg",
       caseFor: [
         "Won six NBA titles with the Chicago Bulls (1991–93 and 1996–98) and was named Finals MVP in all six.",
         "Won five regular-season MVP awards (1988, 1991, 1992, 1996, 1998) and a record ten scoring titles.",
@@ -100,6 +104,11 @@ export const LEBRON_VS_JORDAN: Debate = {
       ],
     },
   ],
+  artwork: {
+    sides: [lebronSide, jordanSide],
+    focus: ["54% 32%", "46% 32%"],
+    file: "src/assets/debates/lebron-vs-jordan.jpg",
+  },
   seo: {
     title: "LeBron vs Jordan: Who Is the NBA GOAT? Vote Now",
     description: "LeBron James or Michael Jordan? Compare titles, MVPs, Finals MVPs and career points, then cast your vote in basketball’s biggest GOAT debate.",
