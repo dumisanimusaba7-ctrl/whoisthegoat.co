@@ -1,3 +1,5 @@
+import dcVsMarvelArtwork from "@/assets/debates/dc-vs-marvel.jpg";
+import drakeVsKendrickArtwork from "@/assets/debates/drake-vs-kendrick.jpg";
 import samsungVsAppleArtwork from "@/assets/debates/samsung-vs-apple.jpg";
 
 import type { Debate } from "./types";
@@ -39,6 +41,7 @@ export const DRAKE_VS_KENDRICK: Debate = {
           boots: "#efefef",
         },
       },
+      cardPhoto: "drake.jpg",
       caseFor: [
         "Drake has 14 Billboard Hot 100 No. 1s, the most by a male solo artist, after “Janice STFU” debuted at No. 1 on the chart dated 30 May 2026.",
         "In May 2026 he became the first artist to reach 400 Hot 100 entries and charted a record 42 songs in a single week.",
@@ -62,22 +65,23 @@ export const DRAKE_VS_KENDRICK: Debate = {
         kind: "figure",
         celebration: "mic-drop",
         prop: "mic",
-        // Dark jacket and flared denim.
+        // Denim jacket over a white tee, as in the photos.
         kit: {
           skin: "#5a3a28",
           hair: "#0d0b0a",
-          hairStyle: "buzz",
+          hairStyle: "curly",
           beard: "#0d0b0a",
           top: "jacket",
-          shirt: "#2a2320",
+          shirt: "#86a3c3",
           sleeves: "long",
-          trim: "#8b6b4a",
+          trim: "#f2f2f2",
           bottoms: "trousers",
           shorts: "#41618f",
           shoes: "sneakers",
           boots: "#e8e3d6",
         },
       },
+      cardPhoto: "kendrick.jpg",
       caseFor: [
         "Kendrick has won 27 Grammy Awards, the most by any rapper, including five in February 2026 when GNX won Best Rap Album and “Luther” won Record of the Year.",
         "His album DAMN. won the 2018 Pulitzer Prize for Music, the first winner from outside classical music and jazz.",
@@ -86,6 +90,7 @@ export const DRAKE_VS_KENDRICK: Debate = {
       ],
     },
   ],
+  artwork: { image: drakeVsKendrickArtwork, position: "50% 45%", file: "src/assets/debates/drake-vs-kendrick.jpg" },
   seo: {
     title: "Drake vs Kendrick Lamar: Who Is the Better Rapper? Vote Now",
     description: "Drake or Kendrick Lamar? Compare Grammy wins, Billboard No. 1s and chart records, checked as of October 2026, then cast your vote in the GOAT debate.",
@@ -152,6 +157,7 @@ export const DC_VS_MARVEL: Debate = {
           limbs: "#1f4fb4",
         },
       },
+      cardPhoto: "dc.jpg",
       caseFor: [
         "Superman first appeared in Action Comics #1 (cover-dated June 1938), and Batman followed in Detective Comics #27 (May 1939).",
         "Aquaman (2018) is DC’s highest-grossing film at $1.15 billion worldwide, one of four DC films to pass $1 billion alongside The Dark Knight Rises, Joker and The Dark Knight.",
@@ -192,6 +198,7 @@ export const DC_VS_MARVEL: Debate = {
           limbs: "#1d3fa8",
         },
       },
+      cardPhoto: "marvel.jpg",
       caseFor: [
         "Marvel Comics #1, cover-dated October 1939, featured the Human Torch and Namor the Sub-Mariner.",
         "The 38 released Marvel Cinematic Universe films have grossed more than $35 billion worldwide (The Numbers, October 2026).",
@@ -200,6 +207,7 @@ export const DC_VS_MARVEL: Debate = {
       ],
     },
   ],
+  artwork: { image: dcVsMarvelArtwork, position: "50% 40%", file: "src/assets/debates/dc-vs-marvel.jpg" },
   seo: {
     title: "DC vs Marvel: Which Universe Is Better? Vote Now",
     description: "DC or Marvel? Compare first comics, box office records, Oscars and owners, checked as of October 2026, then vote for the comic book universe you back.",
