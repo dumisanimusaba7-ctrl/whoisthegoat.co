@@ -7,7 +7,7 @@
  * `debate_options` rows with the same slugs.
  */
 
-import { DRAKE_VS_KENDRICK, DC_VS_MARVEL, SAMSUNG_VS_APPLE } from "./culture";
+import { DC_VS_MARVEL, DRAKE_VS_KENDRICK, NIKE_VS_ADIDAS, SAMSUNG_VS_APPLE } from "./culture";
 import { MESSI_VS_RONALDO, NEYMAR_VS_RONALDINHO, YAMAL_VS_MBAPPE } from "./football";
 import { HAMILTON_VS_VERSTAPPEN, KHABIB_VS_MCGREGOR, LEBRON_VS_JORDAN, TYSON_VS_ALI } from "./sports";
 import type { Category, Debate, DebateOption } from "./types";
@@ -25,6 +25,7 @@ export const DEBATES: Debate[] = [
   DRAKE_VS_KENDRICK,
   DC_VS_MARVEL,
   SAMSUNG_VS_APPLE,
+  NIKE_VS_ADIDAS,
 ];
 
 export const FEATURED_DEBATE_SLUG = "messi-vs-ronaldo";
@@ -46,6 +47,7 @@ export const CATEGORY_LABELS: Record<Category, string> = {
   music: "Music",
   comics: "Comics",
   tech: "Tech",
+  sportswear: "Sportswear",
 };
 
 export function getDebate(slug: string): Debate | undefined {

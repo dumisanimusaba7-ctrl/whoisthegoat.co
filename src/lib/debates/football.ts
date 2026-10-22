@@ -1,6 +1,9 @@
-import messiVsRonaldoArtwork from "@/assets/debates/messi-vs-ronaldo.jpg";
-import neymarVsRonaldinhoArtwork from "@/assets/debates/neymar-vs-ronaldinho.jpg";
-import yamalVsMbappeArtwork from "@/assets/debates/yamal-vs-mbappe.jpg";
+import mbappeSide from "@/assets/debates/yamal-vs-mbappe-2.jpg";
+import messiSide from "@/assets/debates/messi-vs-ronaldo-1.jpg";
+import neymarSide from "@/assets/debates/neymar-vs-ronaldinho-1.jpg";
+import ronaldinhoSide from "@/assets/debates/neymar-vs-ronaldinho-2.jpg";
+import ronaldoSide from "@/assets/debates/messi-vs-ronaldo-2.jpg";
+import yamalSide from "@/assets/debates/yamal-vs-mbappe-1.jpg";
 
 import type { Debate } from "./types";
 
@@ -96,7 +99,11 @@ export const MESSI_VS_RONALDO: Debate = {
       ],
     },
   ],
-  artwork: { image: messiVsRonaldoArtwork, position: "50% 22%", file: "src/assets/debates/messi-vs-ronaldo.jpg" },
+  artwork: {
+    sides: [messiSide, ronaldoSide],
+    focus: ["92% 52%", "12% 36%"],
+    file: "src/assets/debates/messi-vs-ronaldo.jpg",
+  },
   seo: {
     title: "Messi vs Ronaldo: Who Is the GOAT? Vote Now",
     description:
@@ -217,7 +224,11 @@ export const YAMAL_VS_MBAPPE: Debate = {
       ],
     },
   ],
-  artwork: { image: yamalVsMbappeArtwork, position: "50% 18%", file: "src/assets/debates/yamal-vs-mbappe.jpg" },
+  artwork: {
+    sides: [yamalSide, mbappeSide],
+    focus: ["56% 18%", "38% 24%"],
+    file: "src/assets/debates/yamal-vs-mbappe.jpg",
+  },
   seo: {
     title: "Yamal vs Mbappé: Who Is the Better Player? Vote Now",
     description: "Lamine Yamal or Kylian Mbappé? Compare World Cups, league titles, World Cup goals and Ballon d’Or finishes, then cast your vote in the debate.",
@@ -338,7 +349,11 @@ export const NEYMAR_VS_RONALDINHO: Debate = {
       ],
     },
   ],
-  artwork: { image: neymarVsRonaldinhoArtwork, position: "50% 20%", file: "src/assets/debates/neymar-vs-ronaldinho.jpg" },
+  artwork: {
+    sides: [neymarSide, ronaldinhoSide],
+    focus: ["47% 25%", "8% 16%"],
+    file: "src/assets/debates/neymar-vs-ronaldinho.jpg",
+  },
   seo: {
     title: "Neymar vs Ronaldinho: Who Is the Better Player? Vote Now",
     description: "Neymar Jr or Ronaldinho? Compare World Cups, Ballon d’Or wins, Champions League titles and Brazil goals, then vote for the better Brazil No. 10.",

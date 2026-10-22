@@ -1,6 +1,9 @@
-import hamiltonVsVerstappenArtwork from "@/assets/debates/hamilton-vs-verstappen.jpg";
-import khabibVsMcgregorArtwork from "@/assets/debates/khabib-vs-mcgregor.jpg";
-import tysonVsAliArtwork from "@/assets/debates/tyson-vs-ali.jpg";
+import aliSide from "@/assets/debates/tyson-vs-ali-2.jpg";
+import hamiltonSide from "@/assets/debates/hamilton-vs-verstappen-1.jpg";
+import khabibSide from "@/assets/debates/khabib-vs-mcgregor-1.jpg";
+import mcgregorSide from "@/assets/debates/khabib-vs-mcgregor-2.jpg";
+import tysonSide from "@/assets/debates/tyson-vs-ali-1.jpg";
+import verstappenSide from "@/assets/debates/hamilton-vs-verstappen-2.jpg";
 
 import type { Debate } from "./types";
 
@@ -212,7 +215,11 @@ export const TYSON_VS_ALI: Debate = {
       ],
     },
   ],
-  artwork: { image: tysonVsAliArtwork, position: "50% 10%", file: "src/assets/debates/tyson-vs-ali.jpg" },
+  artwork: {
+    sides: [tysonSide, aliSide],
+    focus: ["50% 0%", "50% 0%"],
+    file: "src/assets/debates/tyson-vs-ali.jpg",
+  },
   seo: {
     title: "Tyson vs Ali: Who Is the Greatest Boxer? Vote Now",
     description: "Mike Tyson or Muhammad Ali? Compare records, knockouts, titles and famous fights, then cast your vote for the greatest heavyweight of all time.",
@@ -327,7 +334,11 @@ export const KHABIB_VS_MCGREGOR: Debate = {
       ],
     },
   ],
-  artwork: { image: khabibVsMcgregorArtwork, position: "50% 40%", file: "src/assets/debates/khabib-vs-mcgregor.jpg" },
+  artwork: {
+    sides: [khabibSide, mcgregorSide],
+    focus: ["100% 40%", "0% 40%"],
+    file: "src/assets/debates/khabib-vs-mcgregor.jpg",
+  },
   seo: {
     title: "Khabib vs McGregor: Who Is the Greater Fighter? Vote Now",
     description: "Khabib Nurmagomedov or Conor McGregor? Compare records, UFC titles and their UFC 229 fight, then cast your vote for the greater fighter.",
@@ -429,7 +440,11 @@ export const HAMILTON_VS_VERSTAPPEN: Debate = {
       ],
     },
   ],
-  artwork: { image: hamiltonVsVerstappenArtwork, position: "50% 22%", file: "src/assets/debates/hamilton-vs-verstappen.jpg" },
+  artwork: {
+    sides: [hamiltonSide, verstappenSide],
+    focus: ["37% 9%", "62% 22%"],
+    file: "src/assets/debates/hamilton-vs-verstappen.jpg",
+  },
   seo: {
     title: "Hamilton vs Verstappen: Who Is the Greater F1 Driver? Vote Now",
     description: "Lewis Hamilton or Max Verstappen? Compare world titles, wins, poles and podiums after the 2026 Singapore Grand Prix, then cast your vote.",

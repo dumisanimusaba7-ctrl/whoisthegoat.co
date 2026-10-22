@@ -77,14 +77,15 @@ only published once it passes `MIN_COUNTRY_VOTES`. See `/privacy`.
 
 Create a Supabase project, then apply the schema with either:
 
-- **Dashboard:** SQL Editor → paste and run each file in `supabase/migrations/`
-  in order (`20261008120000_voting.sql`, then `20261021120000_more_debates.sql`), or
+- **Dashboard:** SQL Editor → paste and run `supabase/migrations/20261008120000_voting.sql`,
+  then `supabase/migrations/20261022120000_all_debates.sql`, or
 - **CLI:** `supabase init` (keep the existing `supabase/` folder), `supabase link --project-ref <ref>`, `supabase db push`.
 
 The first migration creates the tables, functions, access rules and the
 `messi-vs-ronaldo` debate, and schedules maintenance with `pg_cron` (enabled on
-Supabase by default). The second adds the other nine debates; it's safe to run
-again. To confirm the setup, run `supabase/check_setup.sql` in
+Supabase by default). `20261022120000_all_debates.sql` adds every other debate
+(it supersedes `20261021120000_more_debates.sql`); it only adds what's missing,
+so it's safe to run again, and it's the one to run after adding a debate. To confirm the setup, run `supabase/check_setup.sql` in
 the SQL Editor: it changes nothing and returns one row per requirement, each
 "ok" or what to fix. Optional deeper test against the live database:
 
@@ -169,9 +170,10 @@ country header (`x-vercel-ip-country` or `cf-ipcountry`).
 1. Add an entry in `src/lib/debates/` (football, sports or culture) and list it
    in `DEBATES` in `src/lib/debates/index.ts`: names, colours, marks (a shirt
    number, a record, a car number), copy, SEO. Optionally add `artwork`: a
-   landscape image split down the middle (first option on the left), placed in
-   `src/assets/debates/`. It becomes the vote board's background; without it
-   the board shows the marks. Optionally add a `runner` to each option: what
+   photo per side (`sides`, 1200×1323 each, face or logo centred), a CSS
+   object-position for each (`focus`), and both side by side (`file`, for link
+   previews), all in `src/assets/debates/`. They become the vote board's
+   background; without them the board shows the marks. Optionally add a `runner` to each option: what
    comes in from its end of the result bar after a vote. A figure (`kind:
    "figure"`) is dressed by its `kit` (top, bottoms, shoes, gloves, colours,
    hair) and finishes with one of the celebrations in
@@ -181,10 +183,9 @@ country header (`x-vercel-ip-country` or `cf-ipcountry`).
    is a `"foldable"` that unfolds or a `"slab"` that wakes. Options without a
    runner reveal with the bar alone. Optionally add `cardPhoto`: a 1080×1350
    (4:5) JPEG in `assets/cards/` for that option's share card and link preview.
-   Use photos you have the rights to publish. To show the artwork in the
-   debate's link preview, also set `artwork.file` to its path. A photo with
-   both options in it is the board artwork (2400×1323, first option on the
-   left); a photo of one option alone is that option's `cardPhoto`. Upscale
+   Use photos you have the rights to publish. A photo with both options in it
+   is the board artwork (cut into a centred photo per side, first option on
+   the left); a photo of one option alone is that option's `cardPhoto`. Upscale
    small photos with `scripts/upscale_photo.py` rather than stretching them
    (see CLAUDE.md).
 2. Optionally add a trophy cabinet in `src/lib/trophies.ts` (honours grouped

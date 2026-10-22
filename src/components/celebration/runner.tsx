@@ -5,6 +5,7 @@ import { useImperativeHandle, useRef, type Ref } from "react";
 import { Car, type CarHandle } from "./car";
 import { Figure, type FigureHandle } from "./figure";
 import { Phone, type PhoneHandle } from "./phone";
+import { Shoe, type ShoeHandle } from "./shoe";
 import { restState, type Runner, type RunnerState } from "./timeline";
 
 export type RunnerHandle = {
@@ -31,6 +32,7 @@ export function RunnerView({
   const figure = useRef<FigureHandle>(null);
   const car = useRef<CarHandle>(null);
   const phone = useRef<PhoneHandle>(null);
+  const shoe = useRef<ShoeHandle>(null);
 
   useImperativeHandle(handle, () => {
     const draw = (state: RunnerState) => {
@@ -38,6 +40,7 @@ export function RunnerView({
       if (state.effects) figure.current?.setEffects(state.effects);
       if (state.car) car.current?.set(state.car);
       if (state.phone) phone.current?.set(state.phone);
+      if (state.shoe) shoe.current?.set(state.shoe);
     };
     return { draw, rest: () => draw(restState(runner)) };
   }, [runner]);
@@ -60,6 +63,8 @@ export function RunnerView({
       return <Car livery={runner.livery} state={rest.car!} handle={car} mirrored={mirrored} className={className} />;
     case "phone":
       return <Phone device={runner.device} state={rest.phone!} handle={phone} className={className} />;
+    case "shoe":
+      return <Shoe style={runner.style} state={rest.shoe!} handle={shoe} className={className} />;
   }
 }
 

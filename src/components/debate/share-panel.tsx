@@ -100,6 +100,27 @@ export function SharePanel() {
     }
   }
 
+  // Instagram has no web share link. On phones the share sheet hands the card
+  // to the Instagram app (Stories or a post); elsewhere, save the card, copy
+  // the link for a link sticker, and open Instagram.
+  async function shareToInstagram() {
+    if (ready && navigator.canShare?.({ files: [ready.file] })) {
+      try {
+        await navigator.share({ files: [ready.file] });
+        return;
+      } catch (error) {
+        if ((error as Error).name === "AbortError") return;
+      }
+    }
+    const save = document.createElement("a");
+    save.href = ready?.url ?? src!;
+    save.download = filename;
+    save.click();
+    navigator.clipboard?.writeText(shareUrl).catch(() => {});
+    setNotice("Card saved and link copied. Post the card on Instagram and add the link as a sticker.");
+    window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
+  }
+
   const xHref = `https://x.com/intent/post?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
   const waHref = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`;
 
@@ -111,12 +132,16 @@ export function SharePanel() {
             Share your vote
           </h2>
           <p className="mt-3 max-w-md leading-relaxed text-ink/75">
-            Your pick, and how much of the world agrees with you, on one card. Post it to your story or feed, or send it
-            to the group chat. Shared links show the card too.
+            Your pick, and how much of the world agrees with you, on one card. Post it to your Instagram story or feed,
+            or send it to the group chat. Shared links show the card too.
           </p>
 
-          <div className="mt-8 grid gap-3 sm:max-w-md sm:grid-cols-2">
-            <button type="button" onClick={share} className="btn btn-dark h-13">
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:max-w-md">
+            <button type="button" onClick={shareToInstagram} className="btn btn-dark col-span-2 h-13">
+              <InstagramIcon />
+              Share to Instagram
+            </button>
+            <button type="button" onClick={share} className="btn btn-outline h-13 text-ink">
               <ShareIcon />
               Share card
             </button>
@@ -174,6 +199,16 @@ export function SharePanel() {
         </figure>
       </div>
     </section>
+  );
+}
+
+function InstagramIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 16 16" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <rect x="2" y="2" width="12" height="12" rx="3.5" />
+      <circle cx="8" cy="8" r="2.75" />
+      <circle cx="11.6" cy="4.4" r="0.6" fill="currentColor" stroke="none" />
+    </svg>
   );
 }
 

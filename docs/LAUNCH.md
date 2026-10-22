@@ -16,7 +16,7 @@
       (Counters correct themselves through the delete trigger.)
 - [ ] Share a link in WhatsApp / X / iMessage and check the preview image.
 - [ ] Check the honours in `src/lib/debates/` are still current.
-- [ ] Run `supabase/migrations/20261021120000_more_debates.sql` and confirm `/api/health` reports all debates open.
+- [ ] Run `supabase/migrations/20261022120000_all_debates.sql` and confirm `/api/health` reports all debates open.
 - [ ] `hello@whoisthegoat.co` (or `NEXT_PUBLIC_CONTACT_EMAIL`) receives mail.
 - [ ] Google Search Console: verify the domain and submit `/sitemap.xml`.
 - [ ] Once AdSense approves the site: set the client and slot env vars, enable the

@@ -1,6 +1,11 @@
-import dcVsMarvelArtwork from "@/assets/debates/dc-vs-marvel.jpg";
-import drakeVsKendrickArtwork from "@/assets/debates/drake-vs-kendrick.jpg";
-import samsungVsAppleArtwork from "@/assets/debates/samsung-vs-apple.jpg";
+import adidasSide from "@/assets/debates/nike-vs-adidas-2.jpg";
+import appleSide from "@/assets/debates/samsung-vs-apple-2.jpg";
+import dcSide from "@/assets/debates/dc-vs-marvel-1.jpg";
+import drakeSide from "@/assets/debates/drake-vs-kendrick-1.jpg";
+import kendrickSide from "@/assets/debates/drake-vs-kendrick-2.jpg";
+import marvelSide from "@/assets/debates/dc-vs-marvel-2.jpg";
+import nikeSide from "@/assets/debates/nike-vs-adidas-1.jpg";
+import samsungSide from "@/assets/debates/samsung-vs-apple-1.jpg";
 
 import type { Debate } from "./types";
 
@@ -90,7 +95,11 @@ export const DRAKE_VS_KENDRICK: Debate = {
       ],
     },
   ],
-  artwork: { image: drakeVsKendrickArtwork, position: "50% 45%", file: "src/assets/debates/drake-vs-kendrick.jpg" },
+  artwork: {
+    sides: [drakeSide, kendrickSide],
+    focus: ["38% 51%", "48% 60%"],
+    file: "src/assets/debates/drake-vs-kendrick.jpg",
+  },
   seo: {
     title: "Drake vs Kendrick Lamar: Who Is the Better Rapper? Vote Now",
     description: "Drake or Kendrick Lamar? Compare Grammy wins, Billboard No. 1s and chart records, checked as of October 2026, then cast your vote in the GOAT debate.",
@@ -207,7 +216,11 @@ export const DC_VS_MARVEL: Debate = {
       ],
     },
   ],
-  artwork: { image: dcVsMarvelArtwork, position: "50% 40%", file: "src/assets/debates/dc-vs-marvel.jpg" },
+  artwork: {
+    sides: [dcSide, marvelSide],
+    focus: ["50% 25%", "50% 25%"],
+    file: "src/assets/debates/dc-vs-marvel.jpg",
+  },
   seo: {
     title: "DC vs Marvel: Which Universe Is Better? Vote Now",
     description: "DC or Marvel? Compare first comics, box office records, Oscars and owners, checked as of October 2026, then vote for the comic book universe you back.",
@@ -290,7 +303,11 @@ export const SAMSUNG_VS_APPLE: Debate = {
     },
   ],
   // Logos sit in the upper half, clear of the names on wide boards.
-  artwork: { image: samsungVsAppleArtwork, position: "50% 85%", file: "src/assets/debates/samsung-vs-apple.jpg" },
+  artwork: {
+    sides: [samsungSide, appleSide],
+    focus: ["50% 25%", "50% 25%"],
+    file: "src/assets/debates/samsung-vs-apple.jpg",
+  },
   seo: {
     title: "Samsung vs Apple: Which Smartphone Brand Is Better? Vote Now",
     description: "Samsung or Apple? Compare smartphone shipments, first phones, foldables and revenue, checked as of October 2026, then vote for the brand you back.",
@@ -313,6 +330,113 @@ export const SAMSUNG_VS_APPLE: Debate = {
     { label: "Smartphones shipped in 2025 (IDC)", values: ["241.2m", "247.8m"] },
     { label: "Smartphones shipped, Jul–Sep 2026 (IDC, preliminary)", values: ["57.8m", "57.3m"] },
     { label: "First foldable phone", values: ["2019", "2026"] },
+  ],
+  factsAsOf: "October 2026",
+};
+
+export const NIKE_VS_ADIDAS: Debate = {
+  slug: "nike-vs-adidas",
+  category: "sportswear",
+  title: "Nike vs Adidas",
+  question: "Which brand is better?",
+  options: [
+    {
+      slug: "nike",
+      name: "Nike",
+      firstName: "",
+      shortName: "Nike",
+      kind: "organization",
+      tag: "Beaverton, Oregon",
+      mark: "64",
+      color: "#F36F21",
+      onColor: "#0A0C14",
+      wikipedia: "https://en.wikipedia.org/wiki/Nike,_Inc.",
+      runner: {
+        kind: "shoe",
+        celebration: "swoosh",
+        // A white trainer with an orange swoosh, after the Nike shoebox orange.
+        style: {
+          upper: "#f4f4f2",
+          midsole: "#ffffff",
+          outsole: "#e4e4e0",
+          laces: "#d8d8d4",
+          accent: "#f36f21",
+          mark: "swoosh",
+          markColor: "#f36f21",
+        },
+      },
+      cardPhoto: "nike.jpg",
+      caseFor: [
+        "Nike is the world’s largest supplier of athletic shoes and apparel, with revenue of $46.4 billion in its financial year to 31 May 2026.",
+        "Nike signed Michael Jordan in 1984, and the Jordan Brand built around him sold $7.0 billion of products in the year to 31 May 2026.",
+        "The Swoosh was drawn in 1971 by design student Carolyn Davidson for $35, and the “Just Do It” slogan first ran in a 1988 campaign.",
+        "Nike kitted out 12 teams at the 2026 World Cup, including Brazil, France and England, and takes over Germany’s kit in 2027 after more than 70 years with Adidas.",
+      ],
+    },
+    {
+      slug: "adidas",
+      name: "Adidas",
+      firstName: "",
+      shortName: "Adidas",
+      kind: "organization",
+      tag: "Herzogenaurach, Germany",
+      mark: "49",
+      color: "#2F5BD3",
+      onColor: "#FFFFFF",
+      wikipedia: "https://en.wikipedia.org/wiki/Adidas",
+      runner: {
+        kind: "shoe",
+        celebration: "stripes",
+        // A Samba: white leather, grey suede toe, black three stripes, gum sole.
+        style: {
+          upper: "#f3f3f1",
+          toe: "#cfcfcb",
+          midsole: "#f1ece2",
+          outsole: "#a8733f",
+          laces: "#e2e2de",
+          accent: "#141414",
+          mark: "stripes",
+          markColor: "#141414",
+        },
+      },
+      cardPhoto: "adidas.jpg",
+      caseFor: [
+        "Adidas has made every World Cup match ball since the Telstar in 1970, and the 2026 ball, Trionda, was its 15th in a row.",
+        "Adidas kitted out both 2026 World Cup finalists, and Spain beat Argentina 1–0 after extra time in the final on 19 July 2026.",
+        "Adidas reported record revenue of €24.8 billion in 2025, then its best quarter ever, €7.25 billion, in July to September 2026 (preliminary figures).",
+        "Adi Dassler registered the company in Herzogenaurach on 18 August 1949, and its footballers in 2026 include Lionel Messi, Lamine Yamal and Jude Bellingham.",
+      ],
+    },
+  ],
+  artwork: {
+    sides: [nikeSide, adidasSide],
+    focus: ["50% 25%", "50% 25%"],
+    file: "src/assets/debates/nike-vs-adidas.jpg",
+  },
+  seo: {
+    title: "Nike vs Adidas: Which Sportswear Brand Is Better? Vote Now",
+    description: "Nike or Adidas? Compare revenue, World Cup kits, founding stories and star athletes, checked as of October 2026, then vote for the brand you back.",
+    keywords: [
+      "nike vs adidas",
+      "adidas vs nike",
+      "best sportswear brand",
+      "nike or adidas",
+      "world cup 2026 kits",
+      "adidas trionda",
+      "jordan brand",
+      "nike vs adidas vote",
+    ],
+  },
+  intro: [
+    "Adi Dassler registered Adidas in the Bavarian town of Herzogenaurach in 1949; in Oregon, Phil Knight and his running coach Bill Bowerman started Blue Ribbon Sports in 1964 and renamed it Nike in 1971. Nike is the bigger company, with revenue of $46.4 billion in the year to 31 May 2026 against Adidas’s record €24.8 billion in 2025, but Adidas had the better summer, kitting out both teams in the 2026 World Cup final.",
+    "Nike has the Swoosh, Air Jordan and “Just Do It”; Adidas has the Three Stripes, the World Cup ball and the shirts of the new world champions, Spain. Now the world votes.",
+  ],
+  taleOfTheTape: [
+    { label: "Founded", values: ["1964 (as Blue Ribbon Sports)", "1949"] },
+    { label: "Headquarters", values: ["Beaverton, Oregon", "Herzogenaurach, Germany"] },
+    { label: "Revenue, latest full year", values: ["$46.4bn (year to 31 May 2026)", "€24.8bn (2025)"] },
+    { label: "Employees", values: ["c. 73,000 (May 2026)", "64,938 (Dec 2025)"] },
+    { label: "Teams kitted at the 2026 World Cup", values: ["12", "14, incl. both finalists"] },
   ],
   factsAsOf: "October 2026",
 };

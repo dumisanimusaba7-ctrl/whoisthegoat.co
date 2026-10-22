@@ -39,6 +39,7 @@ import {
   UPPERCUT,
 } from "./moves";
 import type { Device, PhoneState } from "./phone";
+import type { ShoeState, ShoeStyle } from "./shoe";
 import {
   clamp01,
   easeInCubic,
@@ -78,20 +79,23 @@ export type FigureCelebration =
   | "web-swing";
 export type CarCelebration = "doughnut" | "burnout";
 export type PhoneCelebration = "unfold" | "wake";
+export type ShoeCelebration = "swoosh" | "stripes";
 
 /** What runs along the bar for an option, and how it celebrates. */
 export type Runner =
   | { kind: "figure"; kit: Kit; celebration: FigureCelebration; prop?: FigureProp; label?: string }
   | { kind: "car"; livery: Livery; celebration: CarCelebration }
-  | { kind: "phone"; device: Device; celebration: PhoneCelebration };
+  | { kind: "phone"; device: Device; celebration: PhoneCelebration }
+  | { kind: "shoe"; style: ShoeStyle; celebration: ShoeCelebration };
 
 export const CAR_REST: CarState = { wheel: 0, spin: 0, pitch: 0, shake: 0, smoke: null };
 export const PHONE_REST: PhoneState = { hop: 0, tilt: 0, unfold: 0, screen: 1, island: 0, shine: 0 };
+export const SHOE_REST: ShoeState = { hop: 0, tilt: 0, squash: 1, trail: null, pulse: null };
 
 /** When the runner reaches the result, and when the whole moment is over (ms). */
 export type Timing = { arrive: number; end: number };
 
-const TIMING: Record<FigureCelebration | CarCelebration | PhoneCelebration, Timing> = {
+const TIMING: Record<FigureCelebration | CarCelebration | PhoneCelebration | ShoeCelebration, Timing> = {
   siu: { arrive: 1000, end: 1950 },
   "knee-slide": { arrive: 1250, end: 2000 },
   "304": { arrive: 1000, end: 2100 },
@@ -112,6 +116,8 @@ const TIMING: Record<FigureCelebration | CarCelebration | PhoneCelebration, Timi
   burnout: { arrive: 1100, end: 2400 },
   unfold: { arrive: 1000, end: 1800 },
   wake: { arrive: 1000, end: 2000 },
+  swoosh: { arrive: 1000, end: 2000 },
+  stripes: { arrive: 1000, end: 2050 },
 };
 
 export function runnerTiming(runner: Runner): Timing {
@@ -127,6 +133,7 @@ export type RunnerState = {
   effects?: FigureEffects;
   car?: CarState;
   phone?: PhoneState;
+  shoe?: ShoeState;
 };
 
 export type Frame = RunnerState & {
@@ -720,6 +727,63 @@ function phoneTimeline(kind: PhoneCelebration, timing: Timing, { target, trackPx
   };
 }
 
+/**
+ * Trainers walk in heel to toe. Nike's leaps and draws the swoosh through the
+ * air; Adidas's stamps twice and its three stripes light up in turn.
+ */
+function shoeTimeline(kind: ShoeCelebration, timing: Timing, { target, trackPx, unitPx }: Options): Timeline {
+  const { arrive, end } = timing;
+  // A whole number of steps, so the last one lands on the result.
+  const steps = Math.max(1, Math.round((target * trackPx) / (34 * unitPx)));
+
+  return {
+    arrive,
+    end,
+    sample(t) {
+      if (t < arrive) {
+        const pos = target * travel(t / arrive, 0.15, 0.25);
+        const ph = Math.PI * steps * (target > 0 ? pos / target : 1);
+        // Toe up as it lifts, heel up as it pushes off.
+        return {
+          pos,
+          shoe: { ...SHOE_REST, hop: 7 * Math.abs(Math.sin(ph)), tilt: 9 * Math.sin(2 * ph) },
+          streak: null,
+          done: false,
+        };
+      }
+      const s = t - arrive;
+      if (kind === "swoosh") {
+        const LEAP = 520;
+        const u = clamp01(s / LEAP);
+        const airborne = s < LEAP;
+        const land = s >= LEAP ? 1 - easeOutCubic(clamp01((s - LEAP) / 220)) : 0;
+        return {
+          pos: target,
+          shoe: {
+            hop: airborne ? 34 * 4 * u * (1 - u) : 0,
+            tilt: airborne ? 18 * Math.sin(Math.PI * u) : 0,
+            squash: 1 - 0.12 * land,
+            trail: clamp01((s - 60) / (end - arrive - 60)),
+            pulse: null,
+          },
+          streak: null,
+          done: t >= end,
+        };
+      }
+      // Two stamps, then the stripes light up.
+      const STAMP = 200;
+      const stamp = s < 2 * STAMP ? Math.sin((Math.PI * (s % STAMP)) / STAMP) : 0;
+      const pulse = s >= 2 * STAMP ? clamp01((s - 2 * STAMP) / (end - arrive - 2 * STAMP)) : null;
+      return {
+        pos: target,
+        shoe: { hop: 9 * stamp, tilt: -6 * stamp, squash: s < 2 * STAMP && stamp < 0.15 ? 0.94 : 1, trail: null, pulse },
+        streak: null,
+        done: t >= end,
+      };
+    },
+  };
+}
+
 /* ------------------------------------------------------------------------- */
 
 /** Where a runner comes to rest; also what returning voters see. */
@@ -735,6 +799,8 @@ export function restState(runner: Runner): RunnerState {
       return { car: CAR_REST };
     case "phone":
       return { phone: runner.celebration === "unfold" ? { ...PHONE_REST, unfold: 1 } : PHONE_REST };
+    case "shoe":
+      return { shoe: SHOE_REST };
   }
 }
 
@@ -749,6 +815,8 @@ export function createTimeline(runner: Runner, options: Options): Timeline {
       return carTimeline(runner.celebration, timing, options);
     case "phone":
       return phoneTimeline(runner.celebration, timing, options);
+    case "shoe":
+      return shoeTimeline(runner.celebration, timing, options);
   }
 }
 

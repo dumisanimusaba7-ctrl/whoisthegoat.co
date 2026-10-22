@@ -2,7 +2,7 @@ import type { StaticImageData } from "next/image";
 
 import type { Runner } from "@/components/celebration/timeline";
 
-export type Category = "football" | "basketball" | "boxing" | "mma" | "formula-1" | "music" | "comics" | "tech";
+export type Category = "football" | "basketball" | "boxing" | "mma" | "formula-1" | "music" | "comics" | "tech" | "sportswear";
 
 export type DebateOption = {
   /** Matches `debate_options.slug`. */
@@ -47,16 +47,19 @@ export type Debate = {
   /** Two-sided face-off. The data layer supports more options; the arena UI is built for two. */
   options: [DebateOption, DebateOption];
   /**
-   * Optional background for the vote board, split down the middle to match
-   * the two sides (first option on the left). Without it, the board shows
-   * each option's mark instead.
+   * Optional photos for the vote board, one per side (first option first).
+   * Without them, the board shows each option's mark instead.
    */
   artwork?: {
-    image: StaticImageData;
-    /** CSS object-position, to keep faces in frame as the board crops. */
-    position?: string;
-    /** The same image as a path from the project root, for the link-preview image. */
-    file?: string;
+    /** 1200×1323 each, with the face or logo near the centre and a third of the way down. */
+    sides: [StaticImageData, StaticImageData];
+    /**
+     * CSS object-position for each side, so the face stays whole however the
+     * panel crops: phones show the middle of the width, desktops most of the height.
+     */
+    focus: [string, string];
+    /** Both sides together (2400×1323), as a path from the project root, for link previews. */
+    file: string;
   };
   seo: { title: string; description: string; keywords: string[] };
   intro: string[];

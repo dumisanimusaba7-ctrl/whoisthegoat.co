@@ -257,7 +257,7 @@ function DebateCard({ debate, stats, artwork }: { debate: Debate; stats: Stats |
   return (
     <Canvas>
       {artwork ? (
-        // The artwork is 1500×827: scaled to the card's width it's 662px tall, so it's cropped slightly at the top.
+        // The artwork is 2400×1323: scaled to the card's width it's 662px tall, so it's cropped slightly at the top.
         // eslint-disable-next-line @next/next/no-img-element -- rendered to an image, not the DOM
         <img src={artwork} width={width} height={662} alt="" style={{ position: "absolute", left: 0, top: -8 }} />
       ) : null}

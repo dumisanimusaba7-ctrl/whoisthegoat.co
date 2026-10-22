@@ -4,8 +4,6 @@ import { ViewTransition } from "react";
 
 import { PageHero } from "@/components/layout/page-hero";
 import { DEBATES, CATEGORY_LABELS, UPCOMING_DEBATES, type Debate } from "@/lib/debates";
-import { formatCount, pluralize } from "@/lib/format";
-import { getPageResults } from "@/lib/server/results";
 
 export const metadata: Metadata = {
   title: "Debates",
@@ -48,8 +46,7 @@ export default function DebatesPage() {
   );
 }
 
-async function DebateRow({ debate }: { debate: Debate }) {
-  const results = await getPageResults(debate.slug);
+function DebateRow({ debate }: { debate: Debate }) {
   return (
     <li className="grid gap-6 border-b border-rule py-8 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
       <div>
@@ -60,7 +57,6 @@ async function DebateRow({ debate }: { debate: Debate }) {
         </h2>
         <p className="mt-3 text-mute">
           {CATEGORY_LABELS[debate.category]} · Open
-          {results && results.total > 0 ? ` · ${formatCount(results.total)} ${pluralize(results.total, "vote")}` : null}
         </p>
       </div>
       <div className="flex items-center gap-6">

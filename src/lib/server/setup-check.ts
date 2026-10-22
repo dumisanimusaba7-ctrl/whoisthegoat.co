@@ -19,7 +19,7 @@ export type CheckStatus = "ok" | "problem" | "skipped" | "info";
 export type Check = { name: string; status: CheckStatus; detail: string };
 
 const SETUP_SCRIPT = "supabase/migrations/20261008120000_voting.sql";
-const DEBATES_SCRIPT = "supabase/migrations/20261021120000_more_debates.sql";
+const DEBATES_SCRIPT = "supabase/migrations/20261022120000_all_debates.sql";
 
 type Deployment = { environment: string; branch: string | null; commit: string | null };
 

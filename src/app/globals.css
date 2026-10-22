@@ -158,6 +158,8 @@
   }
 
   body {
+    /* Room for the next-debate bar when it's showing (set by NextDebateBar). */
+    padding-bottom: var(--sticky-bar, 0px);
     background: var(--color-paper);
     color: var(--color-ink);
     font-family: var(--font-sans);
@@ -255,6 +257,18 @@
 /* Interface-level entrance: panels and swapped content. */
 .animate-enter {
   animation: enter var(--duration-ui) var(--ease-out) both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+
+/* The next-debate bar sliding up from the bottom edge. */
+.animate-rise {
+  animation: rise var(--duration-large) var(--ease-out) both;
 }
 
 /* Used only while a share card is being generated. */

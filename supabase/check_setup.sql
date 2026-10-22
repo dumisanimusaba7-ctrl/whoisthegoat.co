@@ -70,7 +70,8 @@ data as (
             (7, 'neymar-vs-ronaldinho', 'neymar, ronaldinho'),
             (8, 'drake-vs-kendrick', 'drake, kendrick'),
             (9, 'dc-vs-marvel', 'dc, marvel'),
-            (10, 'samsung-vs-apple', 'samsung, apple')
+            (10, 'samsung-vs-apple', 'samsung, apple'),
+            (11, 'nike-vs-adidas', 'nike, adidas')
           ) as e (ord, slug, options)
          where coalesce((select status from public.debates d where d.slug = e.slug), '') <> 'live'
             or coalesce((select string_agg(o.slug, ', ' order by o.position)
@@ -146,10 +147,10 @@ checks (step, item, status, detail) as (
          case
            when debates_tbl is null or options_tbl is null then 'debates tables are missing. Run the setup script.'
            when debates_not_ready like '%messi-vs-ronaldo%'
-             then 'Missing or not live: ' || debates_not_ready || '. Run the "Launch debate" inserts at the end of the setup script, then 20261021120000_more_debates.sql.'
+             then 'Missing or not live: ' || debates_not_ready || '. Run the setup script, then supabase/migrations/20261022120000_all_debates.sql.'
            when debates_not_ready is not null
-             then 'Missing or not live: ' || debates_not_ready || '. Run supabase/migrations/20261021120000_more_debates.sql.'
-           else 'All 10 debates are live, each with its two options.'
+             then 'Missing or not live: ' || debates_not_ready || '. Run supabase/migrations/20261022120000_all_debates.sql.'
+           else 'All 11 debates are live, each with its two options.'
          end
     from data
   union all

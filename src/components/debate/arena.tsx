@@ -13,6 +13,7 @@ import { voteTestMode } from "@/lib/test-mode";
 import { prevotedScript } from "@/lib/vote-storage";
 
 import { useDebate, type VoteState } from "./debate-provider";
+import { NextDebateBar } from "./next-debate";
 import { ResultBars } from "./result-bars";
 
 /**
@@ -20,7 +21,7 @@ import { ResultBars } from "./result-bars";
  * the live global result in the same space once you've voted.
  */
 export function Arena({ banner }: { banner?: ReactNode }) {
-  const { debate, results, resultsUnavailable, vote, castVote } = useDebate();
+  const { debate, results, vote, castVote } = useDebate();
   const [a, b] = debate.options;
   const id = `arena-${debate.slug}`;
   const sectionRef = useRef<HTMLElement>(null);
@@ -117,9 +118,14 @@ export function Arena({ banner }: { banner?: ReactNode }) {
         </p>
       ) : null}
 
-      <div className="mx-auto max-w-6xl px-4 pb-10 pt-6 sm:px-6 sm:pb-14">
-        {revealed ? <RevealStrip results={results} celebrate={vote.revealedNow} /> : <VoteCount results={results} unavailable={resultsUnavailable} />}
-      </div>
+      {/* Counts and results only appear once you've voted, so nobody votes with the crowd. */}
+      {revealed ? (
+        <div className="mx-auto max-w-6xl px-4 pb-10 pt-6 sm:px-6 sm:pb-14">
+          <RevealStrip results={results} celebrate={vote.revealedNow} />
+        </div>
+      ) : (
+        <div className="pb-8 sm:pb-12" />
+      )}
 
       <p className="sr-only" aria-live="polite">
         {busy ? "Counting your vote." : vote.revealedNow && chosen ? `Your vote for ${chosen.name} has been counted.` : ""}
@@ -129,27 +135,32 @@ export function Arena({ banner }: { banner?: ReactNode }) {
 }
 
 /**
- * The debate's artwork behind both halves of the board, split at the seam.
- * Decorative: names, countries and results are all in the text above it.
+ * A photo behind each half of the board, each cropped around its own face so
+ * it stays whole on a narrow phone panel as well as a wide desktop one.
+ * Decorative: names, places and results are all in the text above it.
  */
 function BoardArtwork({ artwork, revealed }: { artwork: NonNullable<Debate["artwork"]>; revealed: boolean }) {
   return (
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-      <Image
-        src={artwork.image}
-        alt=""
-        fill
-        quality={95}
-        placeholder="blur"
-        loading="eager"
-        fetchPriority="high"
-        sizes="(min-width: 1200px) 1104px, (min-width: 640px) calc(100vw - 48px), 100vw"
-        className={`object-cover transition-opacity duration-[var(--duration-large)] ease-out ${revealed ? "opacity-60" : ""}`}
-        style={{ objectPosition: artwork.position ?? "50% 50%" }}
-      />
-      {/* Scrims keep the labels (top) and names, buttons and results (bottom) legible. */}
-      <div className="absolute inset-x-0 top-0 h-1/3 bg-linear-to-b from-ink/70 to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 h-3/4 bg-linear-to-t from-ink via-ink/70 to-transparent" />
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 grid grid-cols-2">
+      {artwork.sides.map((image, index) => (
+        <div key={index} className="relative overflow-hidden">
+          <Image
+            src={image}
+            alt=""
+            fill
+            quality={95}
+            placeholder="blur"
+            loading="eager"
+            fetchPriority="high"
+            sizes="(min-width: 1200px) 552px, (min-width: 640px) calc(50vw - 24px), 50vw"
+            className={`object-cover transition-opacity duration-[var(--duration-large)] ease-out ${revealed ? "opacity-60" : ""}`}
+            style={{ objectPosition: artwork.focus[index] }}
+          />
+        </div>
+      ))}
+      {/* Scrims keep the labels (top) and names, buttons and results (bottom) legible, and leave the faces clear. */}
+      <div className="absolute inset-x-0 top-0 h-1/4 bg-linear-to-b from-ink/65 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-[62%] bg-linear-to-t from-ink via-ink/75 to-transparent" />
     </div>
   );
 }
@@ -183,7 +194,7 @@ function Side({
 
   return (
     <div
-      className={`relative flex min-h-[19.5rem] flex-col overflow-hidden px-4 pb-5 pt-5 sm:min-h-[24rem] sm:p-8 lg:min-h-[28rem] ${end ? "items-end text-right" : ""}`}
+      className={`relative flex min-h-[22rem] flex-col overflow-hidden px-4 pb-5 pt-5 sm:min-h-[26rem] sm:p-8 lg:min-h-[30rem] ${end ? "items-end text-right" : ""}`}
       style={{ "--accent": option.color, "--on-accent": option.onColor } as CSSProperties}
     >
       <span aria-hidden="true" className="absolute inset-x-0 top-0 h-1" style={{ background: option.color }} />
@@ -237,29 +248,6 @@ function Side({
       )}
     </div>
   );
-}
-
-/** Before voting: the size of the vote so far. The number moving is the only signal it's live. */
-function VoteCount({ results, unavailable }: { results: DebateResults | null; unavailable: boolean }) {
-  let content: ReactNode = null;
-  if (results && results.total > 0) {
-    content = (
-      <>
-        <span className="tabular font-semibold text-white">
-          <AnimatedNumber value={results.total} format="count" />
-        </span>{" "}
-        {pluralize(results.total, "vote")}
-        {results.countries.count > 0
-          ? ` from ${formatCount(results.countries.count)} ${pluralize(results.countries.count, "country", "countries")}`
-          : null}
-      </>
-    );
-  } else if (results) {
-    content = "No votes yet. Be the first.";
-  } else if (unavailable) {
-    content = "The vote count is unavailable right now.";
-  }
-  return <p className="type-label min-h-5 text-mute-dark">{content}</p>;
 }
 
 /** After voting: the result bars (where the celebration plays), then sharing. */
@@ -318,6 +306,7 @@ function RevealStrip({ results, celebrate }: { results: DebateResults | null; ce
           </a>
         </div>
       </div>
+      <NextDebateBar key={debate.slug} delayMs={celebrate && timing ? timing.end + 400 : 700} />
     </div>
   );
 }
