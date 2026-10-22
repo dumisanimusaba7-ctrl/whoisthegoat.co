@@ -139,6 +139,7 @@ function BoardArtwork({ artwork, revealed }: { artwork: NonNullable<Debate["artw
         src={artwork.image}
         alt=""
         fill
+        quality={95}
         placeholder="blur"
         loading="eager"
         fetchPriority="high"

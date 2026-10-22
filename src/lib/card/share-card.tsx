@@ -328,8 +328,13 @@ export async function renderCard(options: {
   }
 
   const png = await new ImageResponse(element, { ...CARD_FORMATS[format], fonts: CARD_FONTS }).arrayBuffer();
-  // Photo cards as PNG run to 1–2.5 MB; as JPEG they're a few hundred KB,
-  // small enough for chat apps to show them in link previews.
-  const jpeg = await sharp(Buffer.from(png)).jpeg({ quality: 84, mozjpeg: true, progressive: true }).toBuffer();
+  // Photo cards as PNG run to 1–2.5 MB. Link previews stay a few hundred KB as
+  // JPEG, small enough for chat apps to show; the 4:5 card people save and
+  // post is kept close to the original. Full-resolution colour (4:4:4) keeps
+  // the lettering and coloured edges crisp.
+  const quality = format === "post" ? 94 : 88;
+  const jpeg = await sharp(Buffer.from(png))
+    .jpeg({ quality, chromaSubsampling: "4:4:4", mozjpeg: true, progressive: true })
+    .toBuffer();
   return new Response(new Uint8Array(jpeg), { headers: { "Content-Type": "image/jpeg", ...headers } });
 }

@@ -1,4 +1,6 @@
 import hamiltonVsVerstappenArtwork from "@/assets/debates/hamilton-vs-verstappen.jpg";
+import khabibVsMcgregorArtwork from "@/assets/debates/khabib-vs-mcgregor.jpg";
+import tysonVsAliArtwork from "@/assets/debates/tyson-vs-ali.jpg";
 
 import type { Debate } from "./types";
 
@@ -159,6 +161,7 @@ export const TYSON_VS_ALI: Debate = {
           gloves: { style: "boxing", color: "#b1171d" },
         },
       },
+      cardPhoto: "tyson.jpg",
       caseFor: [
         "Became the youngest heavyweight champion in history at 20 years and 4 months, stopping Trevor Berbick in the second round for the WBC title on 22 November 1986.",
         "Was the first heavyweight to hold the WBA, WBC and IBF titles at the same time, and reigned as undisputed champion from 1987 to 1990.",
@@ -200,6 +203,7 @@ export const TYSON_VS_ALI: Debate = {
           gloves: { style: "boxing", color: "#b1171d" },
         },
       },
+      cardPhoto: "ali.jpg",
       caseFor: [
         "Won light-heavyweight gold at the 1960 Olympics in Rome, competing as Cassius Clay.",
         "Took the world heavyweight title from Sonny Liston on 25 February 1964, aged 22.",
@@ -208,6 +212,7 @@ export const TYSON_VS_ALI: Debate = {
       ],
     },
   ],
+  artwork: { image: tysonVsAliArtwork, position: "50% 10%", file: "src/assets/debates/tyson-vs-ali.jpg" },
   seo: {
     title: "Tyson vs Ali: Who Is the Greatest Boxer? Vote Now",
     description: "Mike Tyson or Muhammad Ali? Compare records, knockouts, titles and famous fights, then cast your vote for the greatest heavyweight of all time.",
@@ -272,6 +277,7 @@ export const KHABIB_VS_MCGREGOR: Debate = {
           gloves: { style: "mma", color: "#141416" },
         },
       },
+      cardPhoto: "khabib.jpg",
       caseFor: [
         "Retired with a 29–0 professional record, including 13–0 in the UFC.",
         "Won the vacant UFC lightweight title against Al Iaquinta at UFC 223 on 7 April 2018.",
@@ -312,6 +318,7 @@ export const KHABIB_VS_MCGREGOR: Debate = {
           gloves: { style: "mma", color: "#141416" },
         },
       },
+      cardPhoto: "mcgregor.jpg",
       caseFor: [
         "Became the first fighter to hold UFC titles in two weight classes at the same time, adding the lightweight belt at UFC 205 in November 2016 to his featherweight title.",
         "Knocked out José Aldo in 13 seconds at UFC 194 in December 2015, the fastest finish in UFC title-fight history.",
@@ -320,6 +327,7 @@ export const KHABIB_VS_MCGREGOR: Debate = {
       ],
     },
   ],
+  artwork: { image: khabibVsMcgregorArtwork, position: "50% 40%", file: "src/assets/debates/khabib-vs-mcgregor.jpg" },
   seo: {
     title: "Khabib vs McGregor: Who Is the Greater Fighter? Vote Now",
     description: "Khabib Nurmagomedov or Conor McGregor? Compare records, UFC titles and their UFC 229 fight, then cast your vote for the greater fighter.",

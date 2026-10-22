@@ -183,8 +183,10 @@ country header (`x-vercel-ip-country` or `cf-ipcountry`).
    (4:5) JPEG in `assets/cards/` for that option's share card and link preview.
    Use photos you have the rights to publish. To show the artwork in the
    debate's link preview, also set `artwork.file` to its path. A photo with
-   both options in it is the board artwork (first option on the left); a photo
-   of one option alone is that option's `cardPhoto`.
+   both options in it is the board artwork (2400×1323, first option on the
+   left); a photo of one option alone is that option's `cardPhoto`. Upscale
+   small photos with `scripts/upscale_photo.py` rather than stretching them
+   (see CLAUDE.md).
 2. Optionally add a trophy cabinet in `src/lib/trophies.ts` (honours grouped
    by category, individual awards, records). The `/:debate/trophies` page,
    its totals, the navigation link and the sitemap entry follow from it.

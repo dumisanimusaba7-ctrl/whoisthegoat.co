@@ -15,6 +15,10 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   poweredByHeader: false,
+  images: {
+    // 95 for the vote-board photos (see BoardArtwork); 75 is the default.
+    qualities: [75, 95],
+  },
   // Fonts and photos the image routes read from disk at request time.
   outputFileTracingIncludes: {
     "/api/card/**": ["./assets/**/*"],
