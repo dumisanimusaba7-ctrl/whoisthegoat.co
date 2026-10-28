@@ -1,7 +1,12 @@
 import type { OptionTally } from "./results";
 
 /** Request body for POST /api/vote. */
-export type VoteRequest = { debate: string; choice: string };
+export type VoteRequest = {
+  debate: string;
+  choice: string;
+  /** Cloudflare Turnstile token, when the bot check is on. */
+  turnstile?: string;
+};
 
 export type VoteAccepted = {
   status: "ok" | "already_voted";

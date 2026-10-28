@@ -53,7 +53,7 @@ voting, nothing moves.
 | Threat | Protection |
 | --- | --- |
 | Repeat votes | Random voter id in an `HttpOnly` first-party cookie; the database primary key `(debate, voter_hash)` makes a second vote impossible. A returning voter gets their original choice back. |
-| Bots | Vercel BotID (invisible challenge) on `POST /api/vote` when deployed on Vercel; same-origin check; JSON-only, size-capped bodies. |
+| Bots | Cloudflare Turnstile (invisible check, any host) when its keys are set; Vercel BotID on Vercel deployments; same-origin check; JSON-only, size-capped bodies. |
 | Rapid fire / ballot stuffing | Per-network limits (IPv4 address, or IPv6 `/64`) per minute and per day, enforced inside the vote transaction. Rejected attempts still count. |
 | Tampering | Browser never talks to Supabase. RLS is on for every table with no policies, `anon`/`authenticated` have no grants, and only `service_role` can run the functions. Votes are immutable (trigger); option ↔ debate integrity is a composite foreign key. |
 | Clean-up | Deleting votes (e.g. a flagged network) automatically corrects every counter. `rebuild_debate_tallies()` recomputes them from scratch. |
@@ -109,6 +109,7 @@ cp .env.example .env.local
 | `MIN_COUNTRY_VOTES` | no | Default 10 |
 | `NEXT_PUBLIC_CONTACT_EMAIL` | no | Shown on `/privacy` (default `hello@whoisthegoats.com`) |
 | `NEXT_PUBLIC_ADSENSE_CLIENT`, `NEXT_PUBLIC_ADSENSE_SLOT_RESULTS`, `NEXT_PUBLIC_ADSENSE_SLOT_EDITORIAL` | no | Ads render only when set |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | no | Cloudflare Turnstile keys: both set turns the invisible bot check on |
 | `NEXT_PUBLIC_BOTID_DISABLED` | no | `1` turns BotID off everywhere |
 
 Without database variables the site still builds and renders. Live figures show as

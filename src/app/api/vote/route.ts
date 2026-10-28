@@ -8,6 +8,7 @@ import { isVotingConfigured, serverConfig } from "@/lib/server/config";
 import { clientCountry, clientIp, networkKey } from "@/lib/server/network";
 import { isSameOriginRequest, NO_STORE, readJsonBody } from "@/lib/server/request";
 import { castVote, resolveVoterId, VOTER_COOKIE, VOTER_COOKIE_MAX_AGE } from "@/lib/server/vote";
+import { turnstileRequired, verifyTurnstile } from "@/lib/server/turnstile";
 import { voteTestMode } from "@/lib/test-mode";
 import type { VoteRejected, VoteResponse } from "@/lib/vote-api";
 
@@ -53,12 +54,19 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  const ip = clientIp(request.headers);
+
+  if (turnstileRequired()) {
+    const token = typeof body?.turnstile === "string" ? body.turnstile : "";
+    // No token means the browser never ran the check: refused. If Cloudflare
+    // can't be reached the vote goes through; network rate limits still apply.
+    if (!token || (await verifyTurnstile(token, ip)) === "fail") return reject("forbidden");
+  }
+
   // In test mode every vote counts as a new voter, and no cookie is left behind.
   const voter = voteTestMode
     ? { id: randomUUID(), isNew: false }
     : resolveVoterId(request.cookies.get(VOTER_COOKIE)?.value);
-  const ip = clientIp(request.headers);
-
   let result;
   try {
     result = await castVote({

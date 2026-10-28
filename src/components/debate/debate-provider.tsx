@@ -7,6 +7,8 @@ import type { Debate } from "@/lib/debates";
 import type { DebateResults } from "@/lib/results";
 import { isVoteAccepted, type VoteResponse } from "@/lib/vote-api";
 import { voteTestMode } from "@/lib/test-mode";
+import { turnstileEnabled } from "@/lib/turnstile";
+import { getTurnstileToken, loadTurnstile } from "@/lib/turnstile-client";
 import { readStoredVote, writeStoredVote } from "@/lib/vote-storage";
 
 export type VotePhase =
@@ -109,9 +111,16 @@ export function DebateProvider({
     );
   }, [debate]);
 
+  // Fetch the bot check's script while people read the page, so voting isn't slowed by it.
+  useEffect(() => {
+    if (turnstileEnabled && vote.phase === "open") void loadTurnstile();
+  }, [vote.phase]);
+
   const castVote = useCallback(
     async (choice: string) => {
       setVote((v) => ({ ...v, phase: "submitting", pending: choice, error: null }));
+
+      const turnstile = turnstileEnabled ? await getTurnstileToken() : null;
 
       let data: VoteResponse;
       try {
@@ -119,7 +128,7 @@ export function DebateProvider({
           fetch("/api/vote", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ debate: debate.slug, choice }),
+            body: JSON.stringify({ debate: debate.slug, choice, ...(turnstile ? { turnstile } : {}) }),
           }).then((response) => response.json() as Promise<VoteResponse>),
           VOTE_TIMEOUT_MS,
         );
