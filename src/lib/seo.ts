@@ -3,14 +3,20 @@ import type { Metadata } from "next";
 import type { Debate } from "./debates";
 import { absoluteUrl, SITE_NAME } from "./site";
 
+/** Square link preview, shown big like an Instagram post. */
 export function debateOgImage(debate: Debate) {
   return {
-    url: `/api/og/${debate.slug}`,
-    width: 1200,
-    height: 630,
+    url: `/api/og/${debate.slug}/square`,
+    width: 1080,
+    height: 1080,
     type: "image/jpeg",
     alt: `${debate.question} ${debate.title}: the world decides. Vote at ${SITE_NAME}.`,
   };
+}
+
+/** X crops anything taller than 2:1, so it gets the wide version. */
+export function debateTwitterImage(debate: Debate) {
+  return { ...debateOgImage(debate), url: `/api/og/${debate.slug}`, width: 1200, height: 630 };
 }
 
 /** Metadata shared by every page that hosts a debate's vote. */
@@ -32,7 +38,7 @@ export function debateMetadata(debate: Debate, canonicalPath: string, overrides:
       card: "summary_large_image",
       title: `${debate.title}: ${debate.question}`,
       description: debate.seo.description,
-      images: [image],
+      images: [debateTwitterImage(debate)],
     },
     ...overrides,
   };

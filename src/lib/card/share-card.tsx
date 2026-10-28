@@ -18,8 +18,10 @@ import { CARD_FONTS } from "./fonts";
 export const CARD_FORMATS = {
   /** The share card: 4:5, for feed posts, stories and chats. */
   post: { width: 1080, height: 1350 },
-  /** Link previews (Open Graph, X, WhatsApp). */
+  /** Wide link previews, for X (which crops anything taller to 2:1). */
   og: { width: 1200, height: 630 },
+  /** Square link previews, shown big like an Instagram post (WhatsApp, iMessage, Telegram…). */
+  square: { width: 1080, height: 1080 },
 } as const;
 
 export type CardFormat = keyof typeof CARD_FORMATS;
@@ -131,9 +133,22 @@ function GhostNumber({ value, size }: { value: string; size: number }) {
   );
 }
 
-/** "I VOTED RONALDO" share card, 4:5, over the player's photo. */
-function VoteCard({ debate, option, stats, photo }: { debate: Debate; option: DebateOption; stats: Stats | null; photo: string | null }) {
-  const { width, height } = CARD_FORMATS.post;
+/** "I VOTED RONALDO" share card over the player's photo: 4:5, or square for link previews. */
+function VoteCard({
+  debate,
+  option,
+  stats,
+  photo,
+  square = false,
+}: {
+  debate: Debate;
+  option: DebateOption;
+  stats: Stats | null;
+  photo: string | null;
+  square?: boolean;
+}) {
+  const { width, height } = square ? CARD_FORMATS.square : CARD_FORMATS.post;
+  const post = CARD_FORMATS.post;
   const pad = 64;
   const index = debate.options.findIndex((o) => o.slug === option.slug);
   const percent = stats ? stats.percents[index] : null;
@@ -143,12 +158,20 @@ function VoteCard({ debate, option, stats, photo }: { debate: Debate; option: De
     <Canvas>
       {photo ? (
         // eslint-disable-next-line @next/next/no-img-element -- rendered to an image, not the DOM
-        <img src={photo} width={width} height={height} alt="" style={{ position: "absolute", top: 0, left: 0 }} />
+        // The photo is 4:5 with the face a third of the way down; the square keeps the face
+        // in the same clear band by trimming a little off the top and the rest off the bottom.
+        <img src={photo} width={post.width} height={post.height} alt="" style={{ position: "absolute", top: square ? -90 : 0, left: 0 }} />
       ) : (
-        <GhostNumber value={option.mark} size={980} />
+        <GhostNumber value={option.mark} size={square ? 800 : 980} />
       )}
       {/* Scrims: brand legible at the top, figures at the bottom; the player stays clear in between. */}
-      <Layer style={{ backgroundImage: "linear-gradient(to bottom, rgba(10,12,20,0.82) 0%, rgba(10,12,20,0) 20%, rgba(10,12,20,0) 46%, rgba(10,12,20,0.86) 70%, rgba(10,12,20,0.97) 100%)" }} />
+      <Layer
+        style={{
+          backgroundImage: square
+            ? "linear-gradient(to bottom, rgba(10,12,20,0.82) 0%, rgba(10,12,20,0) 18%, rgba(10,12,20,0) 40%, rgba(10,12,20,0.88) 66%, rgba(10,12,20,0.97) 100%)"
+            : "linear-gradient(to bottom, rgba(10,12,20,0.82) 0%, rgba(10,12,20,0) 20%, rgba(10,12,20,0) 46%, rgba(10,12,20,0.86) 70%, rgba(10,12,20,0.97) 100%)",
+        }}
+      />
       <div style={{ display: "flex", position: "absolute", top: 0, left: 0, right: 0, height: 12, background: option.color }} />
 
       <Layer style={{ flexDirection: "column", padding: `${pad + 12}px ${pad}px ${pad}px` }}>
@@ -169,7 +192,7 @@ function VoteCard({ debate, option, stats, photo }: { debate: Debate; option: De
         {stats && percent !== null ? (
           <div style={{ display: "flex", flexDirection: "column" }}>
             <div style={{ display: "flex", alignItems: "flex-end", marginTop: 14 }}>
-              <div style={{ display: "flex", fontFamily: "Display", fontSize: 220, lineHeight: 0.8, color: option.color }}>
+              <div style={{ display: "flex", fontFamily: "Display", fontSize: square ? 168 : 220, lineHeight: 0.8, color: option.color }}>
                 {formatPercent(percent)}
               </div>
               <div style={{ display: "flex", flexDirection: "column", fontFamily: "Wide", fontSize: 34, lineHeight: 1.1, letterSpacing: "0.04em", marginLeft: 28, paddingBottom: 6 }}>
@@ -177,7 +200,7 @@ function VoteCard({ debate, option, stats, photo }: { debate: Debate; option: De
                 <div style={{ display: "flex" }}>AGREES</div>
               </div>
             </div>
-            <div style={{ display: "flex", marginTop: 40 }}>
+            <div style={{ display: "flex", marginTop: square ? 28 : 40 }}>
               <SplitBar debate={debate} stats={stats} height={16} labelSize={26} />
             </div>
           </div>
@@ -187,7 +210,7 @@ function VoteCard({ debate, option, stats, photo }: { debate: Debate; option: De
           </div>
         )}
 
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 40, paddingTop: 28, borderTop: `2px solid ${RULE}`, fontFamily: "Wide", fontSize: 24, letterSpacing: "0.1em" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: square ? 28 : 40, paddingTop: square ? 22 : 28, borderTop: `2px solid ${RULE}`, fontFamily: "Wide", fontSize: 24, letterSpacing: "0.1em" }}>
           <div style={{ display: "flex", color: MUTED }}>WHO’S YOUR GOAT?</div>
           <div style={{ display: "flex" }}>{`VOTE AT ${SITE_DOMAIN.toUpperCase()}`}</div>
         </div>
@@ -302,6 +325,70 @@ function DebateCard({ debate, stats, artwork }: { debate: Debate; stats: Stats |
   );
 }
 
+/** Square link preview for a debate: each side's photo, face centred, with the live split. */
+function DebateSquare({ debate, stats, sides }: { debate: Debate; stats: Stats | null; sides: [string | null, string | null] }) {
+  const { width, height } = CARD_FORMATS.square;
+  const [a, b] = debate.options;
+  const pad = 56;
+  const half = width / 2;
+  // Each side photo is 1200×1323; at the card's height it's ~980 wide, cropped to half the card around the face.
+  const sideWidth = Math.round((1200 * height) / 1323);
+  const nameSize = fitDisplay(a.shortName.length > b.shortName.length ? a.shortName : b.shortName, half - pad - 20, 110);
+  return (
+    <Canvas>
+      {[a, b].map((option, i) => {
+        const focusX = Number.parseFloat(debate.artwork?.focus[i] ?? "50") / 100;
+        return (
+          <div key={option.slug} style={{ display: "flex", position: "absolute", top: 0, left: i * half, width: half, height, overflow: "hidden", background: INK }}>
+            {sides[i] ? (
+              // eslint-disable-next-line @next/next/no-img-element -- rendered to an image, not the DOM
+              <img src={sides[i]!} width={sideWidth} height={height} alt="" style={{ position: "absolute", top: 0, left: -Math.round((sideWidth - half) * focusX) }} />
+            ) : (
+              <GhostNumber value={option.mark} size={520} />
+            )}
+          </div>
+        );
+      })}
+      <div style={{ display: "flex", position: "absolute", top: 0, left: half - 1, width: 2, height, background: "rgba(10,12,20,0.9)" }} />
+      <Layer style={{ backgroundImage: "linear-gradient(to bottom, rgba(10,12,20,0.75) 0%, rgba(10,12,20,0) 18%, rgba(10,12,20,0) 44%, rgba(10,12,20,0.9) 70%, rgba(10,12,20,0.97) 100%)" }} />
+      <div style={{ display: "flex", position: "absolute", top: 0, left: 0, width: half, height: 12, background: a.color }} />
+      <div style={{ display: "flex", position: "absolute", top: 0, right: 0, width: half, height: 12, background: b.color }} />
+      {/* The VS badge, on the seam just under the faces. */}
+      <div style={{ display: "flex", position: "absolute", top: 520, left: half - 44, width: 88, height: 88, alignItems: "center", justifyContent: "center", background: INK, fontFamily: "Wide", fontSize: 28, letterSpacing: "0.06em" }}>
+        VS
+      </div>
+
+      <Layer style={{ flexDirection: "column", padding: `${pad + 8}px ${pad}px ${pad - 4}px` }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <Brand size={46} />
+          <div style={{ display: "flex", fontFamily: "Wide", fontSize: 20, letterSpacing: "0.12em" }}>{debate.question.toUpperCase()}</div>
+        </div>
+        <div style={{ display: "flex", flexGrow: 1 }} />
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+          {[a, b].map((option, i) => (
+            <div key={option.slug} style={{ display: "flex", flexDirection: "column", alignItems: i === 0 ? "flex-start" : "flex-end" }}>
+              <div style={{ display: "flex", fontFamily: "Display", fontSize: nameSize, lineHeight: 0.86 }}>{option.shortName.toUpperCase()}</div>
+              {stats ? (
+                <div style={{ display: "flex", fontFamily: "Display", fontSize: 132, lineHeight: 0.82, marginTop: 14, color: option.color }}>{formatPercent(stats.percents[i])}</div>
+              ) : null}
+            </div>
+          ))}
+        </div>
+        {stats ? (
+          <div style={{ display: "flex", width: "100%", height: 14, marginTop: 26, background: "rgba(255,255,255,0.12)" }}>
+            <div style={{ display: "flex", width: `${stats.percents[0]}%`, height: "100%", background: a.color }} />
+            <div style={{ display: "flex", width: `${stats.percents[1]}%`, height: "100%", background: b.color }} />
+          </div>
+        ) : null}
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 30, paddingTop: 24, borderTop: `2px solid ${RULE}`, fontFamily: "Wide", fontSize: 22, letterSpacing: "0.1em" }}>
+          <div style={{ display: "flex", color: MUTED }}>THE WORLD DECIDES.</div>
+          <div style={{ display: "flex" }}>{`VOTE AT ${SITE_DOMAIN.toUpperCase()}`}</div>
+        </div>
+      </Layer>
+    </Canvas>
+  );
+}
+
 export async function renderCard(options: {
   debate: Debate;
   /** The option the sharer voted for; omit for the debate preview. */
@@ -315,15 +402,23 @@ export async function renderCard(options: {
 
   let element: ReactNode;
   if (!option) {
-    const artwork = debate.artwork?.file ? await loadImage(debate.artwork.file) : null;
-    element = <DebateCard debate={debate} stats={stats} artwork={artwork} />;
+    const file = debate.artwork?.file;
+    if (format === "og") {
+      element = <DebateCard debate={debate} stats={stats} artwork={file ? await loadImage(file) : null} />;
+    } else {
+      // The per-side photos sit next to the side-by-side file: <slug>-1.jpg and <slug>-2.jpg.
+      const sides = file
+        ? ((await Promise.all([1, 2].map((n) => loadImage(file.replace(/\.jpg$/, `-${n}.jpg`))))) as [string | null, string | null])
+        : ([null, null] as [string | null, string | null]);
+      element = <DebateSquare debate={debate} stats={stats} sides={sides} />;
+    }
   } else {
     const photo = option.cardPhoto ? await loadImage(`assets/cards/${option.cardPhoto}`) : null;
     element =
       format === "og" ? (
         <VoteCardWide debate={debate} option={option} stats={stats} photo={photo} />
       ) : (
-        <VoteCard debate={debate} option={option} stats={stats} photo={photo} />
+        <VoteCard debate={debate} option={option} stats={stats} photo={photo} square={format === "square"} />
       );
   }
 
@@ -332,7 +427,8 @@ export async function renderCard(options: {
   // JPEG, small enough for chat apps to show; the 4:5 card people save and
   // post is kept close to the original. Full-resolution colour (4:4:4) keeps
   // the lettering and coloured edges crisp.
-  const quality = format === "post" ? 94 : 88;
+  // Square previews stay under ~300 KB, which chat apps show without trouble.
+  const quality = format === "post" ? 94 : format === "square" ? 86 : 88;
   const jpeg = await sharp(Buffer.from(png))
     .jpeg({ quality, chromaSubsampling: "4:4:4", mozjpeg: true, progressive: true })
     .toBuffer();

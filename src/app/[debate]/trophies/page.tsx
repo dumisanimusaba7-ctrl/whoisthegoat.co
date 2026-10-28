@@ -5,7 +5,7 @@ import { ViewTransition } from "react";
 import { JsonLd } from "@/components/json-ld";
 import { TrophyCabinet } from "@/components/trophies/cabinet";
 import { DEBATES, getDebate } from "@/lib/debates";
-import { breadcrumbJsonLd, debateOgImage } from "@/lib/seo";
+import { breadcrumbJsonLd, debateOgImage, debateTwitterImage } from "@/lib/seo";
 import { SITE_NAME } from "@/lib/site";
 import { getCabinet, hasCabinet, teamTotals } from "@/lib/trophies";
 
@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: PageProps<"/[debate]/trophies
     description,
     alternates: { canonical: `/${debate.slug}/trophies` },
     openGraph: { type: "website", url: `/${debate.slug}/trophies`, title, description, images: [image] },
-    twitter: { card: "summary_large_image", title, description, images: [image] },
+    twitter: { card: "summary_large_image", title, description, images: [debateTwitterImage(debate)] },
   };
 }
 

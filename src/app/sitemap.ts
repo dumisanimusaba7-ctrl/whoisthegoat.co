@@ -15,6 +15,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         : []),
     ]),
     { url: absoluteUrl("/debates"), changeFrequency: "weekly", priority: 0.6 },
+    { url: absoluteUrl("/leaderboard"), changeFrequency: "hourly", priority: 0.7 },
     { url: absoluteUrl("/results"), changeFrequency: "hourly", priority: 0.6 },
     { url: absoluteUrl("/privacy"), changeFrequency: "yearly", priority: 0.2 },
   ];

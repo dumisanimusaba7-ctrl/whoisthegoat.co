@@ -36,19 +36,21 @@ export async function generateMetadata({ params }: PageProps<"/[debate]/share/[c
   const { debate, option } = found;
   const title = `I voted ${option.shortName}. ${debate.question}`;
   const description = `${option.name} got a vote in the world’s live ${debate.title} poll. Who’s yours? Vote in one tap at ${SITE_NAME}.`;
+  // Square for chat apps, shown big like an Instagram post; X crops to 2:1, so it gets the wide card.
   const image = {
-    url: `/api/card/${debate.slug}/${option.slug}/og`,
-    width: 1200,
-    height: 630,
+    url: `/api/card/${debate.slug}/${option.slug}/square`,
+    width: 1080,
+    height: 1080,
     type: "image/jpeg",
     alt: `I voted ${option.name}. ${debate.question}`,
   };
+  const wide = { ...image, url: `/api/card/${debate.slug}/${option.slug}/og`, width: 1200, height: 630 };
   return debateMetadata(debate, `/${debate.slug}`, {
     title: { absolute: `${title} | ${SITE_NAME}` },
     description,
     robots: { index: false, follow: true },
     openGraph: { type: "website", url: `/${debate.slug}/share/${option.slug}`, title, description, images: [image] },
-    twitter: { card: "summary_large_image", title, description, images: [image] },
+    twitter: { card: "summary_large_image", title, description, images: [wide] },
   });
 }
 

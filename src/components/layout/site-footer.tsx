@@ -7,6 +7,7 @@ import { SITE_TAGLINE } from "@/lib/site";
 const LINKS = [
   { href: "/", label: "Vote" },
   { href: "/debates", label: "Debates" },
+  { href: "/leaderboard", label: "Leaderboard" },
   { href: "/results", label: "Results" },
   { href: `/${getFeaturedDebate().slug}/trophies`, label: "Trophy cabinet" },
   { href: "/#how-it-works", label: "How the vote works" },

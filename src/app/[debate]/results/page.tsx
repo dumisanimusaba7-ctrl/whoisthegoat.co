@@ -8,7 +8,7 @@ import { HowItWorks } from "@/components/debate/how-it-works";
 import { ResultsView } from "@/components/debate/results-view";
 import { JsonLd } from "@/components/json-ld";
 import { DEBATES, getDebate } from "@/lib/debates";
-import { breadcrumbJsonLd, debateOgImage } from "@/lib/seo";
+import { breadcrumbJsonLd, debateOgImage, debateTwitterImage } from "@/lib/seo";
 import { getPageResults } from "@/lib/server/results";
 import { getSiteUrl, SITE_NAME } from "@/lib/site";
 
@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: PageProps<"/[debate]/results"
     description,
     alternates: { canonical: `/${debate.slug}/results` },
     openGraph: { type: "website", url: `/${debate.slug}/results`, title, description, images: [image] },
-    twitter: { card: "summary_large_image", title, description, images: [image] },
+    twitter: { card: "summary_large_image", title, description, images: [debateTwitterImage(debate)] },
   };
 }
 
