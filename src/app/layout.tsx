@@ -41,7 +41,7 @@ const websiteJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
   name: SITE_NAME,
-  alternateName: "Who Is the GOAT",
+  alternateName: "Who Is the GOATs",
   url: absoluteUrl("/"),
   description: SITE_DESCRIPTION,
 };

@@ -1,8 +1,8 @@
-export const SITE_NAME = "WHOISTHEGOAT.CO";
-export const SITE_DOMAIN = "whoisthegoat.co";
+export const SITE_NAME = "WHOISTHEGOATS.COM";
+export const SITE_DOMAIN = "whoisthegoats.com";
 export const SITE_TAGLINE = "The world decides.";
 /** Public contact address shown on the privacy page. */
-export const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "hello@whoisthegoat.co";
+export const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "hello@whoisthegoats.com";
 export const SITE_DESCRIPTION =
   "The world’s live vote on the biggest debates in sport and culture. No sign-up, one tap, real results. Messi or Ronaldo, LeBron or Jordan: who is the GOAT?";
 

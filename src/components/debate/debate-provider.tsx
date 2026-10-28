@@ -32,7 +32,7 @@ export type VoteState = {
 
 type DebateContextValue = {
   debate: Debate;
-  /** Canonical origin for share links, e.g. https://whoisthegoat.co */
+  /** Canonical origin for share links, e.g. https://whoisthegoats.com */
   siteUrl: string;
   results: DebateResults | null;
   resultsUnavailable: boolean;

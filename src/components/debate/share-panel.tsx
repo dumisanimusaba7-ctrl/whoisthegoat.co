@@ -24,7 +24,7 @@ export function SharePanel() {
 
   // One 4:5 card: it fits feed posts as is, and stories and chats show it whole.
   const src = option ? `/api/card/${debate.slug}/${option.slug}/post` : null;
-  const filename = option ? `whoisthegoat-${option.slug}.jpg` : "whoisthegoat.jpg";
+  const filename = option ? `whoisthegoats-${option.slug}.jpg` : "whoisthegoat.jpg";
 
   useEffect(() => {
     if (!src) return;

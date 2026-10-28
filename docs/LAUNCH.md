@@ -8,7 +8,7 @@
 - [ ] Vercel env vars set (`NEXT_PUBLIC_SITE_URL`, `SUPABASE_URL`, `SUPABASE_SECRET_KEY`,
       `VOTE_HASH_SECRET`). `VOTE_HASH_SECRET` stored somewhere safe: changing it
       lets everyone vote again.
-- [ ] Domain `whoisthegoat.co` attached, HTTPS active.
+- [ ] Domain `whoisthegoats.com` attached, HTTPS active.
 - [ ] Cast a test vote on production, then remove it so the count starts at zero:
       ```sql
       delete from public.votes where created_at > now() - interval '10 minutes';
@@ -17,7 +17,7 @@
 - [ ] Share a link in WhatsApp / X / iMessage and check the preview image.
 - [ ] Check the honours in `src/lib/debates/` are still current.
 - [ ] Run `supabase/migrations/20261022120000_all_debates.sql` and confirm `/api/health` reports all debates open.
-- [ ] `hello@whoisthegoat.co` (or `NEXT_PUBLIC_CONTACT_EMAIL`) receives mail.
+- [ ] `hello@whoisthegoats.com` (or `NEXT_PUBLIC_CONTACT_EMAIL`) receives mail.
 - [ ] Google Search Console: verify the domain and submit `/sitemap.xml`.
 - [ ] Once AdSense approves the site: set the client and slot env vars, enable the
       consent message, redeploy.
@@ -34,7 +34,7 @@
 
 ## Social playbook
 
-Every post leads back to one URL: **whoisthegoat.co**. Use real numbers only,
+Every post leads back to one URL: **whoisthegoats.com**. Use real numbers only,
 copied from `/messi-vs-ronaldo/results` at the time of posting. Never round up,
 never post a figure the site doesn't show.
 
@@ -51,16 +51,16 @@ never post a figure the site doesn't show.
 > MESSI OR RONALDO?
 > We've stopped arguing.
 > Let the world decide.
-> Vote now: whoisthegoat.co
+> Vote now: whoisthegoats.com
 
 > {TOTAL} VOTES. {COUNTRIES} COUNTRIES.
 > One question.
-> whoisthegoat.co
+> whoisthegoats.com
 
 > {COUNTRY} HAS SPOKEN: {SPLIT}.
 > Does the rest of the world agree?
-> whoisthegoat.co
+> whoisthegoats.com
 
-**Links:** use `whoisthegoat.co` in bios and posts. For a specific pick, link
-`whoisthegoat.co/messi-vs-ronaldo/share/messi` (or `/ronaldo`): its preview shows
+**Links:** use `whoisthegoats.com` in bios and posts. For a specific pick, link
+`whoisthegoats.com/messi-vs-ronaldo/share/messi` (or `/ronaldo`): its preview shows
 that player's card, and the page itself is the vote.

@@ -1,5 +1,5 @@
 -- ============================================================================
--- WHOISTHEGOAT.CO — delete every vote on every debate and start from zero.
+-- WHOISTHEGOATS.COM — delete every vote on every debate and start from zero.
 --
 -- For clearing test votes BEFORE launch. It deletes all votes, real ones
 -- included, and can't be undone. Never run it once the site is public.

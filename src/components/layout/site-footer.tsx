@@ -19,7 +19,7 @@ export function SiteFooter() {
       <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
         <div className="flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
           <div>
-            <Link href="/" aria-label="WHOISTHEGOAT.CO home" className="inline-flex flex-col gap-4">
+            <Link href="/" aria-label="WHOISTHEGOATS.COM home" className="inline-flex flex-col gap-4">
               <LogoMark className="h-14 w-auto self-start" />
               <LogoWordmark className="h-6 w-auto" />
             </Link>
@@ -42,10 +42,10 @@ export function SiteFooter() {
         </div>
         <div className="mt-12 flex flex-col gap-3 border-t border-white/10 pt-6 text-xs leading-relaxed text-mute-dark sm:flex-row sm:justify-between">
           <p className="max-w-2xl">
-            WHOISTHEGOAT.CO is an independent fan vote. It is not affiliated with, endorsed by or sponsored by any
+            WHOISTHEGOATS.COM is an independent fan vote. It is not affiliated with, endorsed by or sponsored by any
             player, club, league or federation. Player names are used for identification only.
           </p>
-          <p className="shrink-0">© 2026 WHOISTHEGOAT.CO</p>
+          <p className="shrink-0">© 2026 WHOISTHEGOATS.COM</p>
         </div>
       </div>
     </footer>

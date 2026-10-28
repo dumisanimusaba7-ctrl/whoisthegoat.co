@@ -11,7 +11,7 @@ import { getPageResults } from "@/lib/server/results";
 
 export const metadata: Metadata = {
   title: "Results",
-  description: "Results for every debate on WHOISTHEGOAT.CO: the global split and how each country voted.",
+  description: "Results for every debate on WHOISTHEGOATS.COM: the global split and how each country voted.",
   alternates: { canonical: "/results" },
 };
 

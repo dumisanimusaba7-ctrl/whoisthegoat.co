@@ -1,4 +1,4 @@
-# WHOISTHEGOAT.CO
+# WHOISTHEGOATS.COM
 
 **The world decides.** A live, global vote on sport's biggest debates. The launch
 debate is **Messi vs Ronaldo**.
@@ -101,20 +101,20 @@ cp .env.example .env.local
 
 | Variable | Required | Notes |
 | --- | --- | --- |
-| `NEXT_PUBLIC_SITE_URL` | yes | `https://whoisthegoat.co` |
+| `NEXT_PUBLIC_SITE_URL` | yes | `https://whoisthegoats.com` |
 | `SUPABASE_URL` | yes | Project URL |
 | `SUPABASE_SECRET_KEY` | yes | Secret (`sb_secret_…`) or legacy `service_role` key. Server only. |
 | `VOTE_HASH_SECRET` | yes | `openssl rand -hex 32`. Keep it stable. |
 | `VOTE_LIMIT_PER_MINUTE` / `VOTE_LIMIT_PER_DAY` | no | Defaults 10 / 200 per network per debate |
 | `MIN_COUNTRY_VOTES` | no | Default 10 |
-| `NEXT_PUBLIC_CONTACT_EMAIL` | no | Shown on `/privacy` (default `hello@whoisthegoat.co`) |
+| `NEXT_PUBLIC_CONTACT_EMAIL` | no | Shown on `/privacy` (default `hello@whoisthegoats.com`) |
 | `NEXT_PUBLIC_ADSENSE_CLIENT`, `NEXT_PUBLIC_ADSENSE_SLOT_RESULTS`, `NEXT_PUBLIC_ADSENSE_SLOT_EDITORIAL` | no | Ads render only when set |
 | `NEXT_PUBLIC_BOTID_DISABLED` | no | `1` turns BotID off everywhere |
 
 Without database variables the site still builds and renders. Live figures show as
 unavailable and voting returns a clear "briefly unavailable" message. Nothing is faked.
 
-**Checking a deployment:** open `/api/health` (e.g. `https://whoisthegoat.co/api/health`).
+**Checking a deployment:** open `/api/health` (e.g. `https://whoisthegoats.com/api/health`).
 It lists each setting and what the database answered, marks anything wrong with the
 fix, and ends with "Voting is ready." when all is well (HTTP 200; 503 otherwise, so
 it doubles as an uptime check). It never shows keys or secrets.
@@ -148,7 +148,7 @@ npm run build && npm start
 2. Add the environment variables above for Production (and Preview if wanted).
    Keep "Automatically expose System Environment Variables" on: BotID uses
    `NEXT_PUBLIC_VERCEL_ENV` to switch itself on.
-3. Add the `whoisthegoat.co` domain.
+3. Add the `whoisthegoats.com` domain.
 4. Optional: Firewall → enable **BotID Deep Analysis** for stronger bot detection.
 
 Vercel supplies the visitor IP and country headers the vote API relies on. On another
@@ -238,5 +238,5 @@ each Grand Prix for Hamilton vs Verstappen (figures are after Singapore,
 Fonts: Archivo and Montserrat (used for the wordmark outlines) are licensed under
 the SIL Open Font License.
 
-WHOISTHEGOAT.CO is an independent fan vote, not affiliated with any player, club,
+WHOISTHEGOATS.COM is an independent fan vote, not affiliated with any player, club,
 league or federation.

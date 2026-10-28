@@ -1,5 +1,5 @@
 -- ============================================================================
--- WHOISTHEGOAT.CO — update: every debate on the site, including Nike vs Adidas
+-- WHOISTHEGOATS.COM — update: every debate on the site, including Nike vs Adidas
 --
 -- Run in Supabase → SQL Editor after 20261008120000_voting.sql. It adds any
 -- debate or option that's missing and leaves everything else as it is (votes,

@@ -1,5 +1,5 @@
 -- ============================================================================
--- WHOISTHEGOAT.CO — nine more debates
+-- WHOISTHEGOATS.COM — nine more debates
 --
 -- Run after 20261008120000_voting.sql (Supabase → SQL Editor). Safe to run
 -- more than once: existing debates and options are left as they are.

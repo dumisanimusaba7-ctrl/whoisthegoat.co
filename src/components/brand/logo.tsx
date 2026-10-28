@@ -25,7 +25,7 @@ export function LogoMark({ className, title }: SvgProps) {
   );
 }
 
-/** "whoisthegoat.co" set in the brand wordmark. Inherits `currentColor`. */
+/** "whoisthegoats.com" set in the brand wordmark. Inherits `currentColor`. */
 export function LogoWordmark({ className, title }: SvgProps) {
   return (
     <svg
@@ -50,7 +50,7 @@ export function LogoLockup({ className }: { className?: string }) {
       <LogoMark className="h-5 w-auto shrink-0 min-[400px]:h-6 sm:h-7" />
       {/* Narrow phones: a slightly smaller lockup, and the mark alone below 360px. */}
       <LogoWordmark className="h-[11px] w-auto max-[360px]:hidden min-[400px]:h-[13px] sm:h-[15px]" />
-      <span className="sr-only">WHOISTHEGOAT.CO</span>
+      <span className="sr-only">WHOISTHEGOATS.COM</span>
     </span>
   );
 }

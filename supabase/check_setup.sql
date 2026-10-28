@@ -1,5 +1,5 @@
 -- ============================================================================
--- WHOISTHEGOAT.CO — is the database ready for voting?
+-- WHOISTHEGOATS.COM — is the database ready for voting?
 --
 -- Paste into Supabase → SQL Editor and run. It changes nothing: the helper
 -- below is temporary and disappears when the query finishes.

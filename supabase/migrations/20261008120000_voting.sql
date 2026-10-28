@@ -1,5 +1,5 @@
 -- ============================================================================
--- WHOISTHEGOAT.CO — anonymous voting
+-- WHOISTHEGOATS.COM — anonymous voting
 --
 -- Design notes
 --   * The browser never talks to the database. Every read and write goes

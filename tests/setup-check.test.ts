@@ -100,7 +100,7 @@ describe("setup check", () => {
   it("says when voting works but shared links don't", () => {
     const report = formatSetupReport({
       deployment: { environment: "production", branch: null, commit: null },
-      checks: [{ name: "Share links", status: "problem", detail: "https://whoisthegoat.co isn't reachable yet" }],
+      checks: [{ name: "Share links", status: "problem", detail: "https://whoisthegoats.com isn't reachable yet" }],
       ready: true,
       sharing: false,
     });

@@ -369,5 +369,5 @@ export function formatSetupReport({
       ? "Voting is ready."
       : "Voting is ready, but shared links won't work yet: see Share links above.";
 
-  return ["WHOISTHEGOAT.CO setup check", where, "", ...rows, "", verdict, ""].join("\n");
+  return ["WHOISTHEGOATS.COM setup check", where, "", ...rows, "", verdict, ""].join("\n");
 }
