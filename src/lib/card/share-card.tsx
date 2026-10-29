@@ -22,6 +22,8 @@ export const CARD_FORMATS = {
   og: { width: 1200, height: 630 },
   /** Square link previews, shown big like an Instagram post (WhatsApp, iMessage, Telegram…). */
   square: { width: 1080, height: 1080 },
+  /** Full-screen 9:16, for Instagram, WhatsApp and Snapchat stories. */
+  story: { width: 1080, height: 1920 },
 } as const;
 
 export type CardFormat = keyof typeof CARD_FORMATS;
@@ -133,21 +135,55 @@ function GhostNumber({ value, size }: { value: string; size: number }) {
   );
 }
 
-/** "I VOTED RONALDO" share card over the player's photo: 4:5, or square for link previews. */
+type VoteShape = "post" | "square" | "story";
+
+// Per shape: where the 4:5 photo sits, the scrim, the padding and the big number.
+// The square trims a little off the photo's top; the story drops it below
+// Instagram's header and keeps the text above the reply bar.
+const VOTE_SHAPES: Record<VoteShape, { photoTop: number; scrim: string; padTop: number; padBottom: number; percent: number; gap: number }> = {
+  post: {
+    photoTop: 0,
+    scrim: "linear-gradient(to bottom, rgba(10,12,20,0.82) 0%, rgba(10,12,20,0) 20%, rgba(10,12,20,0) 46%, rgba(10,12,20,0.86) 70%, rgba(10,12,20,0.97) 100%)",
+    padTop: 76,
+    padBottom: 64,
+    percent: 220,
+    gap: 40,
+  },
+  square: {
+    photoTop: -90,
+    scrim: "linear-gradient(to bottom, rgba(10,12,20,0.82) 0%, rgba(10,12,20,0) 18%, rgba(10,12,20,0) 40%, rgba(10,12,20,0.88) 66%, rgba(10,12,20,0.97) 100%)",
+    padTop: 76,
+    padBottom: 64,
+    percent: 168,
+    gap: 28,
+  },
+  story: {
+    photoTop: 150,
+    scrim: "linear-gradient(to bottom, rgba(10,12,20,1) 0%, rgba(10,12,20,1) 8%, rgba(10,12,20,0) 17%, rgba(10,12,20,0) 40%, rgba(10,12,20,0.9) 60%, rgba(10,12,20,1) 75%)",
+    padTop: 190,
+    padBottom: 300,
+    percent: 230,
+    gap: 44,
+  },
+};
+
+/** "I VOTED RONALDO" share card over the player's photo: 4:5, square for link previews, or 9:16 for stories. */
 function VoteCard({
   debate,
   option,
   stats,
   photo,
-  square = false,
+  shape = "post",
 }: {
   debate: Debate;
   option: DebateOption;
   stats: Stats | null;
   photo: string | null;
-  square?: boolean;
+  shape?: VoteShape;
 }) {
-  const { width, height } = square ? CARD_FORMATS.square : CARD_FORMATS.post;
+  const { width } = CARD_FORMATS[shape];
+  const look = VOTE_SHAPES[shape];
+  const square = shape === "square";
   const post = CARD_FORMATS.post;
   const pad = 64;
   const index = debate.options.findIndex((o) => o.slug === option.slug);
@@ -158,23 +194,16 @@ function VoteCard({
     <Canvas>
       {photo ? (
         // eslint-disable-next-line @next/next/no-img-element -- rendered to an image, not the DOM
-        // The photo is 4:5 with the face a third of the way down; the square keeps the face
-        // in the same clear band by trimming a little off the top and the rest off the bottom.
-        <img src={photo} width={post.width} height={post.height} alt="" style={{ position: "absolute", top: square ? -90 : 0, left: 0 }} />
+        // The photo is 4:5 with the face a third of the way down.
+        <img src={photo} width={post.width} height={post.height} alt="" style={{ position: "absolute", top: look.photoTop, left: 0 }} />
       ) : (
         <GhostNumber value={option.mark} size={square ? 800 : 980} />
       )}
       {/* Scrims: brand legible at the top, figures at the bottom; the player stays clear in between. */}
-      <Layer
-        style={{
-          backgroundImage: square
-            ? "linear-gradient(to bottom, rgba(10,12,20,0.82) 0%, rgba(10,12,20,0) 18%, rgba(10,12,20,0) 40%, rgba(10,12,20,0.88) 66%, rgba(10,12,20,0.97) 100%)"
-            : "linear-gradient(to bottom, rgba(10,12,20,0.82) 0%, rgba(10,12,20,0) 20%, rgba(10,12,20,0) 46%, rgba(10,12,20,0.86) 70%, rgba(10,12,20,0.97) 100%)",
-        }}
-      />
+      <Layer style={{ backgroundImage: look.scrim }} />
       <div style={{ display: "flex", position: "absolute", top: 0, left: 0, right: 0, height: 12, background: option.color }} />
 
-      <Layer style={{ flexDirection: "column", padding: `${pad + 12}px ${pad}px ${pad}px` }}>
+      <Layer style={{ flexDirection: "column", padding: `${look.padTop}px ${pad}px ${look.padBottom}px` }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <Brand size={52} />
           <div style={{ display: "flex", fontFamily: "Wide", fontSize: 20, letterSpacing: "0.12em", color: WHITE }}>
@@ -192,7 +221,7 @@ function VoteCard({
         {stats && percent !== null ? (
           <div style={{ display: "flex", flexDirection: "column" }}>
             <div style={{ display: "flex", alignItems: "flex-end", marginTop: 14 }}>
-              <div style={{ display: "flex", fontFamily: "Display", fontSize: square ? 168 : 220, lineHeight: 0.8, color: option.color }}>
+              <div style={{ display: "flex", fontFamily: "Display", fontSize: look.percent, lineHeight: 0.8, color: option.color }}>
                 {formatPercent(percent)}
               </div>
               <div style={{ display: "flex", flexDirection: "column", fontFamily: "Wide", fontSize: 34, lineHeight: 1.1, letterSpacing: "0.04em", marginLeft: 28, paddingBottom: 6 }}>
@@ -200,7 +229,7 @@ function VoteCard({
                 <div style={{ display: "flex" }}>AGREES</div>
               </div>
             </div>
-            <div style={{ display: "flex", marginTop: square ? 28 : 40 }}>
+            <div style={{ display: "flex", marginTop: look.gap }}>
               <SplitBar debate={debate} stats={stats} height={16} labelSize={26} />
             </div>
           </div>
@@ -210,7 +239,7 @@ function VoteCard({
           </div>
         )}
 
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: square ? 28 : 40, paddingTop: square ? 22 : 28, borderTop: `2px solid ${RULE}`, fontFamily: "Wide", fontSize: 24, letterSpacing: "0.1em" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: look.gap, paddingTop: square ? 22 : 28, borderTop: `2px solid ${RULE}`, fontFamily: "Wide", fontSize: 24, letterSpacing: "0.1em" }}>
           <div style={{ display: "flex", color: MUTED }}>WHO’S YOUR GOAT?</div>
           <div style={{ display: "flex" }}>{`VOTE AT ${SITE_DOMAIN.toUpperCase()}`}</div>
         </div>
@@ -418,7 +447,7 @@ export async function renderCard(options: {
       format === "og" ? (
         <VoteCardWide debate={debate} option={option} stats={stats} photo={photo} />
       ) : (
-        <VoteCard debate={debate} option={option} stats={stats} photo={photo} square={format === "square"} />
+        <VoteCard debate={debate} option={option} stats={stats} photo={photo} shape={format} />
       );
   }
 
@@ -428,7 +457,7 @@ export async function renderCard(options: {
   // post is kept close to the original. Full-resolution colour (4:4:4) keeps
   // the lettering and coloured edges crisp.
   // Square previews stay under ~300 KB, which chat apps show without trouble.
-  const quality = format === "post" ? 94 : format === "square" ? 86 : 88;
+  const quality = format === "post" || format === "story" ? 94 : format === "square" ? 86 : 88;
   const jpeg = await sharp(Buffer.from(png))
     .jpeg({ quality, chromaSubsampling: "4:4:4", mozjpeg: true, progressive: true })
     .toBuffer();
