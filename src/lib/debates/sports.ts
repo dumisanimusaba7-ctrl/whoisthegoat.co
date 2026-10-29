@@ -409,9 +409,9 @@ export const HAMILTON_VS_VERSTAPPEN: Debate = {
       cardPhoto: "hamilton.jpg",
       caseFor: [
         "Won seven world championships, in 2008, 2014, 2015, 2017, 2018, 2019 and 2020, level with Michael Schumacher for the most in Formula One history.",
-        "Holds the Formula One records for Grand Prix wins (106), pole positions (104) and podiums (208) after the Singapore Grand Prix on 11 October 2026.",
+        "Holds the Formula One records for Grand Prix wins (106), pole positions (104) and podiums (208) after the United States Grand Prix on 25 October 2026.",
         "Won his first race for Ferrari at the Barcelona-Catalunya Grand Prix on 14 June 2026, aged 41, the oldest Grand Prix winner since Jack Brabham in 1970.",
-        "Was third in the 2026 drivers’ standings on 229 points after the Singapore Grand Prix, with one win and six podiums this season.",
+        "Is third in the 2026 drivers’ standings on 241 points after the United States Grand Prix, with one win and six podiums this season.",
       ],
     },
     {
@@ -456,7 +456,7 @@ export const HAMILTON_VS_VERSTAPPEN: Debate = {
   },
   seo: {
     title: "Hamilton vs Verstappen: Who Is the Greater F1 Driver? Vote Now",
-    description: "Lewis Hamilton or Max Verstappen? Compare world titles, wins, poles and podiums after the 2026 Singapore Grand Prix, then cast your vote.",
+    description: "Lewis Hamilton or Max Verstappen? Compare world titles, wins, poles and podiums after the 2026 United States Grand Prix, then cast your vote.",
     keywords: [
       "Hamilton vs Verstappen",
       "Lewis Hamilton",
@@ -476,8 +476,8 @@ export const HAMILTON_VS_VERSTAPPEN: Debate = {
     { label: "World titles", values: ["7", "4"] },
     { label: "Race wins", values: ["106", "73"] },
     { label: "Pole positions", values: ["104", "50"] },
-    { label: "Podiums", values: ["208", "136"] },
-    { label: "Grands Prix entered", values: ["397", "250"] },
+    { label: "Podiums", values: ["208", "137"] },
+    { label: "Grands Prix entered", values: ["398", "251"] },
   ],
-  factsAsOf: "after the Singapore Grand Prix on 11 October 2026",
+  factsAsOf: "after the United States Grand Prix on 25 October 2026",
 };

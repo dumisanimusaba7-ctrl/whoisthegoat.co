@@ -141,6 +141,43 @@ const SHAPES: Record<TrophyKind, Part[]> = {
     ellipse(21.4, 10.8, 2.4, 1.6, "light"),
     path("M18.2 27 C18.2 33 20.6 41 21.6 50 L20.4 50 C19.2 41 17 33 17.2 27 Z", "light"),
   ],
+  // A title belt on a stand: leather strap, side plates, the big centre plate.
+  belt: [
+    rect(14, 56, 20, 6, "plinth", 1.2),
+    path("M22 56 L26 56 L25.4 47 L22.6 47 Z"),
+    path("M2 28.6 C14 31.6 34 31.6 46 28.6 L46 41.4 C34 44.4 14 44.4 2 41.4 Z", "plinth"),
+    path("M2 30.4 C14 33.4 34 33.4 46 30.4", "line"),
+    path("M2 39.6 C14 42.6 34 42.6 46 39.6", "line"),
+    rect(4.6, 31, 7.4, 9.4, "metal", 1.4),
+    rect(36, 31, 7.4, 9.4, "metal", 1.4),
+    circle(24, 36.2, 13),
+    circle(24, 36.2, 9.4, "dark"),
+    circle(24, 36.2, 8.4),
+    path("M19.4 36.2 L22.6 36.2 L24 31.6 L25.4 36.2 L28.6 36.2 L26 38.8 L27 43 L24 40.4 L21 43 L22 38.8 Z", "light"),
+    ellipse(19.6, 29.8, 3.4, 1.8, "light"),
+  ],
+  // A gramophone: cabinet, platter, arm and a flared horn.
+  gramophone: [
+    rect(10, 49, 28, 13, "plinth", 1.4),
+    rect(10, 52, 28, 1, "light"),
+    rect(12, 46.2, 22, 2.8, "metal", 1.2),
+    rect(29.6, 30, 2.6, 17, "metal", 1),
+    path("M32.2 33 C31 26.6 26.4 18.6 18.6 12.6 C14 9 8.6 8.6 6.4 10.6 C5 13.4 8.6 18.6 13 21.2 C20.4 25.4 27.2 29.4 29.6 35.4 Z"),
+    path("M6.4 10.6 C8 8.4 13.4 8.8 16.4 11.8 C13 12.4 9 12.6 6.4 10.6 Z", "dark"),
+    path("M27.6 31 C25 26.4 20.8 22.6 15.4 19.4", "line"),
+    ellipse(13.4, 14.6, 3.2, 1.6, "light"),
+  ],
+  // A tall trophy with a ball on top, like basketball's championship trophy.
+  basketball: [
+    rect(16, 55, 16, 7, "plinth", 1.2),
+    path("M18.4 55 L29.6 55 L28 50.6 L20 50.6 Z"),
+    path("M19.2 50.6 L28.8 50.6 L31.2 25 L16.8 25 Z"),
+    path("M19.6 27 L21 48.4 M23.2 27 L23.6 48.4 M26.8 27 L26.4 48.4 M28.6 27 L27.2 48.4 M17.6 31 L30.4 31 M18.2 38 L29.8 38", "line"),
+    rect(15, 22.6, 18, 2.8, "metal", 1.2),
+    circle(24, 13.4, 9.4),
+    path("M14.6 13.4 L33.4 13.4 M24 4 L24 22.8 M17.4 6.8 C21 10.4 21 16.4 17.4 20 M30.6 6.8 C27 10.4 27 16.4 30.6 20", "line"),
+    ellipse(20.4, 9.6, 3, 1.8, "light"),
+  ],
 };
 
 const METAL: Record<TrophyKind, "gold" | "silver"> = {
@@ -157,6 +194,9 @@ const METAL: Record<TrophyKind, "gold" | "silver"> = {
   "ballon-dor": "gold",
   "golden-shoe": "gold",
   statuette: "gold",
+  belt: "gold",
+  gramophone: "gold",
+  basketball: "gold",
 };
 
 const KINDS = Object.keys(SHAPES) as TrophyKind[];

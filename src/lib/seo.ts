@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import type { Debate } from "./debates";
+import { debateKeywords, optionNames } from "./seo-keywords";
 import { absoluteUrl, SITE_NAME } from "./site";
 
 /** Square link preview, shown big like an Instagram post. */
@@ -25,7 +26,7 @@ export function debateMetadata(debate: Debate, canonicalPath: string, overrides:
   return {
     title: { absolute: `${debate.seo.title} | ${SITE_NAME}` },
     description: debate.seo.description,
-    keywords: debate.seo.keywords,
+    keywords: debateKeywords(debate),
     alternates: { canonical: canonicalPath },
     openGraph: {
       type: "website",
@@ -51,12 +52,17 @@ export function debateJsonLd(debate: Debate, path: string) {
     name: `${debate.title}: ${debate.question}`,
     description: debate.seo.description,
     url: absoluteUrl(path),
-    isPartOf: { "@type": "WebSite", name: SITE_NAME, url: absoluteUrl("/") },
-    about: debate.options.map((option) =>
-      option.kind === "person"
-        ? { "@type": "Person", name: option.name, nationality: option.nationality, sameAs: option.wikipedia }
-        : { "@type": "Organization", name: option.name, sameAs: option.wikipedia },
-    ),
+    isPartOf: { "@type": "WebSite", "@id": absoluteUrl("/#website"), name: SITE_NAME, url: absoluteUrl("/") },
+    inLanguage: "en",
+    keywords: debateKeywords(debate).join(", "),
+    primaryImageOfPage: { "@type": "ImageObject", url: absoluteUrl(debateOgImage(debate).url), width: 1080, height: 1080 },
+    about: debate.options.map((option) => ({
+      "@type": option.kind === "person" ? "Person" : "Organization",
+      name: option.name,
+      alternateName: optionNames(option).slice(1),
+      ...(option.kind === "person" ? { nationality: option.nationality } : {}),
+      sameAs: option.wikipedia,
+    })),
   };
 }
 

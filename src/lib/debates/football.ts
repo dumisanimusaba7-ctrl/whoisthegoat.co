@@ -251,7 +251,7 @@ export const YAMAL_VS_MBAPPE: Debate = {
     { label: "European Championships", values: ["1", "0"] },
     { label: "League titles", values: ["3", "7"] },
     { label: "World Cup goals", values: ["1", "22"] },
-    { label: "Best Ballon d’Or finish (to 2025)", values: ["2nd (2025)", "3rd (2023)"] },
+    { label: "Best Ballon d’Or finish", values: ["2nd (2025)", "2nd (2026)"] },
   ],
   factsAsOf: "October 2026",
 };

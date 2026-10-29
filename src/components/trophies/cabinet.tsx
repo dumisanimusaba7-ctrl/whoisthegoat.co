@@ -5,8 +5,7 @@ import { AnimatedNumber } from "@/components/ui/animated-number";
 import type { Debate, DebateOption } from "@/lib/debates";
 import {
   categoryCounts,
-  competitionCounts,
-  findCategory,
+  headlineCounts,
   teamTotals,
   type Cabinet,
   type CabinetCategory,
@@ -29,20 +28,20 @@ export function TrophyCabinet({ debate, cabinet }: { debate: Debate; cabinet: Ca
 
       <section aria-labelledby="team-title" className="bg-ink text-white">
         <div className="mx-auto max-w-6xl px-4 pb-6 pt-14 sm:px-6 sm:pt-20">
-          <SectionHeading id="team-title" title="Team trophies">
-            Senior honours with club and country. These make up the totals.
+          <SectionHeading id="team-title" title={cabinet.teamTitle}>
+            {cabinet.teamBlurb}
           </SectionHeading>
           {cabinet.team.map((category) => (
             <CategoryBlock key={category.id} debate={debate} category={category} />
           ))}
-          <CategoryBlock debate={debate} category={cabinet.youth} muted />
+          {cabinet.youth ? <CategoryBlock debate={debate} category={cabinet.youth} muted /> : null}
         </div>
       </section>
 
       <section aria-labelledby="awards-title" className="border-t border-white/10 bg-ink-2 text-white">
         <div className="mx-auto max-w-6xl px-4 pb-6 pt-14 sm:px-6 sm:pt-20">
-          <SectionHeading id="awards-title" title="Individual awards">
-            The game’s biggest awards for a single player.
+          <SectionHeading id="awards-title" title={cabinet.individualTitle}>
+            {cabinet.individualBlurb}
           </SectionHeading>
           {individual.map((category) => (
             <CategoryBlock key={category.id} debate={debate} category={category} />
@@ -79,14 +78,12 @@ function SectionHeading({ id, title, children }: { id: string; title: string; ch
 function Hero({ debate, cabinet }: { debate: Debate; cabinet: Cabinet }) {
   const [a, b] = debate.options;
   const totals = teamTotals(cabinet);
-  const youth = categoryCounts(cabinet.youth);
-  const rows: { label: string; kind: TrophyKind; counts: [number, number] }[] = [
-    { label: "Ballon d’Or", kind: "ballon-dor", counts: countsFor(cabinet, "ballon-dor") },
-    { label: "Champions League", kind: "champions-league", counts: countsFor(cabinet, "champions-league") },
-    { label: "World Cup", kind: "world-cup", counts: competitionCounts(cabinet, "FIFA World Cup") },
-    { label: "League titles", kind: "league", counts: countsFor(cabinet, "league") },
-    { label: "International trophies", kind: "continental", counts: countsFor(cabinet, "international") },
-  ];
+  const youth = cabinet.youth ? categoryCounts(cabinet.youth) : [0, 0];
+  const rows: { label: string; kind: TrophyKind; counts: [number, number] }[] = cabinet.headline.map((row) => ({
+    label: row.label,
+    kind: row.kind,
+    counts: headlineCounts(cabinet, row),
+  }));
 
   return (
     <section aria-labelledby="cabinet-title" className="bg-ink text-white">
@@ -96,7 +93,7 @@ function Hero({ debate, cabinet }: { debate: Debate; cabinet: Cabinet }) {
           {debate.title}
         </h1>
         <p className="mt-3 max-w-xl text-base text-mute-dark sm:text-lg">
-          Every team trophy and major individual award, side by side. As of {cabinet.asOf}.
+          {cabinet.intro} As of {cabinet.asOf}.
         </p>
 
         <div className="mt-10 grid grid-cols-2 border-y border-white/10">
@@ -108,8 +105,8 @@ function Hero({ debate, cabinet }: { debate: Debate; cabinet: Cabinet }) {
                 <AnimatedNumber value={totals[i]} from={0} duration={1400} format="count" />
               </p>
               <p className="mt-2 text-sm text-mute-dark">
-                team trophies
-                {youth[i] > 0 ? <span className="block sm:inline">{` + ${youth[i]} youth titles`}</span> : null}
+                {cabinet.totalLabel}
+                {youth[i] > 0 ? <span className="block sm:inline">{` + ${youth[i]} ${cabinet.youth?.label}`}</span> : null}
               </p>
             </div>
           ))}
@@ -147,11 +144,6 @@ function Hero({ debate, cabinet }: { debate: Debate; cabinet: Cabinet }) {
       </div>
     </section>
   );
-}
-
-function countsFor(cabinet: Cabinet, id: string): [number, number] {
-  const category = findCategory(cabinet, id);
-  return category ? categoryCounts(category) : [0, 0];
 }
 
 /** Two-tone bar split in proportion to the two counts. */
@@ -285,8 +277,7 @@ function Records({ debate, cabinet }: { debate: Debate; cabinet: Cabinet }) {
           ))}
         </div>
         <p className="mt-8 max-w-2xl text-sm leading-relaxed text-mute">
-          As of {cabinet.asOf}. Totals count senior team trophies won with club and country; youth titles are listed
-          separately. Seasons follow each competition’s own naming.
+          As of {cabinet.asOf}. {cabinet.footnote}
         </p>
       </div>
     </section>

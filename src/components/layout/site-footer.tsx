@@ -9,7 +9,7 @@ const LINKS = [
   { href: "/debates", label: "Debates" },
   { href: "/leaderboard", label: "Leaderboard" },
   { href: "/results", label: "Results" },
-  { href: `/${getFeaturedDebate().slug}/trophies`, label: "Trophy cabinet" },
+  { href: "/trophies", label: "Trophy cabinets" },
   { href: "/#how-it-works", label: "How the vote works" },
   { href: "/privacy", label: "Privacy" },
 ];

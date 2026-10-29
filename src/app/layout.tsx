@@ -5,7 +5,9 @@ import { JsonLd } from "@/components/json-ld";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { ADSENSE_CLIENT, adsEnabled } from "@/lib/ads";
-import { absoluteUrl, getSiteUrl, SITE_DESCRIPTION, SITE_NAME } from "@/lib/site";
+import { DEBATES } from "@/lib/debates";
+import { siteKeywords } from "@/lib/seo-keywords";
+import { absoluteUrl, getSiteUrl, SITE_DESCRIPTION, SITE_DOMAIN, SITE_NAME } from "@/lib/site";
 import { voteTestMode } from "@/lib/test-mode";
 
 import { archivo } from "./fonts";
@@ -24,7 +26,17 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
+  keywords: siteKeywords(DEBATES),
   applicationName: SITE_NAME,
+  category: "sports",
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
+  // Let search engines show big image previews and full snippets (Google Discover needs large images).
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 },
+  },
   openGraph: { siteName: SITE_NAME, type: "website", locale: "en_US" },
   twitter: { card: "summary_large_image" },
   formatDetection: { telephone: false, email: false, address: false },
@@ -39,11 +51,26 @@ export const viewport: Viewport = {
 
 const websiteJsonLd = {
   "@context": "https://schema.org",
-  "@type": "WebSite",
-  name: SITE_NAME,
-  alternateName: "Who Is the GOATs",
-  url: absoluteUrl("/"),
-  description: SITE_DESCRIPTION,
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": absoluteUrl("/#website"),
+      name: SITE_NAME,
+      alternateName: ["Who Is the GOAT", "Who Is the GOATs", SITE_DOMAIN],
+      url: absoluteUrl("/"),
+      description: SITE_DESCRIPTION,
+      inLanguage: "en",
+      publisher: { "@id": absoluteUrl("/#organization") },
+    },
+    {
+      "@type": "Organization",
+      "@id": absoluteUrl("/#organization"),
+      name: SITE_NAME,
+      url: absoluteUrl("/"),
+      logo: absoluteUrl("/icon-512.png"),
+      slogan: "Who is the GOAT? The world decides.",
+    },
+  ],
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

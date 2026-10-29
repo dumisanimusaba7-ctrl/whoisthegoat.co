@@ -30,7 +30,8 @@ export async function generateMetadata({ params }: PageProps<"/[debate]/trophies
   const [a, b] = debate.options;
   const [ta, tb] = teamTotals(cabinet);
   const title = `${debate.title} Trophy Cabinet: Every Title Compared`;
-  const description = `${a.shortName} ${ta}, ${b.shortName} ${tb}: every team trophy, Ballon d’Or and record, side by side and counted season by season.`;
+  const highlights = cabinet.headline.slice(0, 3).map((row) => row.label).join(", ");
+  const description = `${a.name} ${ta}, ${b.name} ${tb} ${cabinet.totalLabel}. ${highlights} and every record, side by side and counted year by year.`;
   const image = debateOgImage(debate);
   return {
     title: { absolute: `${title} | ${SITE_NAME}` },

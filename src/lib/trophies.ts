@@ -6,6 +6,14 @@
  * Checked against club, federation and competition records, October 2026.
  */
 
+import { DRAKE_VS_KENDRICK } from "./cabinets/drake-vs-kendrick";
+import { HAMILTON_VS_VERSTAPPEN } from "./cabinets/hamilton-vs-verstappen";
+import { KHABIB_VS_MCGREGOR } from "./cabinets/khabib-vs-mcgregor";
+import { LEBRON_VS_JORDAN } from "./cabinets/lebron-vs-jordan";
+import { NEYMAR_VS_RONALDINHO } from "./cabinets/neymar-vs-ronaldinho";
+import { TYSON_VS_ALI } from "./cabinets/tyson-vs-ali";
+import { YAMAL_VS_MBAPPE } from "./cabinets/yamal-vs-mbappe";
+
 /** Which trophy silhouette to draw. */
 export type TrophyKind =
   | "champions-league"
@@ -20,7 +28,13 @@ export type TrophyKind =
   | "medal"
   | "ballon-dor"
   | "golden-shoe"
-  | "statuette";
+  | "statuette"
+  /** Boxing and MMA world-title belts. */
+  | "belt"
+  /** The Grammy's gramophone. */
+  | "gramophone"
+  /** A ball on a tall trophy, like the NBA's Larry O'Brien. */
+  | "basketball";
 
 export type Honour = {
   competition: string;
@@ -38,18 +52,49 @@ export type CabinetCategory = {
   honours: [Honour[], Honour[]];
 };
 
+/** A row in the cabinet's opening table: one category, or one competition across categories. */
+export type HeadlineRow = { label: string; kind: TrophyKind } & ({ category: string } | { competition: string });
+
 export type Cabinet = {
   asOf: string;
-  /** Senior team trophies: these make up each player's total. */
+  /** Under the big totals, e.g. "team trophies" or "world titles". */
+  totalLabel: string;
+  /** One line under the title. */
+  intro: string;
+  /** The counted section, e.g. "Team trophies", and a line about it. */
+  teamTitle: string;
+  teamBlurb: string;
+  individualTitle: string;
+  individualBlurb: string;
+  /** The opening table: the honours this debate turns on. */
+  headline: HeadlineRow[];
+  /** These make up each side's total. */
   team: CabinetCategory[];
-  /** Youth titles, listed but not counted in the total. */
-  youth: CabinetCategory;
+  /** Youth or amateur titles: listed, not counted in the total. */
+  youth?: CabinetCategory & { label: string };
   individual: CabinetCategory[];
   records: [string[], string[]];
+  /** Small print under the records. */
+  footnote: string;
 };
 
 const MESSI_VS_RONALDO: Cabinet = {
   asOf: "October 2026",
+  totalLabel: "team trophies",
+  intro: "Every team trophy and major individual award, side by side.",
+  teamTitle: "Team trophies",
+  teamBlurb: "Senior honours with club and country. These make up the totals.",
+  individualTitle: "Individual awards",
+  individualBlurb: "The game’s biggest awards for a single player.",
+  headline: [
+    { label: "Ballon d’Or", kind: "ballon-dor", category: "ballon-dor" },
+    { label: "Champions League", kind: "champions-league", category: "champions-league" },
+    { label: "World Cup", kind: "world-cup", competition: "FIFA World Cup" },
+    { label: "League titles", kind: "league", category: "league" },
+    { label: "International trophies", kind: "continental", category: "international" },
+  ],
+  footnote:
+    "Totals count senior team trophies won with club and country; youth titles are listed separately. Seasons follow each competition’s own naming.",
   team: [
     {
       id: "champions-league",
@@ -168,6 +213,7 @@ const MESSI_VS_RONALDO: Cabinet = {
   ],
   youth: {
     id: "youth",
+    label: "youth titles",
     title: "Youth titles",
     note: "Listed for completeness; not counted in the totals.",
     honours: [
@@ -239,6 +285,13 @@ const MESSI_VS_RONALDO: Cabinet = {
 
 const CABINETS: Record<string, Cabinet> = {
   "messi-vs-ronaldo": MESSI_VS_RONALDO,
+  "yamal-vs-mbappe": YAMAL_VS_MBAPPE,
+  "neymar-vs-ronaldinho": NEYMAR_VS_RONALDINHO,
+  "lebron-vs-jordan": LEBRON_VS_JORDAN,
+  "tyson-vs-ali": TYSON_VS_ALI,
+  "khabib-vs-mcgregor": KHABIB_VS_MCGREGOR,
+  "hamilton-vs-verstappen": HAMILTON_VS_VERSTAPPEN,
+  "drake-vs-kendrick": DRAKE_VS_KENDRICK,
 };
 
 export function getCabinet(debateSlug: string): Cabinet | undefined {
@@ -265,7 +318,7 @@ export function categoryCounts(category: CabinetCategory): [number, number] {
 }
 
 export function findCategory(cabinet: Cabinet, id: string): CabinetCategory | undefined {
-  return [...cabinet.team, cabinet.youth, ...cabinet.individual].find((category) => category.id === id);
+  return [...cabinet.team, ...(cabinet.youth ? [cabinet.youth] : []), ...cabinet.individual].find((category) => category.id === id);
 }
 
 /** How many times each side won one competition, across every category. */
@@ -276,6 +329,13 @@ export function competitionCounts(cabinet: Cabinet, competition: string): [numbe
       0,
     );
   return [count(0), count(1)];
+}
+
+/** Counts for one row of the opening table. */
+export function headlineCounts(cabinet: Cabinet, row: HeadlineRow): [number, number] {
+  if ("competition" in row) return competitionCounts(cabinet, row.competition);
+  const category = findCategory(cabinet, row.category);
+  return category ? categoryCounts(category) : [0, 0];
 }
 
 /** "2008–09" → "’09", "2022" → "’22". */

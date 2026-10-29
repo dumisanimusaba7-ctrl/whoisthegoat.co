@@ -13,7 +13,7 @@ export function SiteHeader() {
         <Link href="/" aria-label="WHOISTHEGOATS.COM home" className="-ml-1 flex items-center p-1">
           <LogoLockup />
         </Link>
-        <MainNav trophiesHref={`/${getFeaturedDebate().slug}/trophies`} />
+        <MainNav trophiesHref="/trophies" />
       </div>
     </header>
   );

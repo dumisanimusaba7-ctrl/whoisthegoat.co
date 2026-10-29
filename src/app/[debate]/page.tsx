@@ -8,7 +8,9 @@ import { DebateExperience } from "@/components/debate/debate-experience";
 import { HowItWorks } from "@/components/debate/how-it-works";
 import { MoreDebates } from "@/components/debate/more-debates";
 import { JsonLd } from "@/components/json-ld";
+import { FaqSection } from "@/components/seo/faq-section";
 import { DEBATES, getDebate } from "@/lib/debates";
+import { debateFaqs } from "@/lib/faq";
 import { breadcrumbJsonLd, debateJsonLd, debateMetadata } from "@/lib/seo";
 
 // Every real URL here is fully prerendered (ensureStatic in the root layout),
@@ -37,6 +39,7 @@ export default async function DebatePage({ params }: PageProps<"/[debate]">) {
         <AboutDebate debate={debate} />
         <MoreDebates current={debate.slug} />
         <AdSlot placement="editorial" className="border-t border-rule" />
+        <FaqSection title={`${debate.title}: your questions`} faqs={debateFaqs(debate)} />
         <HowItWorks />
         <JsonLd data={debateJsonLd(debate, `/${debate.slug}`)} />
         <JsonLd

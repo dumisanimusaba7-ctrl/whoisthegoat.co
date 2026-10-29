@@ -51,7 +51,7 @@ export const DRAKE_VS_KENDRICK: Debate = {
         "Drake has 14 Billboard Hot 100 No. 1s, the most by a male solo artist, after “Janice STFU” debuted at No. 1 on the chart dated 30 May 2026.",
         "In May 2026 he became the first artist to reach 400 Hot 100 entries and charted a record 42 songs in a single week.",
         "ICEMAN, HABIBTI and MAID OF HONOUR debuted at Nos. 1, 2 and 3 on the Billboard 200 in May 2026, the first time one artist has held the top three places, and ICEMAN became his 15th No. 1 album.",
-        "He has won 41 Billboard Music Awards, the most of any artist, and Billboard named him its Artist of the Decade for the 2010s.",
+        "He has won 42 Billboard Music Awards, the most won by a male artist, and Billboard named him its Artist of the Decade for the 2010s.",
       ],
     },
     {

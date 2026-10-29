@@ -14,7 +14,7 @@ export function MainNav({ trophiesHref }: { trophiesHref: string }) {
       short: "Leaders",
       match: (path: string) => path === "/leaderboard" || path === "/results" || path.endsWith("/results"),
     },
-    { href: trophiesHref, label: "Trophies", match: (path: string) => path.endsWith("/trophies") },
+    { href: trophiesHref, label: "Trophies", match: (path: string) => path === "/trophies" || path.endsWith("/trophies") },
   ];
   return (
     <nav aria-label="Main">
