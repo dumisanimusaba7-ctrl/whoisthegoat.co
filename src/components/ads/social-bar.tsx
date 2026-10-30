@@ -5,15 +5,15 @@ import { useEffect } from "react";
 import { ADSTERRA_SOCIAL_BAR } from "@/lib/adsterra";
 
 /**
- * Adsterra's Social Bar, kept light: never in someone's first 20 seconds (so
- * they can vote first), at most twice in any 30 minutes, and at least 10
- * minutes apart. The times it showed are kept in this browser, so the limits
+ * Adsterra's Social Bar, kept light: the first after 10 seconds (so people can
+ * start voting first), the second 3 minutes later, then none until 30 minutes
+ * have passed since the first. The times it showed are kept in this browser, so the limits
  * hold across pages and new tabs.
  */
-const FIRST_AFTER_MS = 20_000;
+const FIRST_AFTER_MS = 10_000;
 const WINDOW_MS = 30 * 60_000;
 const MAX_PER_WINDOW = 2;
-const MIN_GAP_MS = 10 * 60_000;
+const MIN_GAP_MS = 3 * 60_000;
 const STORAGE_KEY = "goat-social-bar";
 
 function readShown(now: number): number[] {

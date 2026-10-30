@@ -23,13 +23,13 @@ describe("socialBarUrl", () => {
 
 describe("socialBarWait", () => {
   const min = 60_000;
-  it("waits 20 seconds after arrival for the first one", () => {
-    expect(socialBarWait([], 1_000_000, 1_000_000)).toBe(20_000);
+  it("waits 10 seconds after arrival for the first one", () => {
+    expect(socialBarWait([], 1_000_000, 1_000_000)).toBe(10_000);
   });
-  it("keeps 10 minutes between showings", () => {
-    expect(socialBarWait([0], 4 * min, 0)).toBe(6 * min);
+  it("keeps 3 minutes between showings", () => {
+    expect(socialBarWait([0], 1 * min, 0)).toBe(2 * min);
   });
   it("stops after two in 30 minutes", () => {
-    expect(socialBarWait([0, 11 * min], 15 * min, 0)).toBeNull();
+    expect(socialBarWait([0, 3 * min], 15 * min, 0)).toBeNull();
   });
 });
