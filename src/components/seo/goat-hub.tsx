@@ -27,7 +27,7 @@ export function GoatHub() {
           </p>
           <p>
             Pick a debate, cast your vote, and see whether the world agrees with you. The{" "}
-            <Link href="/leaderboard" className="link font-semibold text-ink">
+            <Link prefetch={false} href="/leaderboard" className="link font-semibold text-ink">
               leaderboard
             </Link>{" "}
             shows who is ahead in each one.
@@ -41,7 +41,7 @@ export function GoatHub() {
               <ul className="mt-2 border-t-2 border-ink">
                 {debates.map((debate) => (
                   <li key={debate.slug} className="border-b border-rule py-3">
-                    <Link href={`/${debate.slug}`} className="font-semibold transition-opacity duration-[var(--duration-micro)] hover:opacity-70">
+                    <Link prefetch={false} href={`/${debate.slug}`} className="font-semibold transition-opacity duration-[var(--duration-micro)] hover:opacity-70">
                       {debate.title}: {debate.question}
                     </Link>
                     <p className="mt-1 text-sm text-mute">
@@ -49,7 +49,7 @@ export function GoatHub() {
                       {hasCabinet(debate.slug) ? (
                         <>
                           {" · "}
-                          <Link href={`/${debate.slug}/trophies`} className="link">
+                          <Link prefetch={false} href={`/${debate.slug}/trophies`} className="link">
                             Trophies compared
                           </Link>
                         </>

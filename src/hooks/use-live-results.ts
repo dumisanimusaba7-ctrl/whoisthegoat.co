@@ -4,8 +4,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { newerResults, parseResults, withTotals, type DebateResults, type OptionTally } from "@/lib/results";
 
-const POLL_MS = 5_000;
+// Every poll is a request against the host's monthly allowance, so: only while
+// the numbers are on screen, every 15 seconds, and only for the first five
+// minutes of a visit (it picks up again whenever the tab comes back).
+const POLL_MS = 15_000;
 const MAX_BACKOFF_MS = 60_000;
+const POLL_FOR_MS = 5 * 60_000;
 
 type LiveResults = {
   results: DebateResults | null;
@@ -16,10 +20,11 @@ type LiveResults = {
 };
 
 /**
- * Keeps results live by polling the edge-cached results API while the page
- * is visible. Counts never move backwards: a stale cache hit is ignored.
+ * Keeps results live by polling the edge-cached results API while `active`
+ * (the numbers are showing) and the page is visible. Counts never move
+ * backwards: a stale cache hit is ignored.
  */
-export function useLiveResults(debateSlug: string, initial: DebateResults | null): LiveResults {
+export function useLiveResults(debateSlug: string, initial: DebateResults | null, active: boolean): LiveResults {
   const [results, setResults] = useState<DebateResults | null>(initial);
   const [failed, setFailed] = useState(false);
   const failures = useRef(0);
@@ -32,13 +37,15 @@ export function useLiveResults(debateSlug: string, initial: DebateResults | null
   );
 
   useEffect(() => {
+    if (!active) return;
     let timer: ReturnType<typeof setTimeout> | undefined;
     let controller: AbortController | undefined;
     let stopped = false;
+    let until = Date.now() + POLL_FOR_MS;
 
     const schedule = (delay: number) => {
       clearTimeout(timer);
-      if (!stopped && document.visibilityState === "visible") timer = setTimeout(poll, delay);
+      if (!stopped && document.visibilityState === "visible" && Date.now() < until) timer = setTimeout(poll, delay);
     };
 
     async function poll() {
@@ -62,8 +69,10 @@ export function useLiveResults(debateSlug: string, initial: DebateResults | null
     }
 
     const onVisibility = () => {
-      if (document.visibilityState === "visible") schedule(0);
-      else clearTimeout(timer);
+      if (document.visibilityState === "visible") {
+        until = Date.now() + POLL_FOR_MS;
+        schedule(0);
+      } else clearTimeout(timer);
     };
 
     // Refresh straight away: the server-rendered snapshot may be a little old.
@@ -75,7 +84,7 @@ export function useLiveResults(debateSlug: string, initial: DebateResults | null
       controller?.abort();
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [debateSlug]);
+  }, [debateSlug, active]);
 
   return { results, unavailable: failed && !results, applyTotals };
 }

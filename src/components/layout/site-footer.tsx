@@ -20,7 +20,7 @@ export function SiteFooter() {
       <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
         <div className="flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
           <div>
-            <Link href="/" aria-label="WHOISTHEGOATS.COM home" className="inline-flex flex-col gap-4">
+            <Link prefetch={false} href="/" aria-label="WHOISTHEGOATS.COM home" className="inline-flex flex-col gap-4">
               <LogoMark className="h-14 w-auto self-start" />
               <LogoWordmark className="h-6 w-auto" />
             </Link>
@@ -30,7 +30,7 @@ export function SiteFooter() {
             <ul className="flex flex-wrap gap-x-6">
               {LINKS.map((link) => (
                 <li key={link.href}>
-                  <Link
+                  <Link prefetch={false}
                     href={link.href}
                     className="inline-flex min-h-11 items-center text-sm font-medium text-white/65 transition-colors duration-[var(--duration-micro)] hover:text-white"
                   >

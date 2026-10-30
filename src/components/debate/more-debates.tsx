@@ -2,7 +2,10 @@ import Link from "next/link";
 
 import { CATEGORY_LABELS, DEBATES } from "@/lib/debates";
 
-/** The other open debates, one tap away. */
+/**
+ * The other open debates, one tap away. Not preloaded: a dozen links scrolled
+ * past would each cost a request, and the pages are static, so they open fast anyway.
+ */
 export function MoreDebates({ current }: { current: string }) {
   const others = DEBATES.filter((debate) => debate.slug !== current);
   return (
@@ -12,14 +15,14 @@ export function MoreDebates({ current }: { current: string }) {
           <h2 id="more-debates-title" className="type-title">
             More debates
           </h2>
-          <Link href="/debates" className="link text-sm font-semibold">
+          <Link prefetch={false} href="/debates" className="link text-sm font-semibold">
             All debates
           </Link>
         </div>
         <ul className="mt-6 grid gap-x-10 border-t-2 border-ink sm:grid-cols-2 lg:grid-cols-3">
           {others.map((debate) => (
             <li key={debate.slug} className="border-b border-rule">
-              <Link
+              <Link prefetch={false}
                 href={`/${debate.slug}`}
                 className="group flex min-h-14 items-baseline justify-between gap-4 py-3.5 transition-opacity duration-[var(--duration-micro)] hover:opacity-70"
               >

@@ -86,15 +86,19 @@ export function DebateProvider({
   debate,
   siteUrl,
   initialResults,
+  liveBeforeVote = false,
   children,
 }: {
   debate: Debate;
   siteUrl: string;
   initialResults: DebateResults | null;
+  /** Keep the numbers live even before a vote (pages that show them up front). */
+  liveBeforeVote?: boolean;
   children: ReactNode;
 }) {
-  const { results, unavailable, applyTotals } = useLiveResults(debate.slug, initialResults);
   const [vote, setVote] = useState<VoteState>(INITIAL_VOTE);
+  // Before a vote the split is hidden, so there's nothing to keep live.
+  const { results, unavailable, applyTotals } = useLiveResults(debate.slug, initialResults, liveBeforeVote || vote.phase === "voted");
 
   useEffect(() => {
     // Test mode always opens on the vote buttons.

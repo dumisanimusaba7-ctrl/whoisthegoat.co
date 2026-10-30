@@ -45,7 +45,7 @@ export default async function DebateResultsPage({ params }: PageProps<"/[debate]
   return (
     <ViewTransition enter="page" exit="page" default="none">
       <div>
-        <DebateProvider debate={debate} siteUrl={getSiteUrl().origin} initialResults={results}>
+        <DebateProvider debate={debate} siteUrl={getSiteUrl().origin} initialResults={results} liveBeforeVote>
           <ResultsView />
         </DebateProvider>
         <AdSlot placement="results" kind="native" className="border-t border-rule" />

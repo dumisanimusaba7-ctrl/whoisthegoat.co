@@ -38,13 +38,17 @@ export async function readJsonBody(request: Request, maxBytes = 1024): Promise<u
 }
 
 /**
- * CDN cache headers for public, frequently changing responses. Browsers
- * always revalidate; the edge serves a shared copy for `edgeSeconds` and may
- * keep serving it while refreshing in the background.
+ * CDN cache headers for public, frequently changing responses. The CDN
+ * (Vercel, Netlify, Cloudflare all read CDN-Cache-Control) serves a shared
+ * copy for `edgeSeconds` and may keep serving it while refreshing in the
+ * background. Browsers get plain revalidation: given stale-while-revalidate
+ * themselves, they fire a second background request for every fetch, and on a
+ * plan priced by requests that doubles the cost of each live-results refresh.
  */
 export function edgeCacheHeaders(edgeSeconds: number, staleSeconds: number): Record<string, string> {
   return {
-    "Cache-Control": `public, max-age=0, s-maxage=${edgeSeconds}, stale-while-revalidate=${staleSeconds}`,
+    "Cache-Control": "public, max-age=0, must-revalidate",
+    "CDN-Cache-Control": `public, max-age=${edgeSeconds}, stale-while-revalidate=${staleSeconds}`,
   };
 }
 
