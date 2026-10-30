@@ -9,6 +9,10 @@
 import type { CarState, Livery } from "./car";
 import type { FigureEffects, FigureProp, Kit } from "./figure";
 import {
+  AIR_PUNCH,
+  AIR_PUNCH_LAND,
+  FISTS_DOWN,
+  FISTS_UP,
   ALI_GUARD,
   ARMS_CROSSED,
   boxerStep,
@@ -76,7 +80,9 @@ export type FigureCelebration =
   | "hotline"
   | "mic-drop"
   | "flight"
-  | "web-swing";
+  | "web-swing"
+  | "air-punch"
+  | "fist-pump";
 export type CarCelebration = "doughnut" | "burnout";
 export type PhoneCelebration = "unfold" | "wake";
 export type ShoeCelebration = "swoosh" | "stripes";
@@ -112,6 +118,8 @@ const TIMING: Record<FigureCelebration | CarCelebration | PhoneCelebration | Sho
   "mic-drop": { arrive: 1100, end: 2400 },
   flight: { arrive: 1100, end: 2100 },
   "web-swing": { arrive: 1100, end: 1900 },
+  "air-punch": { arrive: 1000, end: 2100 },
+  "fist-pump": { arrive: 1000, end: 2200 },
   doughnut: { arrive: 1100, end: 2500 },
   burnout: { arrive: 1100, end: 2400 },
   unfold: { arrive: 1000, end: 1800 },
@@ -530,6 +538,49 @@ const FIGURES: Record<Exclude<FigureCelebration, "siu" | "knee-slide">, FigureSp
       ),
     }),
     final: grounded(SKY_FINGER),
+  },
+
+  /** Pelé: a run, a crouch, then the leap with his fist punched at the sky. */
+  "air-punch": {
+    approach: "run",
+    after: (s, from) => {
+      const GATHER = 160;
+      const AIR = 440;
+      if (s < GATHER) return { pose: grounded(through(from, [{ ms: GATHER, to: JUMP_GATHER, ease: easeOutCubic }], s)) };
+      if (s < GATHER + AIR) {
+        const u = (s - GATHER) / AIR;
+        const pose = grounded(mixPose(JUMP_GATHER, AIR_PUNCH, easeOutCubic(Math.min(1, u / 0.4))));
+        return { pose: { ...pose, y: pose.y - 34 * 4 * u * (1 - u) } };
+      }
+      const l = s - GATHER - AIR;
+      const impact = 1 - easeOutCubic(clamp01(l / 160));
+      const pose = grounded(through(AIR_PUNCH, [{ ms: 120, to: AIR_PUNCH_LAND, ease: easeOutCubic }], l));
+      return { pose: { ...pose, squash: 1 - 0.06 * impact }, effects: { dust: during(s, GATHER + AIR, 380) } };
+    },
+    final: grounded(AIR_PUNCH_LAND),
+  },
+
+  /** Diego Maradona, Mexico 1986: fists pulled down in a roar, then thrown up, twice. */
+  "fist-pump": {
+    approach: "run",
+    after: (s, from) => {
+      const pose = grounded(
+        through(
+          from,
+          [
+            { ms: 140, to: PLANT, ease: easeOutCubic },
+            { ms: 200, to: FISTS_DOWN, ease: easeOutCubic },
+            { ms: 220, to: FISTS_UP, ease: back(1.3) },
+            { ms: 180, to: FISTS_DOWN, ease: easeInOutCubic },
+            { ms: 240, to: FISTS_UP, ease: back(1.4) },
+          ],
+          s,
+        ),
+      );
+      const shake = s > 980 ? 2.5 * Math.sin((s - 980) / 40) * Math.exp(-(s - 980) / 260) : 0;
+      return { pose: { ...pose, head: pose.head + shake } };
+    },
+    final: grounded(FISTS_UP),
   },
 
   /** Conor McGregor: the billionaire strut, turned to show the back. */

@@ -71,7 +71,8 @@ data as (
             (8, 'drake-vs-kendrick', 'drake, kendrick'),
             (9, 'dc-vs-marvel', 'dc, marvel'),
             (10, 'samsung-vs-apple', 'samsung, apple'),
-            (11, 'nike-vs-adidas', 'nike, adidas')
+            (11, 'nike-vs-adidas', 'nike, adidas'),
+            (12, 'pele-vs-maradona', 'pele, maradona')
           ) as e (ord, slug, options)
          where coalesce((select status from public.debates d where d.slug = e.slug), '') <> 'live'
             or coalesce((select string_agg(o.slug, ', ' order by o.position)
@@ -150,7 +151,7 @@ checks (step, item, status, detail) as (
              then 'Missing or not live: ' || debates_not_ready || '. Run the setup script, then supabase/migrations/20261022120000_all_debates.sql.'
            when debates_not_ready is not null
              then 'Missing or not live: ' || debates_not_ready || '. Run supabase/migrations/20261022120000_all_debates.sql.'
-           else 'All 11 debates are live, each with its two options.'
+           else 'All 12 debates are live, each with its two options.'
          end
     from data
   union all

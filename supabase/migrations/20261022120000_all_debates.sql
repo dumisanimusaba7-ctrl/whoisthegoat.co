@@ -1,5 +1,5 @@
 -- ============================================================================
--- WHOISTHEGOATS.COM — update: every debate on the site, including Nike vs Adidas
+-- WHOISTHEGOATS.COM — update: every debate on the site, including Pelé vs Maradona
 --
 -- Run in Supabase → SQL Editor after 20261008120000_voting.sql. It adds any
 -- debate or option that's missing and leaves everything else as it is (votes,
@@ -10,6 +10,7 @@
 insert into public.debates (slug, title, sport, status, opened_at)
 values
   ('messi-vs-ronaldo', 'Messi vs Ronaldo', 'football', 'live', now()),
+  ('pele-vs-maradona', 'Pelé vs Maradona', 'football', 'live', now()),
   ('yamal-vs-mbappe', 'Yamal vs Mbappé', 'football', 'live', now()),
   ('lebron-vs-jordan', 'LeBron vs Jordan', 'basketball', 'live', now()),
   ('tyson-vs-ali', 'Tyson vs Ali', 'boxing', 'live', now()),
@@ -27,6 +28,8 @@ select d.id, o.slug, o.name, o.position
 from (values
   ('messi-vs-ronaldo', 'messi', 'Lionel Messi', 1),
   ('messi-vs-ronaldo', 'ronaldo', 'Cristiano Ronaldo', 2),
+  ('pele-vs-maradona', 'pele', 'Pelé', 1),
+  ('pele-vs-maradona', 'maradona', 'Diego Maradona', 2),
   ('yamal-vs-mbappe', 'yamal', 'Lamine Yamal', 1),
   ('yamal-vs-mbappe', 'mbappe', 'Kylian Mbappé', 2),
   ('lebron-vs-jordan', 'lebron', 'LeBron James', 1),

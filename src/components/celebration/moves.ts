@@ -113,3 +113,15 @@ export function boxerStep(phase: number): Pose {
   const s = Math.sin(phase);
   return { ...GUARD, hipN: GUARD.hipN + 9 * s, hipF: GUARD.hipF - 9 * s, kneeN: GUARD.kneeN + 4 * Math.abs(s), kneeF: GUARD.kneeF + 4 * Math.abs(s) };
 }
+
+/** Pelé, mid-leap: right fist punched at the sky, knees tucked. */
+export const AIR_PUNCH = pose({ lean: -4, head: -14, hipN: 46, kneeN: 70, hipF: 10, kneeF: 64, ankleN: 14, ankleF: 18, shoulderN: 174, elbowN: 6, shoulderF: 20, elbowF: 96 });
+
+/** Pelé landing, fist still up. */
+export const AIR_PUNCH_LAND = pose({ lean: 6, head: -8, hipN: 18, kneeN: 22, hipF: -10, kneeF: 18, shoulderN: 168, elbowN: 10, shoulderF: 16, elbowF: 70 });
+
+/** Maradona, 1986: both fists clenched and pulled down to the chest, a roar. */
+export const FISTS_DOWN = pose({ lean: 10, head: -16, hipN: 16, kneeN: 22, hipF: -14, kneeF: 18, shoulderN: 40, elbowN: 128, shoulderF: 30, elbowF: 132 });
+
+/** Maradona: both fists thrown up. */
+export const FISTS_UP = pose({ lean: -6, head: -18, hipN: 8, kneeN: 6, hipF: -8, kneeF: 6, shoulderN: 160, elbowN: 34, shoulderF: 150, elbowF: 40 });

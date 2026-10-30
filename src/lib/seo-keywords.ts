@@ -27,6 +27,8 @@ export const GOAT_PHRASES = [
 /** Names fans also search by, for the people and brands on the site. */
 const ALSO_KNOWN_AS: Record<string, string[]> = {
   messi: ["Leo Messi", "Messi GOAT", "La Pulga"],
+  pele: ["Pele", "Edson Arantes do Nascimento", "O Rei", "The King of Football", "Pelé GOAT"],
+  maradona: ["Diego Armando Maradona", "El Pibe de Oro", "Hand of God", "Maradona GOAT"],
   ronaldo: ["Cristiano", "CR7", "Ronaldo GOAT"],
   yamal: ["Lamine Yamal Nasraoui Ebana", "Yamal Barcelona"],
   mbappe: ["Kylian Mbappe", "Mbappe", "Mbappé Real Madrid"],
