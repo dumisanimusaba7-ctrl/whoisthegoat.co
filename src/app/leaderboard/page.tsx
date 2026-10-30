@@ -35,6 +35,7 @@ export default function LeaderboardPage() {
               <Fragment key={category}>
                 {/* A break in the sports list, half way down. */}
                 {index === 4 ? <AdSlot placement="editorial" kind="native" className="-mt-4 mb-12 !px-0 sm:mb-16" /> : null}
+                {index === 2 || index === 7 ? <AdSlot placement="editorial" kind="bar" className="-mt-4 mb-12 !px-0 sm:mb-16" /> : null}
               <section aria-labelledby={`lb-${category}`} className="mb-12 last:mb-0 sm:mb-16">
                 <h2 id={`lb-${category}`} className="type-display border-t-2 border-ink pt-4 text-4xl sm:text-5xl">
                   {CATEGORY_LABELS[category]}

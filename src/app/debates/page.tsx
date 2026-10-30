@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ViewTransition } from "react";
+import { Fragment, ViewTransition } from "react";
 
 import { AdSlot } from "@/components/ads/ad-slot";
 import { PageHero } from "@/components/layout/page-hero";
@@ -22,8 +22,15 @@ export default function DebatesPage() {
         <div className="bg-paper">
           <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
             <ul className="border-t-2 border-ink">
-              {DEBATES.map((debate) => (
-                <DebateRow key={debate.slug} debate={debate} />
+              {DEBATES.map((debate, index) => (
+                <Fragment key={debate.slug}>
+                  <DebateRow debate={debate} />
+                  {index === 3 || index === 7 ? (
+                    <li className="list-none border-b border-rule">
+                      <AdSlot placement="editorial" kind="bar" className="!px-0 !py-4" />
+                    </li>
+                  ) : null}
+                </Fragment>
               ))}
             </ul>
 

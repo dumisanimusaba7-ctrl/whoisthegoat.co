@@ -161,8 +161,9 @@ country header (`x-vercel-ip-country` or `cf-ipcountry`).
 Adsterra's native banner and 728×90 / 300×250 display banners are placed
 between content sections on every page and never beside the vote buttons
 (`src/components/ads/ad-slot.tsx`; units and keys in `src/lib/adsterra.ts`).
-Each ad loads in its own frame as it nears the screen, so ads can't slow the vote
-or affect each other. Phones get the 300×250, screens 800px and wider the
+Each ad loads as it nears the screen, so ads can't slow the vote, and banners load
+one at a time so their settings never collide. Only one native banner can be on a
+page (it fills a fixed element id); other native spaces show a display banner. Phones get the 300×250, screens 800px and wider the
 728×90; only one is ever loaded. Set `NEXT_PUBLIC_ADSTERRA_DISABLED=1` to turn
 them all off. Don't click your own ads: Adsterra bans accounts for it.
 

@@ -26,6 +26,9 @@ export function TrophyCabinet({ debate, cabinet }: { debate: Debate; cabinet: Ca
     <>
       <TrophySprite />
       <Hero debate={debate} cabinet={cabinet} />
+      <div className="bg-paper">
+        <AdSlot placement="editorial" kind="bar" className="!py-4" />
+      </div>
 
       <section aria-labelledby="team-title" className="bg-ink text-white">
         <div className="mx-auto max-w-6xl px-4 pb-6 pt-14 sm:px-6 sm:pt-20">

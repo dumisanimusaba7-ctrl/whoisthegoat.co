@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { ADSENSE_CLIENT, AD_SLOTS, adsEnabled, type AdPlacement } from "@/lib/ads";
 import { adsterraEnabled } from "@/lib/adsterra";
 
-import { AdsterraBannerUnit, AdsterraNativeUnit } from "./adsterra-unit";
+import { AdsterraBannerUnit, AdsterraBarUnit, AdsterraNativeUnit } from "./adsterra-unit";
 
 declare global {
   interface Window {
@@ -16,8 +16,9 @@ declare global {
 /**
  * A clearly labelled ad space, only ever placed away from the vote buttons.
  * Google AdSense fills it when configured for this placement (ads.ts);
- * otherwise Adsterra does: a `native` banner or a display `banner` (728×90 on
- * wide screens, 300×250 on phones). Renders nothing if neither is on.
+ * otherwise Adsterra does: a `native` banner, a display `banner` (728×90 on
+ * wide screens, 300×250 on phones) or a slim `bar` (728×90 / 320×50).
+ * Renders nothing if neither is on.
  */
 export function AdSlot({
   placement,
@@ -25,7 +26,7 @@ export function AdSlot({
   className = "",
 }: {
   placement: AdPlacement;
-  kind?: "banner" | "native";
+  kind?: "banner" | "native" | "bar";
   className?: string;
 }) {
   const adsense = adsEnabled() && Boolean(AD_SLOTS[placement]);
@@ -34,7 +35,15 @@ export function AdSlot({
   return (
     <aside aria-label="Advertisement" className={`mx-auto max-w-6xl px-4 py-8 sm:px-6 ${className}`}>
       <p className="mb-2 text-center text-xs text-mute">Advertisement</p>
-      {adsense ? <AdSenseUnit slot={AD_SLOTS[placement]} /> : kind === "native" ? <AdsterraNativeUnit /> : <AdsterraBannerUnit />}
+      {adsense ? (
+        <AdSenseUnit slot={AD_SLOTS[placement]} />
+      ) : kind === "native" ? (
+        <AdsterraNativeUnit />
+      ) : kind === "bar" ? (
+        <AdsterraBarUnit />
+      ) : (
+        <AdsterraBannerUnit />
+      )}
     </aside>
   );
 }

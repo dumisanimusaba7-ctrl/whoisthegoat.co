@@ -31,6 +31,7 @@ export default function HomePage() {
         <FaqSection title="Who is the GOAT? Your questions" faqs={[GOAT_MEANING, ...debateFaqs(debate)]} />
         <AdSlot placement="editorial" className="border-t border-rule" />
         <HowItWorks />
+        <AdSlot placement="editorial" kind="bar" className="border-t border-rule" />
         <JsonLd data={debateJsonLd(debate, "/")} />
       </div>
     </ViewTransition>

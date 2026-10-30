@@ -70,8 +70,8 @@ export default function PrivacyPage() {
                 </li>
                 <li>
                   <strong>Adsterra</strong> shows ads on most pages. Its ads are loaded from Adsterra’s servers, which
-                  can use cookies and your device and connection details to choose and measure ads. Ads sit in
-                  separate frames and never see your vote.
+                  can use cookies and your device and connection details to choose and measure ads. Your vote is
+                  never shared with it.
                 </li>
                 <li>
                   <strong>Google AdSense</strong> may show ads on some pages. Google and its partners can use cookies to
