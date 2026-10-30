@@ -48,8 +48,9 @@ export default async function DebateResultsPage({ params }: PageProps<"/[debate]
         <DebateProvider debate={debate} siteUrl={getSiteUrl().origin} initialResults={results}>
           <ResultsView />
         </DebateProvider>
-        <AdSlot placement="results" className="border-t border-rule" />
+        <AdSlot placement="results" kind="native" className="border-t border-rule" />
         <HowItWorks />
+        <AdSlot placement="results" className="border-t border-rule" />
         <JsonLd
           data={breadcrumbJsonLd([
             { name: "Results", path: "/results" },

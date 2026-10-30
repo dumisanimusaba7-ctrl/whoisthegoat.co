@@ -37,9 +37,11 @@ export default async function DebatePage({ params }: PageProps<"/[debate]">) {
       <div>
         <DebateExperience debate={debate} />
         <AboutDebate debate={debate} />
-        <MoreDebates current={debate.slug} />
         <AdSlot placement="editorial" className="border-t border-rule" />
+        <MoreDebates current={debate.slug} />
+        <AdSlot placement="editorial" kind="native" className="border-t border-rule" />
         <FaqSection title={`${debate.title}: your questions`} faqs={debateFaqs(debate)} />
+        <AdSlot placement="editorial" className="border-t border-rule" />
         <HowItWorks />
         <JsonLd data={debateJsonLd(debate, `/${debate.slug}`)} />
         <JsonLd

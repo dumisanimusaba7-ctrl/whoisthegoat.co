@@ -25,9 +25,11 @@ export default function HomePage() {
       <div>
         <DebateExperience debate={debate} />
         <AboutDebate debate={debate} />
-        <GoatHub />
         <AdSlot placement="editorial" className="border-t border-rule" />
+        <GoatHub />
+        <AdSlot placement="editorial" kind="native" className="border-t border-rule" />
         <FaqSection title="Who is the GOAT? Your questions" faqs={[GOAT_MEANING, ...debateFaqs(debate)]} />
+        <AdSlot placement="editorial" className="border-t border-rule" />
         <HowItWorks />
         <JsonLd data={debateJsonLd(debate, "/")} />
       </div>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ViewTransition } from "react";
 
+import { AdSlot } from "@/components/ads/ad-slot";
 import { PageHero } from "@/components/layout/page-hero";
 import { DEBATES, CATEGORY_LABELS, UPCOMING_DEBATES, type Debate } from "@/lib/debates";
 
@@ -25,6 +26,8 @@ export default function DebatesPage() {
                 <DebateRow key={debate.slug} debate={debate} />
               ))}
             </ul>
+
+            <AdSlot placement="editorial" className="!px-0" />
 
             <section aria-labelledby="upcoming-title" className="mt-16 sm:mt-20">
               <h2 id="upcoming-title" className="type-title">

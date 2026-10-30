@@ -69,6 +69,11 @@ export default function PrivacyPage() {
                   <strong>Supabase</strong> hosts the vote database described above.
                 </li>
                 <li>
+                  <strong>Adsterra</strong> shows ads on most pages. Its ads are loaded from Adsterra’s servers, which
+                  can use cookies and your device and connection details to choose and measure ads. Ads sit in
+                  separate frames and never see your vote.
+                </li>
+                <li>
                   <strong>Google AdSense</strong> may show ads on some pages. Google and its partners can use cookies to
                   serve and measure ads. Where the law requires it, you’ll be asked for consent first, and you can
                   manage personalised ads at{" "}

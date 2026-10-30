@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
 
+import { AdSlot } from "@/components/ads/ad-slot";
 import { AnimatedNumber } from "@/components/ui/animated-number";
 import type { Debate, DebateOption } from "@/lib/debates";
 import {
@@ -38,7 +39,11 @@ export function TrophyCabinet({ debate, cabinet }: { debate: Debate; cabinet: Ca
         </div>
       </section>
 
-      <section aria-labelledby="awards-title" className="border-t border-white/10 bg-ink-2 text-white">
+      <div className="bg-paper">
+        <AdSlot placement="editorial" />
+      </div>
+
+      <section aria-labelledby="awards-title" className="bg-ink-2 text-white">
         <div className="mx-auto max-w-6xl px-4 pb-6 pt-14 sm:px-6 sm:pt-20">
           <SectionHeading id="awards-title" title={cabinet.individualTitle}>
             {cabinet.individualBlurb}
@@ -50,6 +55,10 @@ export function TrophyCabinet({ debate, cabinet }: { debate: Debate; cabinet: Ca
       </section>
 
       <Records debate={debate} cabinet={cabinet} />
+
+      <div className="border-t border-rule bg-paper">
+        <AdSlot placement="editorial" kind="native" />
+      </div>
 
       <section className="bg-ink text-white">
         <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-14 sm:flex-row sm:items-center sm:justify-between sm:px-6">

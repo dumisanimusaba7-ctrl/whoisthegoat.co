@@ -156,7 +156,20 @@ Vercel supplies the visitor IP and country headers the vote API relies on. On an
 host, make sure the proxy overwrites `x-real-ip` / `x-forwarded-for` and provides a
 country header (`x-vercel-ip-country` or `cf-ipcountry`).
 
+## Adsterra
+
+Adsterra's native banner and 728×90 / 300×250 display banners are placed
+between content sections on every page and never beside the vote buttons
+(`src/components/ads/ad-slot.tsx`; units and keys in `src/lib/adsterra.ts`).
+Each ad loads in its own frame as it nears the screen, so ads can't slow the vote
+or affect each other. Phones get the 300×250, screens 800px and wider the
+728×90; only one is ever loaded. Set `NEXT_PUBLIC_ADSTERRA_DISABLED=1` to turn
+them all off. Don't click your own ads: Adsterra bans accounts for it.
+
 ## Google AdSense
+
+AdSense takes over any placement that has an AdSense slot id; the rest keep
+showing Adsterra.
 
 1. Apply for AdSense with the domain. Once approved, set `NEXT_PUBLIC_ADSENSE_CLIENT`
    (adds the AdSense script, the `google-adsense-account` meta tag and `/ads.txt`).

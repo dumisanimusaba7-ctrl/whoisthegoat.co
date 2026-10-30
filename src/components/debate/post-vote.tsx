@@ -14,6 +14,7 @@ export function PostVote() {
   return (
     <div className={vote.revealedNow ? "animate-enter" : undefined}>
       <SharePanel />
+      <AdSlot placement="results" className="border-t border-rule" />
       <div className="border-t border-rule bg-paper">
         <CountryBreakdown
           debate={debate}
@@ -24,7 +25,7 @@ export function PostVote() {
           showFullResultsLink
         />
       </div>
-      <AdSlot placement="results" className="border-t border-rule" />
+      <AdSlot placement="results" kind="native" className="border-t border-rule" />
     </div>
   );
 }

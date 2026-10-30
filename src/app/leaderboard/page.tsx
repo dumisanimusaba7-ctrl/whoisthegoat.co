@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ViewTransition } from "react";
+import { Fragment, ViewTransition } from "react";
 
+import { AdSlot } from "@/components/ads/ad-slot";
 import { PageHero } from "@/components/layout/page-hero";
 import { CARD_PHOTOS } from "@/lib/card-photos";
 import { CATEGORY_LABELS, DEBATES, type Debate, type DebateOption } from "@/lib/debates";
@@ -30,8 +31,11 @@ export default function LeaderboardPage() {
         <PageHero title="Leaderboard">Who the world has put in front, sport by sport, and by how much.</PageHero>
         <div className="bg-paper">
           <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
-            {sections().map(([category, debates]) => (
-              <section key={category} aria-labelledby={`lb-${category}`} className="mb-12 last:mb-0 sm:mb-16">
+            {sections().map(([category, debates], index) => (
+              <Fragment key={category}>
+                {/* A break in the sports list, half way down. */}
+                {index === 4 ? <AdSlot placement="editorial" kind="native" className="-mt-4 mb-12 !px-0 sm:mb-16" /> : null}
+              <section aria-labelledby={`lb-${category}`} className="mb-12 last:mb-0 sm:mb-16">
                 <h2 id={`lb-${category}`} className="type-display border-t-2 border-ink pt-4 text-4xl sm:text-5xl">
                   {CATEGORY_LABELS[category]}
                 </h2>
@@ -41,9 +45,11 @@ export default function LeaderboardPage() {
                   ))}
                 </ul>
               </section>
+              </Fragment>
             ))}
           </div>
         </div>
+        <AdSlot placement="editorial" className="border-t border-rule" />
       </div>
     </ViewTransition>
   );

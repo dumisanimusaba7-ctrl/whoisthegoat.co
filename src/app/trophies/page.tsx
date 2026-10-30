@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ViewTransition, type CSSProperties } from "react";
 
+import { AdSlot } from "@/components/ads/ad-slot";
 import { PageHero } from "@/components/layout/page-hero";
 import { TrophyIcon, TrophySprite } from "@/components/trophies/trophy-art";
 import { CATEGORY_LABELS, DEBATES } from "@/lib/debates";
@@ -56,6 +57,9 @@ export default function TrophiesIndexPage() {
               );
             })}
           </ul>
+        </div>
+        <div className="bg-paper">
+          <AdSlot placement="editorial" kind="native" />
         </div>
       </div>
     </ViewTransition>

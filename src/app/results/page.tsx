@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ViewTransition } from "react";
+import { Fragment, ViewTransition } from "react";
 
+import { AdSlot } from "@/components/ads/ad-slot";
 import { ResultBars } from "@/components/debate/result-bars";
 import { PageHero } from "@/components/layout/page-hero";
 import { DEBATES, CATEGORY_LABELS, type Debate } from "@/lib/debates";
@@ -22,11 +23,20 @@ export default function ResultsIndexPage() {
         <PageHero title="Results">Where every debate stands. Open one for the country-by-country split.</PageHero>
         <div className="bg-paper">
           <ul className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
-            {DEBATES.map((debate) => (
-              <ResultRow key={debate.slug} debate={debate} />
+            {DEBATES.map((debate, index) => (
+              <Fragment key={debate.slug}>
+                <ResultRow debate={debate} />
+                {/* An ad after every fourth debate, between the rows. */}
+                {(index + 1) % 4 === 0 && index < DEBATES.length - 1 ? (
+                  <li className="list-none">
+                    <AdSlot placement="results" kind={index === 3 ? "native" : "banner"} className="!px-0" />
+                  </li>
+                ) : null}
+              </Fragment>
             ))}
           </ul>
         </div>
+        <AdSlot placement="results" className="border-t border-rule" />
       </div>
     </ViewTransition>
   );
