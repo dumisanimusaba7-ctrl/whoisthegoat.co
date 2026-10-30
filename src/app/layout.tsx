@@ -4,10 +4,11 @@ import { Analytics } from "@vercel/analytics/next";
 
 import { JsonLd } from "@/components/json-ld";
 import { SiteFooter } from "@/components/layout/site-footer";
+import { SocialBar } from "@/components/ads/social-bar";
 import { TopAdBar } from "@/components/ads/top-bar";
 import { SiteHeader } from "@/components/layout/site-header";
 import { ADSENSE_CLIENT, adsEnabled } from "@/lib/ads";
-import { ADSTERRA_ORIGIN, adsterraEnabled } from "@/lib/adsterra";
+import { ADSTERRA_ORIGIN, ADSTERRA_SOCIAL_BAR, adsterraEnabled } from "@/lib/adsterra";
 import { DEBATES } from "@/lib/debates";
 import { siteKeywords } from "@/lib/seo-keywords";
 import { absoluteUrl, getSiteUrl, SITE_DESCRIPTION, SITE_DOMAIN, SITE_NAME } from "@/lib/site";
@@ -106,6 +107,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SiteFooter />
         <JsonLd data={websiteJsonLd} />
         <Analytics />
+        {adsterraEnabled && ADSTERRA_SOCIAL_BAR ? <SocialBar /> : null}
         {adsEnabled() ? (
           <Script
             id="adsense"

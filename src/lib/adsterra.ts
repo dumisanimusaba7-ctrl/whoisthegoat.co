@@ -9,6 +9,20 @@ export const adsterraEnabled = process.env.NEXT_PUBLIC_ADSTERRA_DISABLED !== "1"
 /** Where every Adsterra script is served from. */
 export const ADSTERRA_ORIGIN = "https://bicea.org";
 
+/**
+ * Social Bar: Adsterra's notification-style ad, one script per site. Paste the
+ * code from Adsterra (the whole <script> tag or just its URL) into
+ * NEXT_PUBLIC_ADSTERRA_SOCIAL_BAR; it shows only when that is set.
+ */
+export const ADSTERRA_SOCIAL_BAR = socialBarUrl(process.env.NEXT_PUBLIC_ADSTERRA_SOCIAL_BAR ?? "");
+
+/** The script URL from a pasted Social Bar snippet or URL, or null if there isn't a usable one. */
+export function socialBarUrl(code: string): string | null {
+  const src = code.match(/src=["']([^"']+)["']/)?.[1] ?? code.trim();
+  const url = src.startsWith("//") ? `https:${src}` : src;
+  return /^https:\/\/[^\s"'<>]+$/.test(url) ? url : null;
+}
+
 /** Native banner: a row of article-style links. Height varies, so it's measured. */
 export const ADSTERRA_NATIVE = {
   script: `${ADSTERRA_ORIGIN}/21/c647b932b167884c21a6111229d18825`,
