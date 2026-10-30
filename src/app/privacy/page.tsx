@@ -63,7 +63,8 @@ export default function PrivacyPage() {
               <ul className="list-disc space-y-3 pl-5">
                 <li>
                   <strong>Vercel</strong> hosts the site. Like any web host it processes IP addresses to deliver pages
-                  and to screen out automated traffic (Vercel BotID).
+                  and to screen out automated traffic (Vercel BotID). Vercel Web Analytics counts page views without
+                  cookies, using anonymised visit data, so we can see which debates people read.
                 </li>
                 <li>
                   <strong>Supabase</strong> hosts the vote database described above.
