@@ -18,7 +18,17 @@ export const ADSTERRA_BANNERS = {
   square: { key: "9e448eb09eef246334956c5f157cf2dc", width: 300, height: 250 },
 } as const;
 
-export type AdsterraBanner = (typeof ADSTERRA_BANNERS)[keyof typeof ADSTERRA_BANNERS];
+/**
+ * The slim bar at the top of every page. Wide screens get the 728×90 above.
+ * Phones need a 320×50 unit (create one in Adsterra and set its key as
+ * NEXT_PUBLIC_ADSTERRA_BAR_PHONE_KEY); until then they get no top bar, rather
+ * than a 250px box pushing the vote down.
+ */
+export const ADSTERRA_BAR_PHONE = process.env.NEXT_PUBLIC_ADSTERRA_BAR_PHONE_KEY
+  ? ({ key: process.env.NEXT_PUBLIC_ADSTERRA_BAR_PHONE_KEY, width: 320, height: 50 } as const)
+  : null;
+
+export type AdsterraBanner = { readonly key: string; readonly width: number; readonly height: number };
 
 /** Screens at least this wide get the 728×90; narrower ones get the 300×250. */
 export const WIDE_BANNER_MIN_WIDTH = 800;

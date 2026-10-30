@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import {
   ADSTERRA_BANNERS,
+  ADSTERRA_BAR_PHONE,
   bannerFrameHtml,
   nativeFrameHtml,
   WIDE_BANNER_MIN_WIDTH,
@@ -15,10 +16,10 @@ const SANDBOX = "allow-scripts allow-same-origin allow-popups allow-popups-to-es
 
 /** True once the element is near the screen: ads load as people scroll to them, not up front. */
 function useNearScreen<T extends Element>() {
-  const ref = useRef<T>(null);
+  // A callback ref, so watching starts whenever the element appears (it may render a moment after mount).
+  const [el, ref] = useState<T | null>(null);
   const [near, setNear] = useState(false);
   useEffect(() => {
-    const el = ref.current;
     if (!el || near) return;
     if (!("IntersectionObserver" in window)) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -36,7 +37,7 @@ function useNearScreen<T extends Element>() {
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [near]);
+  }, [el, near]);
   return [ref, near] as const;
 }
 
@@ -47,6 +48,33 @@ function subscribeWide(callback: () => void) {
 }
 
 const isWide = () => window.matchMedia(`(min-width: ${WIDE_BANNER_MIN_WIDTH}px)`).matches;
+
+/**
+ * The slim bar for the top of every page: the 728×90 on wide screens, the
+ * 320×50 on phones if that unit is set up, and otherwise nothing at all.
+ */
+export function AdsterraBarUnit() {
+  const [ref, near] = useNearScreen<HTMLDivElement>();
+  const wide = useSyncExternalStore(subscribeWide, isWide, () => false);
+  const banner = wide ? ADSTERRA_BANNERS.wide : ADSTERRA_BAR_PHONE;
+  if (!banner) return null;
+  return (
+    <div ref={ref} className="flex items-start justify-center" style={{ minHeight: banner.height }}>
+      {near ? (
+        <iframe
+          key={banner.key}
+          title="Advertisement"
+          srcDoc={bannerFrameHtml(banner)}
+          width={banner.width}
+          height={banner.height}
+          sandbox={SANDBOX}
+          scrolling="no"
+          className="block max-w-full border-0"
+        />
+      ) : null}
+    </div>
+  );
+}
 
 /** A display banner: the 728×90 on wide screens, the 300×250 on phones. Only one is ever loaded. */
 export function AdsterraBannerUnit() {

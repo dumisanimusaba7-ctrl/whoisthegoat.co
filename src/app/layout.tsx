@@ -3,6 +3,7 @@ import Script from "next/script";
 
 import { JsonLd } from "@/components/json-ld";
 import { SiteFooter } from "@/components/layout/site-footer";
+import { TopAdBar } from "@/components/ads/top-bar";
 import { SiteHeader } from "@/components/layout/site-header";
 import { ADSENSE_CLIENT, adsEnabled } from "@/lib/ads";
 import { DEBATES } from "@/lib/debates";
@@ -90,6 +91,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             launch.
           </p>
         ) : null}
+        <TopAdBar />
         <main id="main" className="flex-1">
           {children}
         </main>
