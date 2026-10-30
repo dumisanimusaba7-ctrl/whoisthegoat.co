@@ -14,10 +14,14 @@ import {
 /**
  * Adsterra's snippets, run in the page as Adsterra's instructions have them
  * (it checks which site an ad appears on, so they can't run in a blank frame).
- * Each ad loads as it nears the screen.
+ * Each ad starts loading well before it reaches the screen, so it's already
+ * showing when people scroll to it (and counts for people who stop short).
  */
 
-/** True once the element is near the screen: ads load as people scroll to them, not up front. */
+/** How far ahead of the screen an ad starts loading: about two phone screens. */
+const LOAD_AHEAD = "1500px 0px";
+
+/** True once the element is near the screen: ads load as people scroll towards them, not all up front. */
 function useNearScreen<T extends Element>() {
   // A callback ref, so watching starts whenever the element appears (it may render a moment after mount).
   const [el, ref] = useState<T | null>(null);
@@ -36,7 +40,7 @@ function useNearScreen<T extends Element>() {
           observer.disconnect();
         }
       },
-      { rootMargin: "400px 0px" },
+      { rootMargin: LOAD_AHEAD },
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -74,7 +78,7 @@ function loadBanner(container: HTMLElement, banner: AdsterraBanner) {
         script.onload = () => setTimeout(next, 50);
         script.onerror = next;
         // Never hold up the next banner for long (a blocked or slow script).
-        setTimeout(next, 4000);
+        setTimeout(next, 2000);
         container.append(options, script);
       }),
   );

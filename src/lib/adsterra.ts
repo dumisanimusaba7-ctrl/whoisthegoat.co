@@ -6,9 +6,12 @@
  */
 export const adsterraEnabled = process.env.NEXT_PUBLIC_ADSTERRA_DISABLED !== "1";
 
+/** Where every Adsterra script is served from. */
+export const ADSTERRA_ORIGIN = "https://bicea.org";
+
 /** Native banner: a row of article-style links. Height varies, so it's measured. */
 export const ADSTERRA_NATIVE = {
-  script: "https://bicea.org/21/c647b932b167884c21a6111229d18825",
+  script: `${ADSTERRA_ORIGIN}/21/c647b932b167884c21a6111229d18825`,
   container: "container-c647b932b167884c21a6111229d18825",
 } as const;
 
@@ -28,5 +31,5 @@ export const WIDE_BANNER_MIN_WIDTH = 800;
 
 /** Adsterra's script for a display banner; it reads the global `atOptions` as it runs. */
 export function bannerScriptUrl(banner: AdsterraBanner): string {
-  return `https://bicea.org/22/${banner.key}`;
+  return `${ADSTERRA_ORIGIN}/22/${banner.key}`;
 }

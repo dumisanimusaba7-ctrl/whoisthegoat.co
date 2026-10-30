@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { TopAdBar } from "@/components/ads/top-bar";
 import { SiteHeader } from "@/components/layout/site-header";
 import { ADSENSE_CLIENT, adsEnabled } from "@/lib/ads";
+import { ADSTERRA_ORIGIN, adsterraEnabled } from "@/lib/adsterra";
 import { DEBATES } from "@/lib/debates";
 import { siteKeywords } from "@/lib/seo-keywords";
 import { absoluteUrl, getSiteUrl, SITE_DESCRIPTION, SITE_DOMAIN, SITE_NAME } from "@/lib/site";
@@ -79,6 +80,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={archivo.variable} data-scroll-behavior="smooth">
       <body className="flex min-h-dvh flex-col">
+        {adsterraEnabled ? (
+          // Open the connection to the ad server while the page is still loading (no
+          // crossOrigin: the ad scripts load without CORS, so they use that pool), so
+          // the first ad request doesn't wait for DNS, TCP and TLS. React moves it into <head>.
+          <link rel="preconnect" href={ADSTERRA_ORIGIN} />
+        ) : null}
         <a
           href="#main"
           className="sr-only z-50 bg-white px-4 py-3 text-sm font-semibold text-ink focus:not-sr-only focus:fixed focus:left-3 focus:top-3"
