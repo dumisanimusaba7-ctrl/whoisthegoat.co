@@ -166,8 +166,8 @@ one at a time so their settings never collide. Only one native banner can be on 
 page (it fills a fixed element id); other native spaces show a display banner. Phones get the 300×250, screens 800px and wider the
 728×90; only one is ever loaded. Set `NEXT_PUBLIC_ADSTERRA_DISABLED=1` to turn
 them all off. The Social Bar (Adsterra's notification-style ad, which pays more
-than banners) turns on when `NEXT_PUBLIC_ADSTERRA_SOCIAL_BAR` holds its code from
-Adsterra. It's kept light: never in a visitor's first 20 seconds, at most twice
+than banners) is on too (its code is in `src/lib/adsterra.ts`;
+`NEXT_PUBLIC_ADSTERRA_SOCIAL_BAR` swaps it). It's kept light: never in a visitor's first 20 seconds, at most twice
 in 30 minutes and at least 10 minutes apart (`src/components/ads/social-bar.tsx`). Don't click your own ads: Adsterra bans accounts for it.
 
 ## Google AdSense
