@@ -11,6 +11,7 @@ import { HAMILTON_VS_VERSTAPPEN } from "./cabinets/hamilton-vs-verstappen";
 import { KHABIB_VS_MCGREGOR } from "./cabinets/khabib-vs-mcgregor";
 import { LEBRON_VS_JORDAN } from "./cabinets/lebron-vs-jordan";
 import { NEYMAR_VS_RONALDINHO } from "./cabinets/neymar-vs-ronaldinho";
+import { PELE_VS_MARADONA } from "./cabinets/pele-vs-maradona";
 import { TYSON_VS_ALI } from "./cabinets/tyson-vs-ali";
 import { YAMAL_VS_MBAPPE } from "./cabinets/yamal-vs-mbappe";
 
@@ -285,6 +286,7 @@ const MESSI_VS_RONALDO: Cabinet = {
 
 const CABINETS: Record<string, Cabinet> = {
   "messi-vs-ronaldo": MESSI_VS_RONALDO,
+  "pele-vs-maradona": PELE_VS_MARADONA,
   "yamal-vs-mbappe": YAMAL_VS_MBAPPE,
   "neymar-vs-ronaldinho": NEYMAR_VS_RONALDINHO,
   "lebron-vs-jordan": LEBRON_VS_JORDAN,

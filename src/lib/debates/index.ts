@@ -8,7 +8,7 @@
  */
 
 import { DC_VS_MARVEL, DRAKE_VS_KENDRICK, NIKE_VS_ADIDAS, SAMSUNG_VS_APPLE } from "./culture";
-import { MESSI_VS_RONALDO, NEYMAR_VS_RONALDINHO, YAMAL_VS_MBAPPE } from "./football";
+import { MESSI_VS_RONALDO, NEYMAR_VS_RONALDINHO, PELE_VS_MARADONA, YAMAL_VS_MBAPPE } from "./football";
 import { HAMILTON_VS_VERSTAPPEN, KHABIB_VS_MCGREGOR, LEBRON_VS_JORDAN, TYSON_VS_ALI } from "./sports";
 import type { Category, Debate, DebateOption } from "./types";
 
@@ -16,6 +16,7 @@ export type { Category, Debate, DebateOption, TaleOfTheTapeRow } from "./types";
 
 export const DEBATES: Debate[] = [
   MESSI_VS_RONALDO,
+  PELE_VS_MARADONA,
   YAMAL_VS_MBAPPE,
   LEBRON_VS_JORDAN,
   TYSON_VS_ALI,

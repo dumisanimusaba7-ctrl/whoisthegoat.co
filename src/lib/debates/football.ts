@@ -1,6 +1,8 @@
+import maradonaSide from "@/assets/debates/pele-vs-maradona-2.jpg";
 import mbappeSide from "@/assets/debates/yamal-vs-mbappe-2.jpg";
 import messiSide from "@/assets/debates/messi-vs-ronaldo-1.jpg";
 import neymarSide from "@/assets/debates/neymar-vs-ronaldinho-1.jpg";
+import peleSide from "@/assets/debates/pele-vs-maradona-1.jpg";
 import ronaldinhoSide from "@/assets/debates/neymar-vs-ronaldinho-2.jpg";
 import ronaldoSide from "@/assets/debates/messi-vs-ronaldo-2.jpg";
 import yamalSide from "@/assets/debates/yamal-vs-mbappe-1.jpg";
@@ -377,6 +379,131 @@ export const NEYMAR_VS_RONALDINHO: Debate = {
     { label: "Champions League titles", values: ["1", "1"] },
     { label: "Copa Libertadores titles", values: ["1", "1"] },
     { label: "Brazil goals", values: ["80", "33"] },
+  ],
+  factsAsOf: "October 2026",
+};
+
+export const PELE_VS_MARADONA: Debate = {
+  slug: "pele-vs-maradona",
+  category: "football",
+  title: "Pelé vs Maradona",
+  question: "Who is the GOAT?",
+  options: [
+    {
+      slug: "pele",
+      name: "Pelé",
+      firstName: "Pelé",
+      shortName: "Pelé",
+      kind: "person",
+      tag: "Brazil",
+      nationality: "Brazil",
+      mark: "10",
+      color: "#FFDC02",
+      onColor: "#0A0C14",
+      wikipedia: "https://en.wikipedia.org/wiki/Pel%C3%A9",
+      runner: {
+        kind: "figure",
+        celebration: "air-punch",
+        // Brazil, 1970: yellow shirt, green collar and trim, blue shorts, white socks.
+        kit: {
+          skin: "#6b4430",
+          hair: "#15100c",
+          hairStyle: "short",
+          top: "shirt",
+          shirt: "#f7d417",
+          sleeves: "short",
+          trim: "#0f9d58",
+          number: "10",
+          numberColor: "#0f9d58",
+          bottoms: "football",
+          shorts: "#2346c8",
+          socks: "#f4f5f7",
+          sockBand: "#0f9d58",
+          shoes: "boots",
+          boots: "#14161c",
+        },
+      },
+      cardPhoto: "pele.jpg",
+      caseFor: [
+        "Won the World Cup three times with Brazil, in 1958, 1962 and 1970, the only player to do so, and scored twice in the 1958 final against Sweden at 17.",
+        "Scored 12 goals in 14 World Cup matches across four tournaments, and 77 goals in 92 games for Brazil.",
+        "Won two Copa Libertadores titles and two Intercontinental Cups with Santos, in 1962 and 1963, plus six Brazilian championships, and scored 643 goals for the club in official matches.",
+        "Holds the Guinness World Record for career goals, 1,279 in 1,363 games including friendlies, and won the 1977 NASL title with the New York Cosmos in his final season. He died on 29 December 2022, aged 82.",
+      ],
+    },
+    {
+      slug: "maradona",
+      name: "Diego Maradona",
+      firstName: "Diego",
+      shortName: "Maradona",
+      kind: "person",
+      tag: "Argentina",
+      nationality: "Argentina",
+      mark: "10",
+      color: "#75AADB",
+      onColor: "#0A0C14",
+      wikipedia: "https://en.wikipedia.org/wiki/Diego_Maradona",
+      runner: {
+        kind: "figure",
+        celebration: "fist-pump",
+        // Argentina, 1986: sky-blue and white stripes, black shorts.
+        kit: {
+          skin: "#c9926b",
+          hair: "#17110d",
+          hairStyle: "curly",
+          top: "shirt",
+          shirt: "#f7f8fa",
+          stripes: "#6cace4",
+          sleeves: "short",
+          trim: "#14161c",
+          number: "10",
+          numberColor: "#14161c",
+          bottoms: "football",
+          shorts: "#14161c",
+          socks: "#f4f5f7",
+          sockBand: "#6cace4",
+          shoes: "boots",
+          boots: "#14161c",
+        },
+      },
+      cardPhoto: "maradona.jpg",
+      caseFor: [
+        "Captained Argentina to the 1986 World Cup and won the Golden Ball, scoring both goals in the 2–1 quarter-final win over England: the ‘Hand of God’ and the ‘Goal of the Century’.",
+        "Led Napoli to their first two Serie A titles, in 1986–87 and 1989–90, as well as the 1986–87 Coppa Italia and the 1988–89 UEFA Cup.",
+        "Twice broke the world transfer record, joining Barcelona in 1982 and Napoli in 1984, after winning the 1981 Metropolitano title with Boca Juniors; at Barcelona he won the 1982–83 Copa del Rey.",
+        "Shared FIFA’s Player of the Century award with Pelé in 2000 and was named South American Footballer of the Year six times. He died on 25 November 2020, aged 60.",
+      ],
+    },
+  ],
+  artwork: {
+    sides: [peleSide, maradonaSide],
+    focus: ["50% 2%", "50% 2%"],
+    file: "src/assets/debates/pele-vs-maradona.jpg",
+  },
+  seo: {
+    title: "Pelé vs Maradona: Who Is the GOAT? Vote Now",
+    description:
+      "Pelé or Maradona? Compare World Cups, goals and trophies of FIFA’s joint Players of the Century, then cast your vote in the live GOAT poll. No sign-up.",
+    keywords: [
+      "Pelé vs Maradona",
+      "Pelé or Maradona",
+      "who is the goat",
+      "greatest footballer of all time",
+      "FIFA Player of the Century",
+      "Brazil vs Argentina number 10",
+      "goat vote",
+    ],
+  },
+  intro: [
+    "In 2000 FIFA could not choose between them, so Pelé and Diego Maradona shared the Player of the Century award. Pelé won three World Cups with Brazil and scored 1,279 goals by Guinness World Records’ count; Maradona captained Argentina to the 1986 World Cup and carried Napoli to their first two Serie A titles.",
+    "Both wore the number 10 for their country, and the argument between Brazil and Argentina has outlived them both. The world now votes on who is the GOAT.",
+  ],
+  taleOfTheTape: [
+    { label: "World Cups", values: ["3", "1"] },
+    { label: "World Cup goals", values: ["12", "8"] },
+    { label: "World Cups played", values: ["4", "4"] },
+    { label: "League titles", values: ["7", "3"] },
+    { label: "International goals", values: ["77", "34"] },
   ],
   factsAsOf: "October 2026",
 };
