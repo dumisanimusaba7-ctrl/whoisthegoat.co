@@ -19,7 +19,7 @@ export default function PrivacyPage() {
         </PageHero>
         <article className="bg-paper">
           <div className="mx-auto max-w-3xl px-4 py-14 text-lg leading-relaxed text-ink/85 sm:px-6 sm:py-20">
-            <p className="text-sm text-mute">Last updated 8 October 2026</p>
+            <p className="text-sm text-mute">Last updated 30 October 2026</p>
 
             <Section title="What we collect when you vote">
               <ul className="list-disc space-y-3 pl-5">
