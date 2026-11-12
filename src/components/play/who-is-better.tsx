@@ -9,6 +9,7 @@ import { AdSlot } from "@/components/ads/ad-slot";
 import { encodeOrder } from "@/lib/play/players";
 import {
   buildPool,
+  savedForLast,
   type Contender,
   type GameState,
   gameReducer,
@@ -39,7 +40,7 @@ export function WhoIsBetter() {
     setScreen((previous) => ({ kind: "game", id: previous.kind === "game" ? previous.id + 1 : 1, game: startGame(pool) }));
   }, []);
 
-  if (screen.kind === "start") return <StartScreen players={buildPool()} onStart={start} />;
+  if (screen.kind === "start") return <StartScreen players={savedForLast(buildPool())} onStart={start} />;
   return <Game key={screen.id} initial={screen.game} onAgain={start} />;
 }
 

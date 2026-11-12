@@ -63,10 +63,20 @@ export type GameState = {
 
 export type GameAction = { type: "pick"; side: Side } | { type: "resolve" } | { type: "ready" };
 
-/** Starts a game: the first two face off, everyone else waits in line. Needs at least two players. */
+/** The two players everyone expects to see first. They come in last, so the game doesn't open on the GOAT debate. */
+export const SAVED_FOR_LAST = ["messi", "ronaldo"];
+
+/** Puts the saved-for-last players at the end, keeping the order of everyone else. */
+export function savedForLast<T extends { slug: string }>(items: readonly T[]): T[] {
+  return [...items.filter((i) => !SAVED_FOR_LAST.includes(i.slug)), ...items.filter((i) => SAVED_FOR_LAST.includes(i.slug))];
+}
+
+/** Starts a game: the first two face off, everyone else waits in line, Messi and Ronaldo last. Needs at least two players. */
 export function startGame(pool: Contender[], random: () => number = Math.random): GameState {
   if (pool.length < 2) throw new Error("The elimination game needs at least two players");
-  const [left, right, ...queue] = shuffle(pool, random);
+  const last = shuffle(pool.filter((c) => SAVED_FOR_LAST.includes(c.slug)), random);
+  const rest = shuffle(pool.filter((c) => !SAVED_FOR_LAST.includes(c.slug)), random);
+  const [left, right, ...queue] = [...rest, ...last];
   return { left, right, queue, eliminated: [], picked: null, phase: "choosing", total: pool.length - 1 };
 }
 

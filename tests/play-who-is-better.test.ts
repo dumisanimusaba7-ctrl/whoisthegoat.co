@@ -16,6 +16,15 @@ function seeded(seed: number) {
 }
 
 describe("who is better: the player pool", () => {
+  it("keeps Messi and Ronaldo for last", () => {
+    for (let seed = 1; seed <= 40; seed++) {
+      const state = startGame(buildPool(), seeded(seed));
+      expect([state.left.slug, state.right.slug]).not.toContain("messi");
+      expect([state.left.slug, state.right.slug]).not.toContain("ronaldo");
+      expect(state.queue.slice(-2).map((c) => c.slug).sort()).toEqual(["messi", "ronaldo"]);
+    }
+  });
+
   it("is the 15 most-debated players, once each, each with a portrait and a winner-card photo", () => {
     const pool = buildPool();
     expect(pool).toHaveLength(15);
