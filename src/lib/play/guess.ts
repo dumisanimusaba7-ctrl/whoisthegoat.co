@@ -9,7 +9,9 @@ import belling from "@/assets/play/silhouettes/bellingham-wide.png";
 import griezmann from "@/assets/play/silhouettes/griezmann-l.png";
 import haaland from "@/assets/play/silhouettes/haaland-zen.png";
 import lewandowski from "@/assets/play/silhouettes/lewandowski-cross.png";
+import lewandowskiHands from "@/assets/play/silhouettes/lewandowski-cross-hands.png";
 import mbappeArms from "@/assets/play/silhouettes/mbappe-arms.png";
+import mbappeArmsHands from "@/assets/play/silhouettes/mbappe-arms-hands.png";
 import mbappeSalute from "@/assets/play/silhouettes/mbappe-salute.png";
 import messiEars from "@/assets/play/silhouettes/messi-ears.png";
 import messiShirt from "@/assets/play/silhouettes/messi-shirt.png";
@@ -42,11 +44,11 @@ export type Silhouette = {
 
 export const SILHOUETTES: Silhouette[] = [
   { id: "ronaldo-siu", player: "Cristiano Ronaldo", celebration: "The Siu", fact: "A jump, a spin, then a landing with the arms down and the feet wide. The crowd shouts it back.", image: ronaldo, color: "#E8322A", source: { name: "Yardbarker", url: "https://www.yardbarker.com/soccer/articles/what_is_the_meaning_and_origin_of_cristiano_ronaldos_iconic_siuuu_celebration/s1_17615_43986650" } },
-  { id: "mbappe-arms", player: "Kylian Mbappé", celebration: "The arms crossed", fact: "Arms folded, hands tucked under the armpits. His go-to after a goal for France and PSG.", image: mbappeArms, color: "#2B4C9B", source: { name: "talkSPORT", url: "https://talksport.com/football/423670/the-meaning-behind-kylian-mbappes-goal-celebration-for-france-and-psg-explained/" } },
+  { id: "mbappe-arms", player: "Kylian Mbappé", celebration: "The arms crossed", fact: "Arms folded, hands tucked under the armpits. His go-to after a goal for France and PSG.", image: mbappeArms, hands: mbappeArmsHands, color: "#2B4C9B", source: { name: "talkSPORT", url: "https://talksport.com/football/423670/the-meaning-behind-kylian-mbappes-goal-celebration-for-france-and-psg-explained/" } },
   { id: "mbappe-salute", player: "Kylian Mbappé", celebration: "The salute", fact: "A forehead salute that went viral at the 2026 World Cup. Fans nicknamed it Dictator Mbappé.", image: mbappeSalute, color: "#2B4C9B", source: { name: "X", url: "https://x.com/fedevalv_/status/2072099337321042060" } },
   { id: "haaland-zen", player: "Erling Haaland", celebration: "The meditation", fact: "He sits cross-legged and goes quiet. He has said he loves meditation.", image: haaland, color: "#6CABDD", source: { name: "ESPN", url: "https://www.espn.com/soccer/story/_/id/37582110/love-meditation" } },
   { id: "rashford-temple", player: "Marcus Rashford", celebration: "The temple point", fact: "A finger to the head, now copied by players across the world.", image: rashford, color: "#DA291C", source: { name: "The Sun", url: "https://www.thesun.co.uk/sport/21129876/why-marcus-rashford-point-head-celebration-man-utd-saka/" } },
-  { id: "lewandowski-cross", player: "Robert Lewandowski", celebration: "The crossed arms", fact: "He has called the meaning a family secret.", image: lewandowski, color: "#DC143C", source: { name: "Goal", url: "https://www.goal.com/en-sa/news/what-lewandowski-celebration-meaning-barcelona-goal-gesture/bltb432598af901c86e" } },
+  { id: "lewandowski-cross", player: "Robert Lewandowski", celebration: "The crossed arms", fact: "He has called the meaning a family secret.", image: lewandowski, hands: lewandowskiHands, color: "#DC143C", source: { name: "Goal", url: "https://www.goal.com/en-sa/news/what-lewandowski-celebration-meaning-barcelona-goal-gesture/bltb432598af901c86e" } },
   { id: "neymar-bow", player: "Neymar", celebration: "The bow", fact: "Bowing to the fans after scoring for Santos.", image: neymar, color: "#FFD400", source: { name: "Getty Images", url: "https://www.gettyimages.com/detail/news-photo/footballer-neymar-of-brazilian-team-santos-makes-a-bow-to-news-photo/144150534" } },
   { id: "salah-sky", player: "Mohamed Salah", celebration: "Both fingers to the sky", fact: "Salah's goal celebration at Liverpool, back to the crowd and eyes up.", image: salah, color: "#C8102E", source: { name: "Goal", url: "https://www.goal.com/en/news/explained-mohamed-salah-goal-celebrations-meaning-liverpool-stars-on-pitch-gestures/1uj2zappvknhi1pojuqm0oae6e" } },
   { id: "messi-ears", player: "Lionel Messi", celebration: "Hands to the ears", fact: "Aimed at the Netherlands bench after scoring in the 2022 World Cup quarter-final.", image: messiEars, color: "#75AADB", source: { name: "Barca Universal", url: "https://barcauniversal.com/the-mystery-behind-lionel-messis-celebration-vs-netherlands/" } },
