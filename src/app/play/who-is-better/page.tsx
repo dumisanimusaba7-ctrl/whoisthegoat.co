@@ -6,7 +6,7 @@ import { WhoIsBetter } from "@/components/play/who-is-better";
 
 export const metadata: Metadata = {
   title: "Who is better? The elimination game",
-  description: "Two players, one tap. The one you don't pick disappears and a new challenger steps in. Knock them all out until your ultimate player is left.",
+  description: "15 of the most debated footballers. Two at a time, one tap. The one you don't pick disappears and a new challenger steps in, until your ultimate player is left.",
   alternates: { canonical: "/play/who-is-better" },
 };
 

@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
+import { existsSync } from "node:fs";
+
 import { DEBATES } from "@/lib/debates";
-import { buildPool, gameReducer, getMode, MODES, roundNumber, shareText, shuffle, startGame, winnerOf } from "@/lib/play/who-is-better";
+import { fullName, getPlayer, pickCardPlayer, PLAYERS } from "@/lib/play/players";
+import { buildPool, gameReducer, roundNumber, shareText, shuffle, startGame, winnerOf } from "@/lib/play/who-is-better";
 
 /** A repeatable "random": a small linear congruential generator. */
 function seeded(seed: number) {
@@ -13,36 +16,41 @@ function seeded(seed: number) {
 }
 
 describe("who is better: the player pool", () => {
-  it("is built from people on the debates, once each, all with a portrait", () => {
-    for (const mode of MODES) {
-      const pool = buildPool(mode.categories);
-      expect(pool.length, mode.id).toBeGreaterThanOrEqual(8);
-      expect(new Set(pool.map((p) => p.slug)).size).toBe(pool.length);
-      for (const player of pool) {
-        // In Node, Vite turns an image import into a path; Next gives an object with a src.
-        expect(player.photo, player.slug).toBeTruthy();
-        expect(player.focus, player.slug).toMatch(/%/);
-        expect(DEBATES.some((d) => d.slug === player.debateSlug)).toBe(true);
-      }
+  it("is the 15 most-debated players, once each, each with a portrait and a winner-card photo", () => {
+    const pool = buildPool();
+    expect(pool).toHaveLength(15);
+    expect(PLAYERS).toHaveLength(15);
+    expect(new Set(pool.map((p) => p.slug)).size).toBe(15);
+    for (const player of pool) {
+      expect(player.photo, player.slug).toBeTruthy();
+      expect(player.name.length, player.slug).toBeGreaterThan(0);
+    }
+    for (const player of PLAYERS) {
+      expect(player.slug).toMatch(/^[a-z0-9]+$/);
+      expect(player.color).toMatch(/^#[0-9A-Fa-f]{6}$/);
+      expect(player.cardFile).toBe(`assets/play/${player.slug}.jpg`);
+      expect(existsSync(player.cardFile), player.cardFile).toBe(true);
+      expect(player.credits.portrait.length).toBeGreaterThan(0);
+      expect(player.credits.card.length).toBeGreaterThan(0);
     }
   });
 
-  it("keeps companies and musicians out of the sports modes", () => {
-    const slugs = buildPool(getMode("athletes").categories).map((p) => p.slug);
-    for (const out of ["nike", "adidas", "apple", "samsung", "drake", "kendrick", "marvel", "dc"]) expect(slugs).not.toContain(out);
-    expect(slugs).toEqual(expect.arrayContaining(["messi", "ronaldo", "lebron", "jordan", "ali"]));
+  it("links players who are in a debate on the site to that debate", () => {
+    for (const player of PLAYERS) {
+      if (!player.debateSlug) continue;
+      const debate = DEBATES.find((d) => d.slug === player.debateSlug);
+      expect(debate, player.slug).toBeDefined();
+      expect(debate?.options.some((o) => o.slug === player.slug || o.slug === player.slug.replace("9", ""))).toBe(true);
+      expect(debate?.title).toBe(player.debateTitle);
+    }
   });
 
-  it("has football as a subset of all sports", () => {
-    const football = buildPool(getMode("football").categories).map((p) => p.slug);
-    const all = buildPool(getMode("athletes").categories).map((p) => p.slug);
-    expect(football.every((slug) => all.includes(slug))).toBe(true);
-    expect(football).not.toContain("lebron");
-  });
-
-  it("falls back to football for an unknown mode", () => {
-    expect(getMode("nonsense").id).toBe("football");
-    expect(getMode(null).id).toBe("football");
+  it("describes the winner for the share card", () => {
+    const messi = getPlayer("messi")!;
+    expect(fullName(messi)).toBe("Lionel Messi");
+    expect(fullName(getPlayer("pele")!)).toBe("Pelé");
+    expect(pickCardPlayer(messi)).toMatchObject({ slug: "messi", name: "Messi", beaten: 14, photoFile: "assets/play/messi.jpg" });
+    expect(getPlayer("nobody")).toBeUndefined();
   });
 });
 
@@ -58,7 +66,7 @@ describe("who is better: shuffling", () => {
 });
 
 describe("who is better: a game", () => {
-  const pool = buildPool(getMode("football").categories);
+  const pool = buildPool();
 
   it("starts with two players facing off and the rest in line", () => {
     const state = startGame(pool, seeded(3));
@@ -114,9 +122,12 @@ describe("who is better: a game", () => {
     expect(gameReducer(state, { type: "ready" })).toBe(state);
   });
 
+  it("plays 14 matches for 15 players", () => {
+    expect(startGame(pool, seeded(8)).total).toBe(14);
+  });
+
   it("words the share line with the number beaten", () => {
     const winner = pool[0];
-    expect(shareText(winner, 7, "Football")).toBe(`I knocked out 7 footballers and my ultimate pick is ${winner.name}. Who's yours?`);
-    expect(shareText(winner, 15, "All sports")).toContain("15 athletes");
+    expect(shareText(winner, 14)).toBe(`I knocked out 14 footballers and my ultimate player is ${winner.name}. Who's yours?`);
   });
 });

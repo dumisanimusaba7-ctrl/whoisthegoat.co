@@ -1,60 +1,30 @@
 import type { StaticImageData } from "next/image";
 
-import { type Category, DEBATES, type Debate } from "@/lib/debates";
+import { PLAYERS, type PlayPlayer } from "./players";
+import { PORTRAITS } from "./portraits";
 
-/** One player in the elimination game, built from a person on the debates. */
+/** One player in the elimination game. */
 export type Contender = {
   slug: string;
   /** Shown big under the portrait: "Messi". */
   name: string;
   /** Shown small above it: "Lionel". Empty when the name says it all. */
   firstName: string;
-  /** The face-centred vote-board photo (1200×1323). */
+  /** The face portrait (1200×1323). */
   photo: StaticImageData;
-  /** CSS object-position that keeps the face whole however the tile crops. */
-  focus: string;
   color: string;
-  /** The debate this player is in, to send the winner's fans to the real vote. */
-  debateSlug: string;
-  debateTitle: string;
+  /** The debate this player is in on the site, if any, to send the winner's fans to the real vote. */
+  debateSlug?: string;
+  debateTitle?: string;
 };
 
-export type ModeId = "football" | "athletes";
-
-export type Mode = { id: ModeId; label: string; blurb: string; categories: Category[] };
-
-export const MODES: Mode[] = [
-  { id: "football", label: "Football", blurb: "Footballers, old and new", categories: ["football"] },
-  { id: "athletes", label: "All sports", blurb: "Football, basketball, boxing, MMA and F1", categories: ["football", "basketball", "boxing", "mma", "formula-1"] },
-];
-
-export function getMode(id: string | null | undefined): Mode {
-  return MODES.find((mode) => mode.id === id) ?? MODES[0];
-}
-
-/** Everyone in the debates of these categories whose debate has board artwork, once each. */
-export function buildPool(categories: Category[], debates: Debate[] = DEBATES): Contender[] {
-  const seen = new Set<string>();
-  const pool: Contender[] = [];
-  for (const debate of debates) {
-    if (!categories.includes(debate.category)) continue;
-    if (!debate.artwork) continue;
-    debate.options.forEach((option, index) => {
-      if (option.kind !== "person" || seen.has(option.slug)) return;
-      seen.add(option.slug);
-      pool.push({
-        slug: option.slug,
-        name: option.shortName,
-        firstName: option.firstName && option.firstName !== option.shortName ? option.firstName : "",
-        photo: debate.artwork!.sides[index],
-        focus: debate.artwork!.focus[index],
-        color: option.color,
-        debateSlug: debate.slug,
-        debateTitle: debate.title,
-      });
-    });
-  }
-  return pool;
+/** The 15 most-debated players, each with a portrait. */
+export function buildPool(players: PlayPlayer[] = PLAYERS): Contender[] {
+  return players.flatMap((player) => {
+    const photo = PORTRAITS[player.slug];
+    if (!photo) return [];
+    return [{ slug: player.slug, name: player.name, firstName: player.firstName, photo, color: player.color, debateSlug: player.debateSlug, debateTitle: player.debateTitle }];
+  });
 }
 
 /** A random order for a new game. Pass `random` to make it repeatable. */
@@ -127,7 +97,6 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 }
 
 /** The line people share, with the number they beat on the way. */
-export function shareText(winner: Contender, beaten: number, modeLabel: string): string {
-  const players = modeLabel === "Football" ? "footballers" : "athletes";
-  return `I knocked out ${beaten} ${players} and my ultimate pick is ${winner.name}. Who's yours?`;
+export function shareText(winner: Contender, beaten: number): string {
+  return `I knocked out ${beaten} footballers and my ultimate player is ${winner.name}. Who's yours?`;
 }

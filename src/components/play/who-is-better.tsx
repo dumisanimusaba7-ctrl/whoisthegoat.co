@@ -11,9 +11,6 @@ import {
   type Contender,
   type GameState,
   gameReducer,
-  getMode,
-  type Mode,
-  MODES,
   roundNumber,
   shareText,
   type Side,
@@ -30,59 +27,44 @@ function reduced(): boolean {
   return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-type Screen = { kind: "start" } | { kind: "game"; id: number; mode: Mode; game: GameState };
+type Screen = { kind: "start" } | { kind: "game"; id: number; game: GameState };
 
 export function WhoIsBetter() {
-  const [modeId, setModeId] = useState<Mode["id"]>("football");
   const [screen, setScreen] = useState<Screen>({ kind: "start" });
 
-  const start = useCallback((mode: Mode) => {
-    const pool = buildPool(mode.categories);
-    track("who_is_better_started", { mode: mode.id, players: pool.length });
-    setScreen((previous) => ({ kind: "game", id: previous.kind === "game" ? previous.id + 1 : 1, mode, game: startGame(pool) }));
+  const start = useCallback(() => {
+    const pool = buildPool();
+    track("who_is_better_started", { players: pool.length });
+    setScreen((previous) => ({ kind: "game", id: previous.kind === "game" ? previous.id + 1 : 1, game: startGame(pool) }));
   }, []);
 
-  if (screen.kind === "start") {
-    return <StartScreen modeId={modeId} onMode={setModeId} onStart={() => start(getMode(modeId))} />;
-  }
-  return <Game key={screen.id} mode={screen.mode} initial={screen.game} onAgain={() => start(screen.mode)} onChangeMode={() => setScreen({ kind: "start" })} />;
+  if (screen.kind === "start") return <StartScreen players={buildPool()} onStart={start} />;
+  return <Game key={screen.id} initial={screen.game} onAgain={start} />;
 }
 
-function StartScreen({ modeId, onMode, onStart }: { modeId: Mode["id"]; onMode: (id: Mode["id"]) => void; onStart: () => void }) {
+/** The first screen: who is in the game, and a button. */
+function StartScreen({ players, onStart }: { players: Contender[]; onStart: () => void }) {
   return (
     <div className="mx-auto max-w-xl px-4 py-10 text-center sm:py-16">
       <h1 className="type-headline text-[min(2.6rem,10vw)] sm:text-6xl">Who is better?</h1>
-      <p className="mx-auto mt-4 max-w-md text-lg leading-relaxed text-mute-dark">Tap the better player. The other one disappears. Keep going until only your ultimate player is left.</p>
-      <p className="type-overline mt-8 text-mute-dark">Who is in the game</p>
-      <div role="radiogroup" aria-label="Who is in the game" className="mt-4 grid grid-cols-2 gap-3">
-        {MODES.map((mode) => {
-          const count = buildPool(mode.categories).length;
-          const active = mode.id === modeId;
-          return (
-            <button
-              key={mode.id}
-              type="button"
-              role="radio"
-              aria-checked={active}
-              onClick={() => onMode(mode.id)}
-              className={`min-h-24 border-2 px-3 py-4 text-left transition-colors duration-[var(--duration-micro)] ${active ? "border-white bg-white text-ink" : "border-white/25 text-white hover:border-white/60"}`}
-            >
-              <span className="block text-lg font-bold">{mode.label}</span>
-              <span className={`mt-1 block text-sm ${active ? "text-mute" : "text-mute-dark"}`}>
-                {count} players. {mode.blurb}.
-              </span>
-            </button>
-          );
-        })}
-      </div>
-      <button type="button" onClick={onStart} className="btn btn-light mt-6 w-full sm:w-auto sm:px-12">
+      <p className="mx-auto mt-4 max-w-md text-lg leading-relaxed text-mute-dark">
+        {players.length} of the most debated players in football. Tap the better one. The other disappears and a new challenger steps in. Keep going until your ultimate player is left.
+      </p>
+      <ul className="mx-auto mt-8 grid max-w-sm grid-cols-5 gap-2" aria-label="The players">
+        {players.map((player) => (
+          <li key={player.slug} title={player.name} className="relative aspect-square overflow-hidden bg-ink-2">
+            <Image src={player.photo} alt={player.name} fill sizes="64px" className="object-cover object-[50%_30%]" />
+          </li>
+        ))}
+      </ul>
+      <button type="button" onClick={onStart} className="btn btn-light mt-8 w-full sm:w-auto sm:px-12">
         Start
       </button>
     </div>
   );
 }
 
-function Game({ mode, initial, onAgain, onChangeMode }: { mode: Mode; initial: GameState; onAgain: () => void; onChangeMode: () => void }) {
+function Game({ initial, onAgain }: { initial: GameState; onAgain: () => void }) {
   const [game, dispatch] = useReducer(gameReducer, initial);
 
   // The unpicked player fades for a moment, then the next one arrives and the game waits for a tap again.
@@ -99,11 +81,11 @@ function Game({ mode, initial, onAgain, onChangeMode }: { mode: Mode; initial: G
 
   const winner = winnerOf(game);
   useEffect(() => {
-    if (winner) track("who_is_better_finished", { mode: mode.id, winner: winner.slug, beaten: game.eliminated.length });
-  }, [winner, mode.id, game.eliminated.length]);
+    if (winner) track("who_is_better_finished", { winner: winner.slug, beaten: game.eliminated.length });
+  }, [winner, game.eliminated.length]);
 
   if (winner) {
-    return <ResultScreen mode={mode} winner={winner} beaten={game.eliminated} onAgain={onAgain} onChangeMode={onChangeMode} />;
+    return <ResultScreen winner={winner} beaten={game.eliminated} onAgain={onAgain} />;
   }
 
   const round = roundNumber(game);
@@ -168,8 +150,8 @@ function Tile({ player, side, state, disabled, onPick }: { player: Contender; si
           quality={95}
           placeholder="blur"
           priority
-          className="object-cover transition-transform duration-[var(--duration-large)] ease-out group-enabled:group-hover:scale-[1.03]"
-          style={{ objectPosition: player.focus }}
+          className="object-cover object-[50%_40%] transition-transform duration-[var(--duration-large)] ease-out group-enabled:group-hover:scale-[1.03]"
+          
         />
       </span>
       <span className="mt-3 block min-h-14">
@@ -180,13 +162,14 @@ function Tile({ player, side, state, disabled, onPick }: { player: Contender; si
   );
 }
 
-function ResultScreen({ mode, winner, beaten, onAgain, onChangeMode }: { mode: Mode; winner: Contender; beaten: Contender[]; onAgain: () => void; onChangeMode: () => void }) {
+function ResultScreen({ winner, beaten, onAgain }: { winner: Contender; beaten: Contender[]; onAgain: () => void }) {
   const [shared, setShared] = useState<"idle" | "copied">("idle");
+  const cardUrl = `/api/play/card/${winner.slug}/post`;
 
   const share = useCallback(async () => {
-    const url = `${window.location.origin}/play/who-is-better`;
-    const text = shareText(winner, beaten.length, mode.label);
-    track("who_is_better_shared", { mode: mode.id, winner: winner.slug });
+    const url = `${window.location.origin}/play/who-is-better/pick/${winner.slug}`;
+    const text = shareText(winner, beaten.length);
+    track("who_is_better_shared", { winner: winner.slug });
     try {
       if (navigator.share) {
         await navigator.share({ text, url });
@@ -198,34 +181,30 @@ function ResultScreen({ mode, winner, beaten, onAgain, onChangeMode }: { mode: M
     } catch {
       // Closing the share sheet is not an error.
     }
-  }, [winner, beaten.length, mode]);
+  }, [winner, beaten.length]);
 
   return (
-    <div className="mx-auto max-w-md px-4 pb-10 pt-10 text-center sm:pt-14">
-      <p className="type-overline text-mute-dark">Your ultimate pick</p>
-      <div className="play-arrive mx-auto mt-4 max-w-xs" style={{ "--tile": winner.color } as React.CSSProperties}>
-        <div className="play-kept relative aspect-[4/5] overflow-hidden bg-ink-2">
-          <Image src={winner.photo} alt="" fill sizes="320px" quality={95} placeholder="blur" priority className="object-cover" style={{ objectPosition: winner.focus }} />
-        </div>
-        <h2 className="type-display mt-4 text-6xl">{winner.name}</h2>
-      </div>
-      <p className="mt-4 text-lg text-white/85">
-        You knocked out {beaten.length} {mode.id === "football" ? "footballers" : "athletes"} to get here.
-      </p>
-      <p className="mt-2 text-sm leading-relaxed text-mute-dark">{beaten.map((p) => p.name).join(" · ")}</p>
+    <div className="mx-auto max-w-md px-4 pb-10 pt-8 text-center sm:pt-12">
+      <p className="type-overline text-mute-dark">Your ultimate player</p>
+      {/* The card people share, shown as it will look (rendered on the server). */}
+      {/* eslint-disable-next-line @next/next/no-img-element -- a server-rendered share card, already sized */}
+      <img src={cardUrl} width={1080} height={1350} alt={`${winner.name}: my ultimate player. I knocked out the other ${beaten.length}.`} className="play-arrive mx-auto mt-4 aspect-[4/5] w-full max-w-xs bg-ink-2" />
+      <p className="mt-4 text-sm leading-relaxed text-mute-dark">Knocked out: {beaten.map((p) => p.name).join(" · ")}</p>
 
       <div className="mt-6 grid gap-3">
         <button type="button" onClick={share} className="btn btn-light">
-          {shared === "copied" ? "Copied. Now send it" : "Share my pick"}
+          {shared === "copied" ? "Copied. Now send it" : "Share my player"}
         </button>
-        <Link href={`/${winner.debateSlug}`} className="btn btn-outline">
-          Vote: {winner.debateTitle}
-        </Link>
+        <a href={cardUrl} download={`my-ultimate-player-${winner.slug}.jpg`} className="btn btn-outline">
+          Save the card
+        </a>
+        {winner.debateSlug ? (
+          <Link href={`/${winner.debateSlug}`} className="btn btn-outline">
+            Vote: {winner.debateTitle}
+          </Link>
+        ) : null}
         <button type="button" onClick={onAgain} className="btn btn-outline">
-          Play again with a new order
-        </button>
-        <button type="button" onClick={onChangeMode} className="link text-sm">
-          Change who is in the game
+          Play again in a new order
         </button>
       </div>
       <AdSlot placement="editorial" className="mt-6 !px-0" />

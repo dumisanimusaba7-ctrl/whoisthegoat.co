@@ -15,7 +15,7 @@ const GAMES = [
   {
     href: "/play/who-is-better",
     title: "Who is better?",
-    blurb: "Two players, one tap. The one you don't pick disappears. Keep going until your ultimate player is left.",
+    blurb: "15 of the most debated footballers, two at a time. The one you don't pick disappears. Keep going until your ultimate player is left.",
   },
 ];
 
