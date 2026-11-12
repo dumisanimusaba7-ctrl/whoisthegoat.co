@@ -7,7 +7,7 @@ import { PageHero } from "@/components/layout/page-hero";
 
 export const metadata: Metadata = {
   title: "Play",
-  description: "Football games on WHOISTHEGOATS.COM. Knock players out one by one until your ultimate player is left.",
+  description: "Football games on WHOISTHEGOATS.COM. Knock players out until your ultimate player is left, or guess the footballer from a celebration silhouette.",
   alternates: { canonical: "/play" },
 };
 
@@ -16,6 +16,11 @@ const GAMES = [
     href: "/play/who-is-better",
     title: "Who is better?",
     blurb: "15 of the most debated footballers, two at a time. The one you don't pick disappears. Keep going until your ultimate player is left.",
+  },
+  {
+    href: "/play/guess-the-player",
+    title: "Who is that?",
+    blurb: "15 famous goal celebrations as black silhouettes. Name the player from the pose alone.",
   },
 ];
 
