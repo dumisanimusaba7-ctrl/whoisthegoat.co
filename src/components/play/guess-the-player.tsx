@@ -62,13 +62,7 @@ function Outline({ silhouette, revealed }: { silhouette: Silhouette; revealed: b
     transition: "background-color 700ms ease",
   };
   return (
-    <div role="img" aria-label={revealed ? `${silhouette.player}: ${silhouette.celebration}` : "A footballer's celebration as a black silhouette"} className="relative h-full w-full" style={style}>
-      {silhouette.hands ? (
-        // Light lines for hands in front of the body, drawn in the same box as the outline so they line up.
-        // eslint-disable-next-line @next/next/no-img-element -- a small decorative line drawing
-        <img src={silhouette.hands.src} alt="" className="absolute inset-0 h-full w-full object-contain object-bottom" />
-      ) : null}
-    </div>
+    <div role="img" aria-label={revealed ? `${silhouette.player}: ${silhouette.celebration}` : "A footballer's celebration as a black silhouette"} className="h-full w-full" style={style} />
   );
 }
 

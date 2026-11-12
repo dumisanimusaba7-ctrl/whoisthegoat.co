@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { existsSync, readdirSync } from "node:fs";
+import { readdirSync } from "node:fs";
 
 import { buildQuestions, decodeRun, encodeRun, LOOKS, lookalikes, OPTIONS_PER_QUESTION, QUESTIONS_PER_GAME, rankFor, ratingFor, resemblance, SILHOUETTES, shareLine } from "@/lib/play/guess";
 
@@ -27,9 +27,8 @@ describe("the silhouette bank", () => {
   });
 
   it("has a file for every silhouette and none left over", () => {
-    const files = readdirSync("src/assets/play/silhouettes").filter((f) => f.endsWith(".png") && !f.endsWith("-hands.png")).sort();
+    const files = readdirSync("src/assets/play/silhouettes").filter((f) => f.endsWith(".png")).sort();
     expect(files).toEqual(SILHOUETTES.map((s) => `${s.id}.png`).sort());
-    for (const s of SILHOUETTES) if (s.hands) expect(existsSync(`src/assets/play/silhouettes/${s.id}-hands.png`)).toBe(true);
   });
 });
 
