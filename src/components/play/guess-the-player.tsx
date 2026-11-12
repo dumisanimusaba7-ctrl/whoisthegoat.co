@@ -68,20 +68,26 @@ function Outline({ silhouette, revealed }: { silhouette: Silhouette; revealed: b
   );
 }
 
-/** The real photo of the moment. It is on the page from the start, invisible, so it is ready; it fades in over the outline once the answer is picked. */
+/**
+ * The real photo of the moment. It is cropped to the player and has the outline's exact ratio, so it sits in the
+ * same box as the outline, scaled the same way. It is on the page from the start, invisible, so it is ready, and
+ * fades in over the outline once the answer is picked.
+ */
 function Moment({ id, revealed }: { id: string; revealed: boolean }) {
-  const moment = MOMENTS[id];
-  if (!moment) return null;
+  const photo = MOMENTS[id];
+  if (!photo) return null;
   return (
-    <Image
-      src={moment.photo}
-      alt=""
-      aria-hidden={!revealed}
-      fill
-      sizes="(min-width: 640px) 576px, 100vw"
-      className="object-cover"
-      style={{ objectPosition: moment.focus, opacity: revealed ? 1 : 0, transition: "opacity var(--moment-fade, 900ms) ease" }}
-    />
+    // The same box as the outline: the stage's padding, and the same bottom edge.
+    <div className="absolute bottom-0 left-4 right-4 top-4" aria-hidden="true">
+      <Image
+        src={photo}
+        alt=""
+        fill
+        sizes="(min-width: 640px) 544px, 92vw"
+        className="object-contain object-bottom"
+        style={{ opacity: revealed ? 1 : 0, transition: "opacity 900ms ease" }}
+      />
+    </div>
   );
 }
 

@@ -21,28 +21,30 @@ import ronaldoCalma from "@/assets/play/moments/ronaldo-calma.jpg";
 import vardySlide from "@/assets/play/moments/vardy-slide.jpg";
 import sakaFlag from "@/assets/play/moments/saka-flag.jpg";
 
-/** The original photo behind each silhouette, shown when the answer is revealed. `focus` is where the player is in the photo (x% y%), so a crop keeps them in view. */
-export type Moment = { photo: StaticImageData; focus: string };
-
-export const MOMENTS: Record<string, Moment> = {
-  "ronaldo-siu": { photo: ronaldoSiu, focus: "50% 52%" },
-  "mbappe-arms": { photo: mbappeArms, focus: "54% 50%" },
-  "mbappe-salute": { photo: mbappeSalute, focus: "49% 56%" },
-  "haaland-zen": { photo: haalandZen, focus: "53% 52%" },
-  "rashford-temple": { photo: rashfordTemple, focus: "56% 51%" },
-  "lewandowski-cross": { photo: lewandowskiCross, focus: "42% 51%" },
-  "neymar-bow": { photo: neymarBow, focus: "37% 54%" },
-  "salah-sky": { photo: salahSky, focus: "48% 50%" },
-  "messi-ears": { photo: messiEars, focus: "52% 51%" },
-  "messi-shirt": { photo: messiShirt, focus: "44% 53%" },
-  "bellingham-wide": { photo: bellinghamWide, focus: "50% 56%" },
-  "yamal-roar": { photo: yamalRoar, focus: "52% 51%" },
-  "vini-dance": { photo: viniDance, focus: "40% 52%" },
-  "palmer-shrug": { photo: palmerShrug, focus: "49% 53%" },
-  "griezmann-l": { photo: griezmannL, focus: "76% 53%" },
-  "pogba-dab": { photo: pogbaDab, focus: "56% 55%" },
-  "dybala-mask": { photo: dybalaMask, focus: "34% 54%" },
-  "ronaldo-calma": { photo: ronaldoCalma, focus: "52% 52%" },
-  "vardy-slide": { photo: vardySlide, focus: "42% 52%" },
-  "saka-flag": { photo: sakaFlag, focus: "42% 53%" },
+/**
+ * The original photo behind each silhouette, shown when the answer is revealed. Each is cropped to the
+ * player's bounding box, the same box the outline was cut from, so it has the outline's exact ratio and
+ * can take its place.
+ */
+export const MOMENTS: Record<string, StaticImageData> = {
+  "ronaldo-siu": ronaldoSiu,
+  "mbappe-arms": mbappeArms,
+  "mbappe-salute": mbappeSalute,
+  "haaland-zen": haalandZen,
+  "rashford-temple": rashfordTemple,
+  "lewandowski-cross": lewandowskiCross,
+  "neymar-bow": neymarBow,
+  "salah-sky": salahSky,
+  "messi-ears": messiEars,
+  "messi-shirt": messiShirt,
+  "bellingham-wide": bellinghamWide,
+  "yamal-roar": yamalRoar,
+  "vini-dance": viniDance,
+  "palmer-shrug": palmerShrug,
+  "griezmann-l": griezmannL,
+  "pogba-dab": pogbaDab,
+  "dybala-mask": dybalaMask,
+  "ronaldo-calma": ronaldoCalma,
+  "vardy-slide": vardySlide,
+  "saka-flag": sakaFlag,
 };
