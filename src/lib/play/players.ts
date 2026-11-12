@@ -21,6 +21,7 @@ export type PlayPlayer = {
 
 const CC = (who: string, licence: string, file: string) => `${who}, ${licence}, Wikimedia Commons (${file})`;
 
+/** The order here is part of every shared link (see encodeOrder): only ever add players at the end. */
 export const PLAYERS: PlayPlayer[] = [
   { slug: "messi", firstName: "Lionel", name: "Messi", color: "#75AADB", debateSlug: "messi-vs-ronaldo", debateTitle: "Messi vs Ronaldo", cardFile: "assets/play/messi.jpg", credits: { portrait: CC("Bryan Berlin", "CC BY-SA 4.0", "Leo Messi Argentina v Egypt 7 July 2026-1.jpg"), card: "Al Jazeera gallery, 2022 World Cup final" } },
   { slug: "ronaldo", firstName: "Cristiano", name: "Ronaldo", color: "#E8322A", debateSlug: "messi-vs-ronaldo", debateTitle: "Messi vs Ronaldo", cardFile: "assets/play/ronaldo.jpg", credits: { portrait: CC("Bryan Berlin", "CC BY-SA 4.0", "Cristiano Ronaldo Croatia v Portugal 2 July 2026-075 (cropped).jpg"), card: "Real Madrid celebration, news photo" } },
@@ -48,8 +49,34 @@ export function fullName(player: PlayPlayer): string {
   return player.firstName ? `${player.firstName} ${player.name}` : player.name;
 }
 
-/** The shape the winner-card renderer wants. Everyone else in the game was beaten. */
-export function pickCardPlayer(player: PlayPlayer) {
+/** One character per player: their place in PLAYERS, in base 36. */
+const CODE_DIGITS = "0123456789abcdefghijklmnopqrstuvwxyz";
+
+/**
+ * The order the beaten players were knocked out, as a short code for the share
+ * link ("a03b…", one character each). Null unless it is exactly the other 14,
+ * each once.
+ */
+export function encodeOrder(slugs: string[], winnerSlug: string): string | null {
+  if (slugs.length !== PLAYERS.length - 1) return null;
+  const indices = slugs.map((slug) => PLAYERS.findIndex((player) => player.slug === slug));
+  const seen = new Set(indices);
+  const winner = PLAYERS.findIndex((player) => player.slug === winnerSlug);
+  if (winner < 0 || seen.size !== slugs.length || seen.has(-1) || seen.has(winner)) return null;
+  return indices.map((index) => CODE_DIGITS[index]).join("");
+}
+
+/** The players in the order they were knocked out, or null if the code isn't exactly that for this winner. Nothing but known players can come out. */
+export function decodeOrder(code: string | null | undefined, winnerSlug: string): PlayPlayer[] | null {
+  if (!code || code.length !== PLAYERS.length - 1) return null;
+  const players = [...code].map((digit) => PLAYERS[CODE_DIGITS.indexOf(digit)]);
+  if (players.some((player) => !player) || new Set(players).size !== players.length) return null;
+  if (players.some((player) => player.slug === winnerSlug)) return null;
+  return players;
+}
+
+/** The shape the winner-card renderer wants. `order` is who they knocked out, first to last. */
+export function pickCardPlayer(player: PlayPlayer, order?: PlayPlayer[] | null) {
   return {
     slug: player.slug,
     fullName: fullName(player),
@@ -57,5 +84,6 @@ export function pickCardPlayer(player: PlayPlayer) {
     color: player.color,
     photoFile: player.cardFile,
     beaten: PLAYERS.length - 1,
+    beatenNames: order?.map((beaten) => beaten.name),
   };
 }

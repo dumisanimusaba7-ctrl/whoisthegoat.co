@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useReducer, useState } from "react";
 
 import { AdSlot } from "@/components/ads/ad-slot";
+import { encodeOrder } from "@/lib/play/players";
 import {
   buildPool,
   type Contender,
@@ -164,10 +165,12 @@ function Tile({ player, side, state, disabled, onPick }: { player: Contender; si
 
 function ResultScreen({ winner, beaten, onAgain }: { winner: Contender; beaten: Contender[]; onAgain: () => void }) {
   const [shared, setShared] = useState<"idle" | "copied">("idle");
-  const cardUrl = `/api/play/card/${winner.slug}/post`;
+  // The order they knocked the others out, so the card (and the link preview) lists it.
+  const code = encodeOrder(beaten.map((player) => player.slug), winner.slug);
+  const cardUrl = `/api/play/card/${winner.slug}/post${code ? `?o=${code}` : ""}`;
 
   const share = useCallback(async () => {
-    const url = `${window.location.origin}/play/who-is-better/pick/${winner.slug}`;
+    const url = `${window.location.origin}/play/who-is-better/pick/${winner.slug}${code ? `/${code}` : ""}`;
     const text = shareText(winner, beaten.length);
     track("who_is_better_shared", { winner: winner.slug });
     try {
@@ -181,7 +184,7 @@ function ResultScreen({ winner, beaten, onAgain }: { winner: Contender; beaten: 
     } catch {
       // Closing the share sheet is not an error.
     }
-  }, [winner, beaten.length]);
+  }, [winner, beaten.length, code]);
 
   return (
     <div className="mx-auto max-w-md px-4 pb-10 pt-8 text-center sm:pt-12">

@@ -430,6 +430,15 @@ export type PickCardPlayer = {
   photoFile: string;
   /** How many others they beat to get here. */
   beaten: number;
+  /** Who they knocked out, first to last. When given, the 4:5 and story cards list them struck out. */
+  beatenNames?: string[];
+};
+
+// Where the struck-out list sits on each card, and how big it is. The square
+// (a link preview) has no room for fourteen lines, so it keeps the one-line count.
+const PICK_LIST: Partial<Record<VoteShape, { top: number; size: number; line: number }>> = {
+  post: { top: 168, size: 25, line: 41 },
+  story: { top: 330, size: 30, line: 50 },
 };
 
 /** "MY ULTIMATE PLAYER" card over the winner's most iconic photo: 4:5, square for link previews, or 9:16 for stories. */
@@ -439,6 +448,7 @@ function PickCard({ player, photo, shape = "post" }: { player: PickCardPlayer; p
   const post = CARD_FORMATS.post;
   const pad = 64;
   const name = player.name.toUpperCase();
+  const list = player.beatenNames && player.beatenNames.length > 0 ? PICK_LIST[shape] : undefined;
 
   return (
     <Canvas>
@@ -447,6 +457,21 @@ function PickCard({ player, photo, shape = "post" }: { player: PickCardPlayer; p
         <img src={photo} width={post.width} height={post.height} alt="" style={{ position: "absolute", top: look.photoTop, left: 0 }} />
       ) : null}
       <Layer style={{ backgroundImage: look.scrim }} />
+      {list && player.beatenNames ? (
+        // A darker edge on the right keeps the names legible over any photo.
+        <div
+          style={{
+            display: "flex",
+            position: "absolute",
+            top: list.top - 40,
+            right: 0,
+            width: 520,
+            // Runs on into the dark band under the photo, so its lower edge disappears into it.
+            height: player.beatenNames.length * list.line + 330,
+            backgroundImage: "linear-gradient(to left, rgba(10,12,20,0.66) 0%, rgba(10,12,20,0.44) 55%, rgba(10,12,20,0) 100%)",
+          }}
+        />
+      ) : null}
       <div style={{ display: "flex", position: "absolute", top: 0, left: 0, right: 0, height: 12, background: player.color }} />
 
       <Layer style={{ flexDirection: "column", padding: `${look.padTop}px ${pad}px ${look.padBottom}px` }}>
@@ -459,15 +484,41 @@ function PickCard({ player, photo, shape = "post" }: { player: PickCardPlayer; p
 
         <div style={{ display: "flex", fontFamily: "Wide", fontSize: 40, letterSpacing: "0.05em", color: player.color }}>MY ULTIMATE PLAYER</div>
         <div style={{ display: "flex", fontFamily: "Display", fontSize: fitDisplay(name, width - pad * 2, 250), lineHeight: 0.84, marginTop: 10 }}>{name}</div>
-        <div style={{ display: "flex", fontFamily: "Wide", fontSize: 30, letterSpacing: "0.05em", marginTop: 22 }}>
-          {`I KNOCKED OUT THE OTHER ${player.beaten}`}
-        </div>
+        {list ? null : (
+          <div style={{ display: "flex", fontFamily: "Wide", fontSize: 30, letterSpacing: "0.05em", marginTop: 22 }}>
+            {`I KNOCKED OUT THE OTHER ${player.beaten}`}
+          </div>
+        )}
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: look.gap, paddingTop: 28, borderTop: `2px solid ${RULE}`, fontFamily: "Wide", fontSize: 24, letterSpacing: "0.1em" }}>
           <div style={{ display: "flex", color: MUTED }}>WHO’S YOURS?</div>
           <div style={{ display: "flex" }}>{`PLAY AT ${SITE_DOMAIN.toUpperCase()}`}</div>
         </div>
       </Layer>
+
+      {list && player.beatenNames ? (
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", position: "absolute", top: list.top, right: pad }}>
+          <div style={{ display: "flex", fontFamily: "Wide", fontSize: 18, letterSpacing: "0.14em", color: player.color, marginBottom: 8 }}>KNOCKED OUT, IN ORDER</div>
+          {player.beatenNames.map((beaten, index) => (
+            <div
+              key={`${index}-${beaten}`}
+              style={{
+                display: "flex",
+                height: list.line,
+                alignItems: "center",
+                fontFamily: "Wide",
+                fontSize: list.size,
+                letterSpacing: "0.05em",
+                color: "rgba(255,255,255,0.82)",
+                textDecoration: "line-through",
+                textShadow: "0 2px 8px rgba(0,0,0,0.85)",
+              }}
+            >
+              {beaten.toUpperCase()}
+            </div>
+          ))}
+        </div>
+      ) : null}
     </Canvas>
   );
 }

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { existsSync } from "node:fs";
 
 import { DEBATES } from "@/lib/debates";
-import { fullName, getPlayer, pickCardPlayer, PLAYERS } from "@/lib/play/players";
+import { decodeOrder, encodeOrder, fullName, getPlayer, pickCardPlayer, PLAYERS } from "@/lib/play/players";
 import { buildPool, gameReducer, roundNumber, shareText, shuffle, startGame, winnerOf } from "@/lib/play/who-is-better";
 
 /** A repeatable "random": a small linear congruential generator. */
@@ -51,6 +51,44 @@ describe("who is better: the player pool", () => {
     expect(fullName(getPlayer("pele")!)).toBe("Pelé");
     expect(pickCardPlayer(messi)).toMatchObject({ slug: "messi", name: "Messi", beaten: 14, photoFile: "assets/play/messi.jpg" });
     expect(getPlayer("nobody")).toBeUndefined();
+  });
+});
+
+describe("who is better: the knock-out order in a share link", () => {
+  const winner = "messi";
+  const others = PLAYERS.filter((p) => p.slug !== winner).map((p) => p.slug);
+
+  it("round-trips the order the others were knocked out", () => {
+    const order = [...others].reverse();
+    const code = encodeOrder(order, winner)!;
+    expect(code).toHaveLength(14);
+    expect(decodeOrder(code, winner)?.map((p) => p.slug)).toEqual(order);
+  });
+
+  it("gives the same code for the same order, and a different one for another", () => {
+    expect(encodeOrder(others, winner)).toBe(encodeOrder([...others], winner));
+    expect(encodeOrder(others, winner)).not.toBe(encodeOrder([...others].reverse(), winner));
+  });
+
+  it("only accepts exactly the other 14 players, each once", () => {
+    expect(encodeOrder(others.slice(1), winner)).toBeNull();
+    expect(encodeOrder([...others.slice(1), others[1]], winner)).toBeNull();
+    expect(encodeOrder([...others.slice(1), winner], winner)).toBeNull();
+    expect(encodeOrder([...others.slice(1), "nobody"], winner)).toBeNull();
+    const code = encodeOrder(others, winner)!;
+    expect(decodeOrder(code.slice(1), winner)).toBeNull();
+    expect(decodeOrder(`${code.slice(1)}${code[1]}`, winner)).toBeNull();
+    expect(decodeOrder(code, "ronaldo")).toBeNull();
+    expect(decodeOrder("<script>alert(1)</script>", winner)).toBeNull();
+    expect(decodeOrder("", winner)).toBeNull();
+    expect(decodeOrder(null, winner)).toBeNull();
+    expect(decodeOrder("z".repeat(14), winner)).toBeNull();
+  });
+
+  it("puts the beaten names on the card in that order", () => {
+    const order = decodeOrder(encodeOrder(others, winner)!, winner)!;
+    expect(pickCardPlayer(getPlayer(winner)!, order).beatenNames).toEqual(order.map((p) => p.name));
+    expect(pickCardPlayer(getPlayer(winner)!).beatenNames).toBeUndefined();
   });
 });
 
