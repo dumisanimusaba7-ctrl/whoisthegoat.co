@@ -1,9 +1,11 @@
 "use client";
 
 import { track } from "@vercel/analytics";
+import Image from "next/image";
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 
 import { AdSlot } from "@/components/ads/ad-slot";
+import { MOMENTS } from "@/lib/play/moments";
 import { buildQuestions, encodeRun, QUESTIONS_PER_GAME, ratingFor, rankFor, shareLine, SILHOUETTES, type Played, type Question, type Silhouette } from "@/lib/play/guess";
 
 /** Silhouettes this browser has already been asked, so a rematch leads with new ones. */
@@ -63,6 +65,23 @@ function Outline({ silhouette, revealed }: { silhouette: Silhouette; revealed: b
   };
   return (
     <div role="img" aria-label={revealed ? `${silhouette.player}: ${silhouette.celebration}` : "A footballer's celebration as a black silhouette"} className="h-full w-full" style={style} />
+  );
+}
+
+/** The real photo of the moment. It is on the page from the start, invisible, so it is ready; it fades in over the outline once the answer is picked. */
+function Moment({ id, revealed }: { id: string; revealed: boolean }) {
+  const moment = MOMENTS[id];
+  if (!moment) return null;
+  return (
+    <Image
+      src={moment.photo}
+      alt=""
+      aria-hidden={!revealed}
+      fill
+      sizes="(min-width: 640px) 576px, 100vw"
+      className="object-cover"
+      style={{ objectPosition: moment.focus, opacity: revealed ? 1 : 0, transition: "opacity var(--moment-fade, 900ms) ease" }}
+    />
   );
 }
 
@@ -148,8 +167,9 @@ function Game({ questions, onAgain }: { questions: Question[]; onAgain: () => vo
       </div>
 
       <h2 className="sr-only">Who is that?</h2>
-      <div className="mt-4 h-[min(36vh,320px)] bg-paper px-4 pt-4">
+      <div className="relative mt-4 h-[min(36vh,320px)] overflow-hidden bg-paper px-4 pt-4">
         <Outline key={question.silhouette.id} silhouette={question.silhouette} revealed={picked !== null} />
+        <Moment key={`photo-${question.silhouette.id}`} id={question.silhouette.id} revealed={picked !== null} />
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-2 sm:gap-3" role="group" aria-label="Pick the player">
@@ -183,7 +203,7 @@ function Game({ questions, onAgain }: { questions: Question[]; onAgain: () => vo
             <p className="mt-1 font-semibold">{question.silhouette.celebration}</p>
             <p className="mt-1 text-sm leading-relaxed text-mute-dark">{question.silhouette.fact}</p>
             <a href={question.silhouette.source.url} target="_blank" rel="noopener noreferrer" className="link mt-2 inline-block text-sm">
-              See the original photo ({question.silhouette.source.name})
+              Photo: {question.silhouette.source.name}
             </a>
           </div>
         ) : null}
