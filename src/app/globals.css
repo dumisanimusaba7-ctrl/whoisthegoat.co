@@ -427,3 +427,39 @@
     animation: none !important;
   }
 }
+
+/* ── Who is better? ──────────────────────────────────────────────────────── */
+
+.play-tile {
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    opacity 1500ms var(--ease-in-out),
+    filter 1500ms var(--ease-in-out),
+    transform 1500ms var(--ease-in-out);
+}
+
+/* The player who wasn't picked fades slowly away. */
+.play-vanish {
+  opacity: 0;
+  filter: grayscale(1) blur(2px);
+  transform: scale(0.96);
+  pointer-events: none;
+}
+
+/* The player who was picked stays, ringed in their colour. */
+.play-kept {
+  box-shadow: 0 0 0 3px var(--tile, #fff);
+}
+
+/* The next challenger fades into the empty place. */
+.play-arrive {
+  animation: play-arrive 900ms var(--ease-out) both;
+}
+
+@keyframes play-arrive {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+    transform: scale(1.03);
+  }
+}

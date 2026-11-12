@@ -17,6 +17,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
         ? [{ url: absoluteUrl(`/${debate.slug}/trophies`), lastModified: now, changeFrequency: "monthly" as const, priority: 0.8 }]
         : []),
     ]),
+    { url: absoluteUrl("/play"), lastModified: now, changeFrequency: "weekly", priority: 0.7 },
+    { url: absoluteUrl("/play/who-is-better"), lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: absoluteUrl("/trophies"), lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: absoluteUrl("/leaderboard"), lastModified: now, changeFrequency: "hourly", priority: 0.8 },
     { url: absoluteUrl("/debates"), lastModified: now, changeFrequency: "weekly", priority: 0.7 },

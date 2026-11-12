@@ -48,8 +48,8 @@ export function LogoLockup({ className }: { className?: string }) {
   return (
     <span className={`inline-flex items-center gap-2 min-[400px]:gap-2.5 ${className ?? ""}`}>
       <LogoMark className="h-5 w-auto shrink-0 min-[400px]:h-6 sm:h-7" />
-      {/* Narrow phones: a slightly smaller lockup, and the mark alone below 360px. */}
-      <LogoWordmark className="h-[11px] w-auto max-[360px]:hidden min-[400px]:h-[13px] sm:h-[15px]" />
+      {/* Phones: the mark alone below 440px, so the four links fit beside it. */}
+      <LogoWordmark className="h-[11px] w-auto max-[439px]:hidden min-[400px]:h-[13px] sm:h-[15px]" />
       <span className="sr-only">WHOISTHEGOATS.COM</span>
     </span>
   );

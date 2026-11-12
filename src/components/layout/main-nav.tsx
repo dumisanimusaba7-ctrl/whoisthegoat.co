@@ -14,6 +14,7 @@ export function MainNav({ trophiesHref }: { trophiesHref: string }) {
       short: "Leaders",
       match: (path: string) => path === "/leaderboard" || path === "/results" || path.endsWith("/results"),
     },
+    { href: "/play", label: "Play", match: (path: string) => path.startsWith("/play") },
     { href: trophiesHref, label: "Trophies", match: (path: string) => path === "/trophies" || path.endsWith("/trophies") },
   ];
   return (
@@ -30,9 +31,9 @@ export function MainNav({ trophiesHref }: { trophiesHref: string }) {
               >
                 {"short" in item ? (
                   <>
-                    {/* The full label doesn't fit beside the logo on the narrowest phones. */}
-                    <span className="min-[380px]:hidden">{item.short}</span>
-                    <span className="max-[379px]:hidden">{item.label}</span>
+                    {/* The full label doesn't fit beside the logo and the other links on most phones. */}
+                    <span className="min-[440px]:hidden">{item.short}</span>
+                    <span className="max-[439px]:hidden">{item.label}</span>
                   </>
                 ) : (
                   item.label
