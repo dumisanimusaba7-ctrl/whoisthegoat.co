@@ -498,7 +498,7 @@ function PickCard({ player, photo, shape = "post" }: { player: PickCardPlayer; p
 
       {list && player.beatenNames ? (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", position: "absolute", top: list.top, right: pad }}>
-          <div style={{ display: "flex", fontFamily: "Wide", fontSize: 18, letterSpacing: "0.14em", color: player.color, marginBottom: 8 }}>KNOCKED OUT, IN ORDER</div>
+          <div style={{ display: "flex", fontFamily: "Wide", fontSize: 18, letterSpacing: "0.14em", color: WHITE, textShadow: "0 2px 8px rgba(0,0,0,0.85)", marginBottom: 8 }}>KNOCKED OUT, IN ORDER</div>
           {player.beatenNames.map((beaten, index) => (
             <div
               key={`${index}-${beaten}`}
