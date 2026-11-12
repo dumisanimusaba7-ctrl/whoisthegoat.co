@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 
 import { AdSlot } from "@/components/ads/ad-slot";
+import { Board, readBest, SubmitScore, useBest, writeBest } from "@/components/play/high-scores";
 import { MOMENTS } from "@/lib/play/moments";
 import { buildQuestions, encodeRun, QUESTIONS_PER_GAME, ratingFor, rankFor, shareLine, SILHOUETTES, type Played, type Question, type Silhouette } from "@/lib/play/guess";
 
@@ -92,6 +93,7 @@ function Moment({ id, revealed }: { id: string; revealed: boolean }) {
 }
 
 function StartScreen({ onStart }: { onStart: () => void }) {
+  const best = useBest();
   return (
     <div className="mx-auto max-w-xl px-4 py-10 text-center sm:py-16">
       <h1 className="type-headline text-[min(2.6rem,10vw)] sm:text-6xl">Who is that?</h1>
@@ -105,9 +107,16 @@ function StartScreen({ onStart }: { onStart: () => void }) {
           </div>
         ))}
       </div>
-      <button type="button" onClick={onStart} className="btn btn-light mt-8 w-full sm:w-auto sm:px-12">
+      {best > 0 ? (
+        <p className="tabular mt-6 font-semibold">
+          Your high score: {best}
+          <span className="text-mute-dark">/{QUESTIONS_PER_GAME}</span>
+        </p>
+      ) : null}
+      <button type="button" onClick={onStart} className="btn btn-light mt-6 w-full sm:w-auto sm:px-12">
         Start
       </button>
+      <Board limit={10} />
     </div>
   );
 }
@@ -119,6 +128,8 @@ function Game({ questions, onAgain }: { questions: Question[]; onAgain: () => vo
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
   const [played, setPlayed] = useState<Played[]>([]);
+  // Their high score going in, to tell whether this game beats it.
+  const [bestBefore] = useState(readBest);
   const nextRef = useRef<HTMLButtonElement>(null);
 
   const total = questions.length;
@@ -132,7 +143,9 @@ function Game({ questions, onAgain }: { questions: Question[]; onAgain: () => vo
   }, [picked]);
 
   useEffect(() => {
-    if (done) track("guess_finished", { score, total });
+    if (!done) return;
+    track("guess_finished", { score, total });
+    writeBest(score);
   }, [done, score, total]);
 
   const answer = (name: string) => {
@@ -155,7 +168,7 @@ function Game({ questions, onAgain }: { questions: Question[]; onAgain: () => vo
     setIndex((i) => i + 1);
   };
 
-  if (done) return <Result score={score} total={total} bestStreak={bestStreak} played={played} onAgain={onAgain} />;
+  if (done) return <Result score={score} total={total} bestStreak={bestStreak} played={played} bestBefore={bestBefore} onAgain={onAgain} />;
 
   return (
     <div className="mx-auto max-w-xl px-3 pb-10 pt-5 sm:px-6 sm:pt-10">
@@ -166,6 +179,7 @@ function Game({ questions, onAgain }: { questions: Question[]; onAgain: () => vo
         <p className="type-label tabular text-mute-dark">
           Score {score}
           {streak >= 2 ? ` · ${streak} in a row` : ""}
+          {bestBefore > 0 ? ` · Best ${Math.max(bestBefore, score)}` : ""}
         </p>
       </div>
       <div className="mt-2 h-1 bg-white/15" role="progressbar" aria-label="Questions answered" aria-valuemin={0} aria-valuemax={total} aria-valuenow={index}>
@@ -221,7 +235,10 @@ function Game({ questions, onAgain }: { questions: Question[]; onAgain: () => vo
   );
 }
 
-function Result({ score, total, bestStreak, played, onAgain }: { score: number; total: number; bestStreak: number; played: Played[]; onAgain: () => void }) {
+function Result({ score, total, bestStreak, played, bestBefore, onAgain }: { score: number; total: number; bestStreak: number; played: Played[]; bestBefore: number; onAgain: () => void }) {
+  const isNewBest = score > bestBefore;
+  const [posted, setPosted] = useState<string | null>(null);
+  const [boardKey, setBoardKey] = useState(0);
   const [shared, setShared] = useState<"idle" | "copied">("idle");
   const rank = rankFor(score, total);
   // The card lists the 20 outlines played, the ones guessed right in colour.
@@ -253,6 +270,20 @@ function Result({ score, total, bestStreak, played, onAgain }: { score: number; 
       <img src={cardUrl} width={1080} height={1350} alt={`${rank}: ${score} out of ${total} celebrations named.`} className="play-arrive mx-auto mt-4 aspect-[4/5] w-full max-w-xs bg-ink-2" />
       <p className="mt-4 leading-relaxed">{ratingFor(score, total)}</p>
       {bestStreak >= 2 ? <p className="mt-1 text-sm text-mute-dark">Best run: {bestStreak} in a row</p> : null}
+      <p className="tabular mt-3 font-semibold">
+        {isNewBest ? "New high score!" : `Your high score: ${bestBefore}/${total}`}
+      </p>
+      {isNewBest ? (
+        <SubmitScore
+          score={score}
+          run={code}
+          onSent={(name) => {
+            setPosted(name);
+            setBoardKey((key) => key + 1);
+          }}
+        />
+      ) : null}
+      <Board refresh={boardKey} highlight={posted ?? undefined} />
       <div className="mt-6 grid gap-3">
         <button type="button" onClick={share} className="btn btn-light">
           {shared === "copied" ? "Copied. Now send it" : "Challenge a friend"}

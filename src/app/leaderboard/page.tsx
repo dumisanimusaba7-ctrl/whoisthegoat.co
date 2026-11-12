@@ -9,6 +9,9 @@ import { CARD_PHOTOS } from "@/lib/card-photos";
 import { CATEGORY_LABELS, DEBATES, type Debate, type DebateOption } from "@/lib/debates";
 import { formatPercent } from "@/lib/format";
 import { optionPercentages } from "@/lib/results";
+import { QUESTIONS_PER_GAME } from "@/lib/play/guess";
+import { GUESS_GAME } from "@/lib/play/scores";
+import { getPageBoard } from "@/lib/server/scores";
 import { getPageResults } from "@/lib/server/results";
 
 export const metadata: Metadata = {
@@ -48,11 +51,44 @@ export default function LeaderboardPage() {
               </section>
               </Fragment>
             ))}
+            <GameBoard />
           </div>
         </div>
         <AdSlot placement="editorial" className="border-t border-rule" />
       </div>
     </ViewTransition>
+  );
+}
+
+/** The best players of the silhouette game. Only each player's highest score is on it. */
+async function GameBoard() {
+  const rows = await getPageBoard(GUESS_GAME);
+  return (
+    <section aria-labelledby="lb-games" className="mt-12 sm:mt-16">
+      <h2 id="lb-games" className="type-display border-t-2 border-ink pt-4 text-4xl sm:text-5xl">
+        Who is that?
+      </h2>
+      <p className="mt-3 max-w-xl text-mute">The best scores guessing footballers from their celebration silhouettes. Each player appears once, with their highest score.</p>
+      {rows.length === 0 ? (
+        <p className="mt-6 text-mute">No scores yet.</p>
+      ) : (
+        <ol className="mt-6 max-w-xl divide-y divide-rule border-y border-rule">
+          {rows.map((row, index) => (
+            <li key={`${index}-${row.name}`} className="flex items-baseline gap-4 py-3">
+              <span className="tabular w-8 text-right text-mute">{index + 1}</span>
+              <span className="min-w-0 flex-1 truncate font-semibold">{row.name}</span>
+              <span className="tabular font-semibold">
+                {row.score}
+                <span className="text-mute">/{QUESTIONS_PER_GAME}</span>
+              </span>
+            </li>
+          ))}
+        </ol>
+      )}
+      <Link href="/play/guess-the-player" className="btn btn-dark mt-6 inline-flex">
+        Play and get on the board
+      </Link>
+    </section>
   );
 }
 
