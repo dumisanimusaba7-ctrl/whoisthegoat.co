@@ -62,32 +62,32 @@ describe("names on the board", () => {
 describe("POST /api/play/score", () => {
   beforeEach(() => {
     submitScore.mockReset();
-    submitScore.mockResolvedValue({ status: "new_best", score: 9, rank: 3 });
+    submitScore.mockResolvedValue({ status: "new_best", score: 9, rank: 3, country: null, countryRank: null });
   });
 
   it("sends a valid best to the board with the player's name", async () => {
-    const res = await POST(scoreRequest({ score: 9, run: run(9), name: "Sam" }));
+    const res = await POST(scoreRequest({ game: "guess-the-player", score: 9, run: run(9), name: "Sam" }));
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ status: "new_best", score: 9, rank: 3 });
+    expect(await res.json()).toEqual({ status: "new_best", score: 9, rank: 3, country: null, countryRank: null });
     expect(submitScore).toHaveBeenCalledWith(expect.objectContaining({ game: "guess-the-player", name: "Sam", score: 9 }));
     // A new player gets a cookie so their later scores replace this one instead of adding rows.
     expect(res.headers.get("set-cookie")).toContain("wigoat_vid=");
   });
 
   it("does not set a new cookie for someone who already has one", async () => {
-    const res = await POST(scoreRequest({ score: 9, run: run(9), name: "Sam" }, { cookie: "wigoat_vid=0b6f1c3e-1f4a-4c1d-9a55-0d6f1f5b7a10" }));
+    const res = await POST(scoreRequest({ game: "guess-the-player", score: 9, run: run(9), name: "Sam" }, { cookie: "wigoat_vid=0b6f1c3e-1f4a-4c1d-9a55-0d6f1f5b7a10" }));
     expect(res.status).toBe(200);
     expect(res.headers.get("set-cookie")).toBeNull();
   });
 
   it("rejects requests from other sites", async () => {
-    expect((await POST(scoreRequest({ score: 9, run: run(9), name: "Sam" }, { origin: "https://evil.example" }))).status).toBe(403);
+    expect((await POST(scoreRequest({ game: "guess-the-player", score: 9, run: run(9), name: "Sam" }, { origin: "https://evil.example" }))).status).toBe(403);
     expect(submitScore).not.toHaveBeenCalled();
   });
 
   it("rejects a score that doesn't match its run, a score of 0, an impossible score or a bad name", async () => {
     const bad = [
-      { score: 12, run: run(9), name: "Sam" },
+      { game: "guess-the-player", score: 12, run: run(9), name: "Sam" },
       { score: 0, run: run(0), name: "Sam" },
       { score: 21, run: run(9), name: "Sam" },
       { score: 9.5, run: run(9), name: "Sam" },
@@ -100,8 +100,24 @@ describe("POST /api/play/score", () => {
     expect(submitScore).not.toHaveBeenCalled();
   });
 
+  it("takes a quiz score inside its range, with the player's country, and refuses one outside it", async () => {
+    submitScore.mockResolvedValue({ status: "new_best", score: 1234, rank: 5, country: "GB", countryRank: 2 });
+    const ok = await POST(scoreRequest({ game: "know-your-goats", score: 1234, name: "Sam" }, { "x-vercel-ip-country": "GB" }));
+    expect(ok.status).toBe(200);
+    expect(await ok.json()).toEqual({ status: "new_best", score: 1234, rank: 5, country: "GB", countryRank: 2 });
+    expect(submitScore).toHaveBeenCalledWith(expect.objectContaining({ game: "know-your-goats", score: 1234, country: "GB" }));
+    for (const score of [0, 2251, 99999, -5, 12.5]) {
+      expect((await POST(scoreRequest({ game: "know-your-goats", score, name: "Sam" }))).status, String(score)).toBe(400);
+    }
+  });
+
+  it("refuses an unknown game", async () => {
+    expect((await POST(scoreRequest({ game: "nope", score: 9, run: run(9), name: "Sam" }))).status).toBe(400);
+    expect((await POST(scoreRequest({ score: 9, run: run(9), name: "Sam" }))).status).toBe(400);
+  });
+
   it("says the board is unavailable when the database fails", async () => {
     submitScore.mockRejectedValue(new Error("down"));
-    expect((await POST(scoreRequest({ score: 9, run: run(9), name: "Sam" }))).status).toBe(503);
+    expect((await POST(scoreRequest({ game: "guess-the-player", score: 9, run: run(9), name: "Sam" }))).status).toBe(503);
   });
 });

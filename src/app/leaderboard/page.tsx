@@ -9,8 +9,7 @@ import { CARD_PHOTOS } from "@/lib/card-photos";
 import { CATEGORY_LABELS, DEBATES, type Debate, type DebateOption } from "@/lib/debates";
 import { formatPercent } from "@/lib/format";
 import { optionPercentages } from "@/lib/results";
-import { QUESTIONS_PER_GAME } from "@/lib/play/guess";
-import { GUESS_GAME } from "@/lib/play/scores";
+import { formatScore, GAMES, GUESS_GAME, QUIZ_GAME, type GameSlug } from "@/lib/play/scores";
 import { getPageBoard } from "@/lib/server/scores";
 import { getPageResults } from "@/lib/server/results";
 
@@ -51,7 +50,8 @@ export default function LeaderboardPage() {
               </section>
               </Fragment>
             ))}
-            <GameBoard />
+            <GameBoard game={GUESS_GAME} blurb="The best scores guessing footballers from their celebration silhouettes." />
+            <GameBoard game={QUIZ_GAME} blurb="The best rounds of the GOAT quiz, in points." />
           </div>
         </div>
         <AdSlot placement="editorial" className="border-t border-rule" />
@@ -60,15 +60,16 @@ export default function LeaderboardPage() {
   );
 }
 
-/** The best players of the silhouette game. Only each player's highest score is on it. */
-async function GameBoard() {
-  const rows = await getPageBoard(GUESS_GAME);
+/** The best players of a game. Only each player's highest score is on it. */
+async function GameBoard({ game, blurb }: { game: GameSlug; blurb: string }) {
+  const rows = await getPageBoard(game);
+  const { label, href } = GAMES[game];
   return (
-    <section aria-labelledby="lb-games" className="mt-12 sm:mt-16">
-      <h2 id="lb-games" className="type-display border-t-2 border-ink pt-4 text-4xl sm:text-5xl">
-        Who is that?
+    <section aria-labelledby={`lb-${game}`} className="mt-12 sm:mt-16">
+      <h2 id={`lb-${game}`} className="type-display border-t-2 border-ink pt-4 text-4xl sm:text-5xl">
+        {label}
       </h2>
-      <p className="mt-3 max-w-xl text-mute">The best scores guessing footballers from their celebration silhouettes. Each player appears once, with their highest score.</p>
+      <p className="mt-3 max-w-xl text-mute">{blurb} Each player appears once, with their highest score.</p>
       {rows.length === 0 ? (
         <p className="mt-6 text-mute">No scores yet.</p>
       ) : (
@@ -77,15 +78,12 @@ async function GameBoard() {
             <li key={`${index}-${row.name}`} className="flex items-baseline gap-4 py-3">
               <span className="tabular w-8 text-right text-mute">{index + 1}</span>
               <span className="min-w-0 flex-1 truncate font-semibold">{row.name}</span>
-              <span className="tabular font-semibold">
-                {row.score}
-                <span className="text-mute">/{QUESTIONS_PER_GAME}</span>
-              </span>
+              <span className="tabular font-semibold">{formatScore(game, row.score)}</span>
             </li>
           ))}
         </ol>
       )}
-      <Link href="/play/guess-the-player" className="btn btn-dark mt-6 inline-flex">
+      <Link href={href} className="btn btn-dark mt-6 inline-flex">
         Play and get on the board
       </Link>
     </section>

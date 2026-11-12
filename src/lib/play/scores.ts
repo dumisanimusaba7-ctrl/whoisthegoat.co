@@ -1,7 +1,27 @@
 /** High scores for the games: what a name may be, and the shapes shared by the page and the server. */
 
-/** The one game with a board so far. It matches the `game` column in the database. */
+import { QUESTIONS_PER_GAME } from "@/lib/play/guess";
+import { QUIZ_MAX_POINTS } from "@/lib/play/quiz";
+
+/** The games with a board. The slug matches the `game` column in the database. */
 export const GUESS_GAME = "guess-the-player";
+export const QUIZ_GAME = "know-your-goats";
+
+export type GameSlug = typeof GUESS_GAME | typeof QUIZ_GAME;
+
+export const GAMES: Record<GameSlug, { label: string; href: string; max: number; unit: string }> = {
+  [GUESS_GAME]: { label: "Who is that?", href: "/play/guess-the-player", max: QUESTIONS_PER_GAME, unit: `/${QUESTIONS_PER_GAME}` },
+  [QUIZ_GAME]: { label: "Know your GOATs", href: "/play/know-your-goats", max: QUIZ_MAX_POINTS, unit: " pts" },
+};
+
+export function isGame(value: string): value is GameSlug {
+  return Object.hasOwn(GAMES, value);
+}
+
+/** A score as shown on a board: "17/20" or "1,430 pts". */
+export function formatScore(game: GameSlug, score: number): string {
+  return `${score.toLocaleString("en")}${GAMES[game].unit}`;
+}
 
 export const NAME_MIN = 2;
 export const NAME_MAX = 16;
@@ -52,7 +72,25 @@ export function parseBoard(data: unknown): ScoreRow[] {
   });
 }
 
+/** `country` and `countryRank` are the player's two-letter country and their place among players from there, when known. */
 export type ScoreResponse =
-  | { status: "new_best"; score: number; rank: number }
-  | { status: "not_higher"; score: number; rank: number }
+  | { status: "new_best" | "not_higher"; score: number; rank: number; country: string | null; countryRank: number | null }
   | { status: "invalid" | "forbidden" | "rate_limited" | "unavailable"; message: string };
+
+/** Countries whose name takes "the": "in the United Kingdom". */
+const TAKES_THE = new Set(["GB", "US", "NL", "AE", "PH", "BS", "GM", "KM", "MV", "MH", "SB", "SC", "CG", "CD", "CF", "DO"]);
+
+/** "in the United Kingdom", "in Ireland": a country as it reads after "in". */
+export function inCountry(code: string): string {
+  const name = countryName(code);
+  return `in ${TAKES_THE.has(code) && !name.startsWith("The ") ? "the " : ""}${name}`;
+}
+
+/** "United Kingdom" for "GB", or the code itself where the browser can't say. */
+export function countryName(code: string): string {
+  try {
+    return new Intl.DisplayNames(["en"], { type: "region" }).of(code) ?? code;
+  } catch {
+    return code;
+  }
+}

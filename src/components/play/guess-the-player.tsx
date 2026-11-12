@@ -5,7 +5,8 @@ import Image from "next/image";
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 
 import { AdSlot } from "@/components/ads/ad-slot";
-import { Board, readBest, SubmitScore, useBest, writeBest } from "@/components/play/high-scores";
+import { Board, readBest, SubmitScore, touchStreak, useBest, useStreakLine, writeBest } from "@/components/play/high-scores";
+import { GUESS_GAME } from "@/lib/play/scores";
 import { MOMENTS } from "@/lib/play/moments";
 import { buildQuestions, encodeRun, QUESTIONS_PER_GAME, ratingFor, rankFor, shareLine, SILHOUETTES, type Played, type Question, type Silhouette } from "@/lib/play/guess";
 
@@ -93,7 +94,8 @@ function Moment({ id, revealed }: { id: string; revealed: boolean }) {
 }
 
 function StartScreen({ onStart }: { onStart: () => void }) {
-  const best = useBest();
+  const best = useBest(GUESS_GAME);
+  const streakLine = useStreakLine();
   return (
     <div className="mx-auto max-w-xl px-4 py-10 text-center sm:py-16">
       <h1 className="type-headline text-[min(2.6rem,10vw)] sm:text-6xl">Who is that?</h1>
@@ -113,10 +115,11 @@ function StartScreen({ onStart }: { onStart: () => void }) {
           <span className="text-mute-dark">/{QUESTIONS_PER_GAME}</span>
         </p>
       ) : null}
+      {streakLine ? <p className="mt-1 text-sm text-warning">{streakLine}</p> : null}
       <button type="button" onClick={onStart} className="btn btn-light mt-6 w-full sm:w-auto sm:px-12">
         Start
       </button>
-      <Board limit={10} />
+      <Board game={GUESS_GAME} limit={10} />
     </div>
   );
 }
@@ -129,7 +132,7 @@ function Game({ questions, onAgain }: { questions: Question[]; onAgain: () => vo
   const [bestStreak, setBestStreak] = useState(0);
   const [played, setPlayed] = useState<Played[]>([]);
   // Their high score going in, to tell whether this game beats it.
-  const [bestBefore] = useState(readBest);
+  const [bestBefore] = useState(() => readBest(GUESS_GAME));
   const nextRef = useRef<HTMLButtonElement>(null);
 
   const total = questions.length;
@@ -145,7 +148,8 @@ function Game({ questions, onAgain }: { questions: Question[]; onAgain: () => vo
   useEffect(() => {
     if (!done) return;
     track("guess_finished", { score, total });
-    writeBest(score);
+    writeBest(GUESS_GAME, score);
+    touchStreak();
   }, [done, score, total]);
 
   const answer = (name: string) => {
@@ -275,6 +279,7 @@ function Result({ score, total, bestStreak, played, bestBefore, onAgain }: { sco
       </p>
       {isNewBest ? (
         <SubmitScore
+          game={GUESS_GAME}
           score={score}
           run={code}
           onSent={(name) => {
@@ -283,7 +288,7 @@ function Result({ score, total, bestStreak, played, bestBefore, onAgain }: { sco
           }}
         />
       ) : null}
-      <Board refresh={boardKey} highlight={posted ?? undefined} />
+      <Board game={GUESS_GAME} refresh={boardKey} highlight={posted ?? undefined} />
       <div className="mt-6 grid gap-3">
         <button type="button" onClick={share} className="btn btn-light">
           {shared === "copied" ? "Copied. Now send it" : "Challenge a friend"}

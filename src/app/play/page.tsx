@@ -7,7 +7,7 @@ import { PageHero } from "@/components/layout/page-hero";
 
 export const metadata: Metadata = {
   title: "Play",
-  description: "Football games on WHOISTHEGOATS.COM. Knock players out until your ultimate player is left, or guess the footballer from a celebration silhouette.",
+  description: "Football games on WHOISTHEGOATS.COM. Knock players out until your ultimate player is left, guess the footballer from a celebration silhouette, or see how well you know the GOATs.",
   alternates: { canonical: "/play" },
 };
 
@@ -20,7 +20,12 @@ const GAMES = [
   {
     href: "/play/guess-the-player",
     title: "Who is that?",
-    blurb: "15 famous goal celebrations as black silhouettes. Name the player from the pose alone.",
+    blurb: "20 famous goal celebrations as black silhouettes. Name the player from the pose alone.",
+  },
+  {
+    href: "/play/know-your-goats",
+    title: "Know your GOATs",
+    blurb: "Pick Ronaldo, Messi, Jordan, LeBron, McGregor or Khabib. 10 questions, 15 seconds each. Harder questions and faster answers score more.",
   },
 ];
 

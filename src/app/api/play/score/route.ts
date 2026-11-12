@@ -1,9 +1,10 @@
 import { checkBotId } from "botid/server";
 import { NextResponse, type NextRequest } from "next/server";
 
-import { decodeRun, QUESTIONS_PER_GAME } from "@/lib/play/guess";
-import { cleanName, GUESS_GAME, type ScoreResponse } from "@/lib/play/scores";
+import { decodeRun } from "@/lib/play/guess";
+import { cleanName, GAMES, GUESS_GAME, isGame, QUIZ_GAME, type GameSlug, type ScoreResponse } from "@/lib/play/scores";
 import { isVotingConfigured, serverConfig } from "@/lib/server/config";
+import { clientCountry } from "@/lib/server/network";
 import { isSameOriginRequest, NO_STORE, readJsonBody } from "@/lib/server/request";
 import { submitScore } from "@/lib/server/scores";
 import { resolveVoterId, VOTER_COOKIE, VOTER_COOKIE_MAX_AGE } from "@/lib/server/vote";
@@ -19,19 +20,26 @@ function reject(status: keyof typeof REJECTIONS) {
   return NextResponse.json<ScoreResponse>({ status, message }, { status: httpStatus, headers: NO_STORE });
 }
 
+/** Whether a score is possible for the game: Who is that? needs the run it was made from; the quiz needs a score inside its range. */
+function plausible(game: GameSlug, score: number, body: Record<string, unknown>): boolean {
+  if (score < 1 || score > GAMES[game].max) return false;
+  if (game === GUESS_GAME) return decodeRun(typeof body.run === "string" ? body.run : null, score) !== null;
+  return game === QUIZ_GAME;
+}
+
 /**
- * Puts a player's best score on the Who is that? board. Only a player's best is ever kept: the database
- * replaces their row only when the new score is higher, so sending a lower one changes nothing. The score
- * must come with the run it was made from (the 20 silhouettes and which were right), which has to add up.
+ * Puts a player's best score on a game's board. Only a player's best is ever kept: the database replaces their
+ * row only when the new score is higher, so sending a lower one changes nothing. It also files the player under
+ * the country the edge network reports, for "you rank #N in your country".
  */
 export async function POST(request: NextRequest) {
   if (!isSameOriginRequest(request)) return reject("forbidden");
 
   const body = (await readJsonBody(request, 2048)) as Record<string, unknown> | undefined;
+  const game = typeof body?.game === "string" && isGame(body.game) ? body.game : null;
   const score = typeof body?.score === "number" && Number.isInteger(body.score) ? body.score : null;
   const name = cleanName(body?.name);
-  if (score === null || score < 1 || score > QUESTIONS_PER_GAME || !name) return reject("invalid");
-  if (!decodeRun(typeof body?.run === "string" ? body.run : null, score)) return reject("invalid");
+  if (!body || !game || score === null || !name || !plausible(game, score, body)) return reject("invalid");
 
   if (!isVotingConfigured()) return reject("unavailable");
 
@@ -47,7 +55,7 @@ export async function POST(request: NextRequest) {
   const player = resolveVoterId(request.cookies.get(VOTER_COOKIE)?.value);
   let result;
   try {
-    result = await submitScore({ game: GUESS_GAME, playerId: player.id, name, score });
+    result = await submitScore({ game, playerId: player.id, name, score, country: clientCountry(request.headers) });
   } catch (error) {
     console.error("[score] submit failed:", error);
     return reject("unavailable");
