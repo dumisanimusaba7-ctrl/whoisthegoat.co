@@ -32,10 +32,10 @@ export function isCardFormat(value: string): value is CardFormat {
   return Object.hasOwn(CARD_FORMATS, value);
 }
 
-const INK = "#0A0C14";
-const WHITE = "#FFFFFF";
-const MUTED = "#A3A8B6";
-const RULE = "rgba(255,255,255,0.18)";
+export const INK = "#0A0C14";
+export const WHITE = "#FFFFFF";
+export const MUTED = "#A3A8B6";
+export const RULE = "rgba(255,255,255,0.18)";
 
 /** Percentages only: the cards never show vote counts. */
 type Stats = { percents: [number, number] };
@@ -69,7 +69,7 @@ function loadImage(path: string): Promise<string | null> {
 }
 
 /** Largest font size (px) at which an uppercase name fits the given width. */
-function fitDisplay(text: string, width: number, max: number): number {
+export function fitDisplay(text: string, width: number, max: number): number {
   // Archivo Condensed Black averages ~0.52em per uppercase glyph.
   return Math.min(max, Math.floor(width / (Math.max(text.length, 1) * 0.54)));
 }
@@ -83,7 +83,7 @@ function Mark({ size, color = WHITE }: { size: number; color?: string }) {
   );
 }
 
-function Brand({ size }: { size: number }) {
+export function Brand({ size }: { size: number }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: size * 0.45 }}>
       <Mark size={size} />
@@ -111,7 +111,7 @@ function SplitBar({ debate, stats, height, labelSize }: { debate: Debate; stats:
   );
 }
 
-function Canvas({ children }: { children: ReactNode }) {
+export function Canvas({ children }: { children: ReactNode }) {
   return (
     <div style={{ display: "flex", position: "relative", width: "100%", height: "100%", background: INK, color: WHITE, fontFamily: "Text", overflow: "hidden" }}>
       {children}
@@ -120,7 +120,7 @@ function Canvas({ children }: { children: ReactNode }) {
 }
 
 /** A full-size layer: photo, scrim or the content on top. */
-function Layer({ children, style }: { children?: ReactNode; style?: CSSProperties }) {
+export function Layer({ children, style }: { children?: ReactNode; style?: CSSProperties }) {
   return <div style={{ display: "flex", position: "absolute", top: 0, left: 0, right: 0, bottom: 0, ...style }}>{children}</div>;
 }
 
