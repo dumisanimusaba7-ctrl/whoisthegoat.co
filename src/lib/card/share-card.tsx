@@ -418,6 +418,101 @@ function DebateSquare({ debate, stats, sides }: { debate: Debate; stats: Stats |
   );
 }
 
+/** What the winner card needs: a player from the elimination game. */
+export type PickCardPlayer = {
+  slug: string;
+  /** Full name for the card: "LAMINE YAMAL". */
+  fullName: string;
+  /** Surname or single name, big: "YAMAL". */
+  name: string;
+  color: string;
+  /** Path from the project root to the 1080×1350 photo, face a third of the way down. */
+  photoFile: string;
+  /** How many others they beat to get here. */
+  beaten: number;
+};
+
+/** "MY ULTIMATE PLAYER" card over the winner's most iconic photo: 4:5, square for link previews, or 9:16 for stories. */
+function PickCard({ player, photo, shape = "post" }: { player: PickCardPlayer; photo: string | null; shape?: VoteShape }) {
+  const { width } = CARD_FORMATS[shape];
+  const look = VOTE_SHAPES[shape];
+  const post = CARD_FORMATS.post;
+  const pad = 64;
+  const name = player.name.toUpperCase();
+
+  return (
+    <Canvas>
+      {photo ? (
+        // eslint-disable-next-line @next/next/no-img-element -- rendered to an image, not the DOM
+        <img src={photo} width={post.width} height={post.height} alt="" style={{ position: "absolute", top: look.photoTop, left: 0 }} />
+      ) : null}
+      <Layer style={{ backgroundImage: look.scrim }} />
+      <div style={{ display: "flex", position: "absolute", top: 0, left: 0, right: 0, height: 12, background: player.color }} />
+
+      <Layer style={{ flexDirection: "column", padding: `${look.padTop}px ${pad}px ${look.padBottom}px` }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <Brand size={52} />
+          <div style={{ display: "flex", fontFamily: "Wide", fontSize: 20, letterSpacing: "0.12em", color: WHITE }}>WHO IS BETTER?</div>
+        </div>
+
+        <div style={{ display: "flex", flexGrow: 1 }} />
+
+        <div style={{ display: "flex", fontFamily: "Wide", fontSize: 40, letterSpacing: "0.05em", color: player.color }}>MY ULTIMATE PLAYER</div>
+        <div style={{ display: "flex", fontFamily: "Display", fontSize: fitDisplay(name, width - pad * 2, 250), lineHeight: 0.84, marginTop: 10 }}>{name}</div>
+        <div style={{ display: "flex", fontFamily: "Wide", fontSize: 30, letterSpacing: "0.05em", marginTop: 22 }}>
+          {`I KNOCKED OUT THE OTHER ${player.beaten}`}
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: look.gap, paddingTop: 28, borderTop: `2px solid ${RULE}`, fontFamily: "Wide", fontSize: 24, letterSpacing: "0.1em" }}>
+          <div style={{ display: "flex", color: MUTED }}>WHO’S YOURS?</div>
+          <div style={{ display: "flex" }}>{`PLAY AT ${SITE_DOMAIN.toUpperCase()}`}</div>
+        </div>
+      </Layer>
+    </Canvas>
+  );
+}
+
+/** The same card as a landscape link preview: text on the left, the photo on the right. */
+function PickCardWide({ player, photo }: { player: PickCardPlayer; photo: string | null }) {
+  const { width, height } = CARD_FORMATS.og;
+  const photoWidth = Math.round((height * 4) / 5);
+  const textWidth = width - photoWidth;
+  const pad = 56;
+  const name = player.name.toUpperCase();
+
+  return (
+    <Canvas>
+      <div style={{ display: "flex", position: "absolute", top: 0, right: 0, width: photoWidth, height }}>
+        {photo ? (
+          // eslint-disable-next-line @next/next/no-img-element -- rendered to an image, not the DOM
+          <img src={photo} width={photoWidth} height={height} alt="" />
+        ) : null}
+        <Layer style={{ backgroundImage: "linear-gradient(to right, rgba(10,12,20,1) 0%, rgba(10,12,20,0) 22%)" }} />
+      </div>
+      <div style={{ display: "flex", position: "absolute", top: 0, left: 0, right: 0, height: 10, background: player.color }} />
+      <div style={{ display: "flex", flexDirection: "column", position: "absolute", top: 0, left: 0, bottom: 0, width: textWidth, padding: `${pad + 6}px ${pad}px ${pad - 8}px` }}>
+        <Brand size={40} />
+        <div style={{ display: "flex", flexGrow: 1 }} />
+        <div style={{ display: "flex", fontFamily: "Wide", fontSize: 26, letterSpacing: "0.06em", color: player.color }}>MY ULTIMATE PLAYER</div>
+        <div style={{ display: "flex", fontFamily: "Display", fontSize: fitDisplay(name, textWidth - pad * 2, 170), lineHeight: 0.86, marginTop: 6 }}>{name}</div>
+        <div style={{ display: "flex", fontFamily: "Wide", fontSize: 22, letterSpacing: "0.05em", marginTop: 20 }}>{`I KNOCKED OUT THE OTHER ${player.beaten}`}</div>
+        <div style={{ display: "flex", fontFamily: "Wide", fontSize: 20, letterSpacing: "0.1em", color: MUTED, marginTop: 28 }}>{`PLAY AT ${SITE_DOMAIN.toUpperCase()}`}</div>
+      </div>
+    </Canvas>
+  );
+}
+
+/** Winner card for the elimination game, as a JPEG. */
+export async function renderPickCard(options: { player: PickCardPlayer; format: CardFormat; headers?: Record<string, string> }): Promise<Response> {
+  const { player, format, headers } = options;
+  const photo = await loadImage(player.photoFile);
+  const element = format === "og" ? <PickCardWide player={player} photo={photo} /> : <PickCard player={player} photo={photo} shape={format} />;
+  const png = await new ImageResponse(element, { ...CARD_FORMATS[format], fonts: CARD_FONTS }).arrayBuffer();
+  const quality = format === "post" || format === "story" ? 94 : format === "square" ? 86 : 88;
+  const jpeg = await sharp(Buffer.from(png)).jpeg({ quality, chromaSubsampling: "4:4:4", mozjpeg: true, progressive: true }).toBuffer();
+  return new Response(new Uint8Array(jpeg), { headers: { "Content-Type": "image/jpeg", ...headers } });
+}
+
 export async function renderCard(options: {
   debate: Debate;
   /** The option the sharer voted for; omit for the debate preview. */

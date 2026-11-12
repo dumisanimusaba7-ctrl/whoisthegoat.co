@@ -23,6 +23,7 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/api/card/**": ["./assets/**/*"],
     "/api/og/**": ["./assets/**/*", "./src/assets/debates/**/*"],
+    "/api/play/**": ["./assets/**/*"],
   },
   turbopack: {
     rules: {
