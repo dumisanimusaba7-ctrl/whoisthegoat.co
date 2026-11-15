@@ -37,8 +37,12 @@ const nextConfig: NextConfig = {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
   async redirects() {
-    // Search-friendly aliases for the launch debate.
     return [
+      // One address for the whole site. Votes are remembered per address (the voter cookie and the browser's
+      // saved vote don't carry from whoisthegoats.com to www.whoisthegoats.com), so serving both would let the
+      // same person vote once on each.
+      { source: "/:path*", has: [{ type: "host", value: "www.whoisthegoats.com" }], destination: "https://whoisthegoats.com/:path*", permanent: true },
+      // Search-friendly aliases for the launch debate.
       { source: "/who-is-the-goat", destination: "/", permanent: true },
       { source: "/messi-vs-ronaldo-vote", destination: "/messi-vs-ronaldo", permanent: true },
       { source: "/messi-vs-ronaldo-results", destination: "/messi-vs-ronaldo/results", permanent: true },
