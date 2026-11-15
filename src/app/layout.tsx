@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 
 import { JsonLd } from "@/components/json-ld";
@@ -108,14 +107,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <JsonLd data={websiteJsonLd} />
         <Analytics />
         {adsterraEnabled && ADSTERRA_SOCIAL_BAR ? <SocialBar /> : null}
-        {adsEnabled() ? (
-          <Script
-            id="adsense"
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
-            strategy="afterInteractive"
-            crossOrigin="anonymous"
-          />
-        ) : null}
+        {/* Google's own snippet, as a plain tag: React moves it into <head> in the page's HTML, where Google's site check looks for it. */}
+        {adsEnabled() ? <script async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`} crossOrigin="anonymous" /> : null}
       </body>
     </html>
   );
