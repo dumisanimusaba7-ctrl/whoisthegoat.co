@@ -12,6 +12,11 @@ export type PlayPlayer = {
   debateTitle?: string;
   /** The winner-card photo, 1080×1350 with the face a third of the way down, as a path from the project root. */
   cardFile: string;
+  /**
+   * Other winner-card photos for the same player, same size. Which one a card gets is fixed by the knock-out order
+   * in the link (see pickCardPlayer), so a shared card never changes, and different games get different cards.
+   */
+  moreCardFiles?: string[];
   /** Where the photos came from. */
   credits: {
     portrait: string;
@@ -25,7 +30,7 @@ const CC = (who: string, licence: string, file: string) => `${who}, ${licence}, 
 export const PLAYERS: PlayPlayer[] = [
   { slug: "messi", firstName: "Lionel", name: "Messi", color: "#75AADB", debateSlug: "messi-vs-ronaldo", debateTitle: "Messi vs Ronaldo", cardFile: "assets/play/messi.jpg", credits: { portrait: CC("Bryan Berlin", "CC BY-SA 4.0", "Leo Messi Argentina v Egypt 7 July 2026-1.jpg"), card: "Al Jazeera gallery, 2022 World Cup final" } },
   { slug: "ronaldo", firstName: "Cristiano", name: "Ronaldo", color: "#E8322A", debateSlug: "messi-vs-ronaldo", debateTitle: "Messi vs Ronaldo", cardFile: "assets/play/ronaldo.jpg", credits: { portrait: CC("Bryan Berlin", "CC BY-SA 4.0", "Cristiano Ronaldo Croatia v Portugal 2 July 2026-075 (cropped).jpg"), card: "Real Madrid celebration, news photo" } },
-  { slug: "pele", firstName: "", name: "Pelé", color: "#009C3B", debateSlug: "pele-vs-maradona", debateTitle: "Pelé vs Maradona", cardFile: "assets/play/pele.jpg", credits: { portrait: CC("Unknown author", "public domain", "Pele con brasil (cropped).jpg"), card: CC("Associated Press", "public domain", "Pele celebrating 1970.jpg") } },
+  { slug: "pele", firstName: "", name: "Pelé", color: "#009C3B", debateSlug: "pele-vs-maradona", debateTitle: "Pelé vs Maradona", cardFile: "assets/play/pele.jpg", moreCardFiles: ["assets/play/pele-trophies.jpg"], credits: { portrait: CC("Unknown author", "public domain", "Pele con brasil (cropped).jpg"), card: `${CC("Associated Press", "public domain", "Pele celebrating 1970.jpg")}; second card (three trophies): supplied by the site owner` } },
   { slug: "maradona", firstName: "Diego", name: "Maradona", color: "#75AADB", debateSlug: "pele-vs-maradona", debateTitle: "Pelé vs Maradona", cardFile: "assets/play/maradona.jpg", credits: { portrait: "Supplied by the site owner", card: "Supplied by the site owner (1986 World Cup final)" } },
   { slug: "cruyff", firstName: "Johan", name: "Cruyff", color: "#FF6A13", cardFile: "assets/play/cruyff.jpg", credits: { portrait: CC("Rob Mieremet / Anefo", "CC0", "Johan Cruijff (1974).jpg"), card: "Supplied by the site owner (Netherlands, 1974)" } },
   { slug: "zidane", firstName: "Zinedine", name: "Zidane", color: "#2B5BD7", cardFile: "assets/play/zidane.jpg", credits: { portrait: "Supplied by the site owner", card: "Supplied by the site owner" } },
@@ -76,13 +81,22 @@ export function decodeOrder(code: string | null | undefined, winnerSlug: string)
 }
 
 /** The shape the winner-card renderer wants. `order` is who they knocked out, first to last. */
+/** The winner-card photo for this player and knock-out order: the main one, or another if they have more. */
+export function cardFileFor(player: PlayPlayer, order?: PlayPlayer[] | null): string {
+  const files = [player.cardFile, ...(player.moreCardFiles ?? [])];
+  if (files.length === 1 || !order?.length) return files[0];
+  // The same order always gives the same photo, so a shared link keeps its card.
+  const key = order.reduce((sum, beaten, index) => sum + (index + 1) * [...beaten.slug].reduce((n, c) => n + c.charCodeAt(0), 0), 0);
+  return files[key % files.length];
+}
+
 export function pickCardPlayer(player: PlayPlayer, order?: PlayPlayer[] | null) {
   return {
     slug: player.slug,
     fullName: fullName(player),
     name: player.name,
     color: player.color,
-    photoFile: player.cardFile,
+    photoFile: cardFileFor(player, order),
     beaten: PLAYERS.length - 1,
     beatenNames: order?.map((beaten) => beaten.name),
   };

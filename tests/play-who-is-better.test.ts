@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { existsSync } from "node:fs";
 
 import { DEBATES } from "@/lib/debates";
-import { decodeOrder, encodeOrder, fullName, getPlayer, pickCardPlayer, PLAYERS } from "@/lib/play/players";
+import { cardFileFor, decodeOrder, encodeOrder, fullName, getPlayer, pickCardPlayer, PLAYERS } from "@/lib/play/players";
 import { buildPool, gameReducer, roundNumber, shareText, shuffle, startGame, winnerOf } from "@/lib/play/who-is-better";
 
 /** A repeatable "random": a small linear congruential generator. */
@@ -176,5 +176,31 @@ describe("who is better: a game", () => {
   it("words the share line with the number beaten", () => {
     const winner = pool[0];
     expect(shareText(winner, 14)).toBe(`I knocked out 14 footballers and my ultimate player is ${winner.name}. Who's yours?`);
+  });
+});
+
+describe("winner cards with more than one photo", () => {
+  const pele = getPlayer("pele")!;
+
+  it("gives Pelé a second card photo, on disk, the same size as the first", () => {
+    expect(pele.moreCardFiles).toEqual(["assets/play/pele-trophies.jpg"]);
+    for (const file of [pele.cardFile, ...(pele.moreCardFiles ?? [])]) expect(existsSync(file), file).toBe(true);
+  });
+
+  it("keeps the same photo for the same knock-out order, and uses both across games", () => {
+    const others = PLAYERS.filter((p) => p.slug !== "pele");
+    const used = new Set<string>();
+    for (let seed = 1; seed <= 40; seed++) {
+      const order = shuffle(others, seeded(seed));
+      const file = cardFileFor(pele, order);
+      expect(cardFileFor(pele, order)).toBe(file);
+      used.add(file);
+    }
+    expect(used).toEqual(new Set(["assets/play/pele.jpg", "assets/play/pele-trophies.jpg"]));
+  });
+
+  it("uses the main photo with no order, and for players with a single photo", () => {
+    expect(cardFileFor(pele)).toBe("assets/play/pele.jpg");
+    expect(cardFileFor(getPlayer("messi")!, PLAYERS.filter((p) => p.slug !== "messi"))).toBe("assets/play/messi.jpg");
   });
 });
