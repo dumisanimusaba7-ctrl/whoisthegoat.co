@@ -14,12 +14,26 @@ import bellinghamWide from "@/assets/play/moments/bellingham-wide.jpg";
 import yamalRoar from "@/assets/play/moments/yamal-roar.jpg";
 import viniDance from "@/assets/play/moments/vini-dance.jpg";
 import palmerShrug from "@/assets/play/moments/palmer-shrug.jpg";
-import griezmannL from "@/assets/play/moments/griezmann-l.jpg";
 import pogbaDab from "@/assets/play/moments/pogba-dab.jpg";
 import dybalaMask from "@/assets/play/moments/dybala-mask.jpg";
 import ronaldoCalma from "@/assets/play/moments/ronaldo-calma.jpg";
 import vardySlide from "@/assets/play/moments/vardy-slide.jpg";
 import sakaFlag from "@/assets/play/moments/saka-flag.jpg";
+import griezmannL from "@/assets/play/moments/griezmann-l.jpg";
+import gyokeresMask from "@/assets/play/moments/gyokeres-mask.jpg";
+import viniEyes from "@/assets/play/moments/vini-eyes.jpg";
+import ronaldoHush from "@/assets/play/moments/ronaldo-hush.jpg";
+import mbappe2022 from "@/assets/play/moments/mbappe-2022.jpg";
+import oliseHush from "@/assets/play/moments/olise-hush.jpg";
+import haalandSlide from "@/assets/play/moments/haaland-slide.jpg";
+import salahSujood from "@/assets/play/moments/salah-sujood.jpg";
+import messiSky from "@/assets/play/moments/messi-sky.jpg";
+import kaneArms from "@/assets/play/moments/kane-arms.jpg";
+import sakaEars from "@/assets/play/moments/saka-ears.jpg";
+import leaoSurf from "@/assets/play/moments/leao-surf.jpg";
+import garnachoOverhead from "@/assets/play/moments/garnacho-overhead.jpg";
+import salahArms from "@/assets/play/moments/salah-arms.jpg";
+import bellinghamFull from "@/assets/play/moments/bellingham-full.jpg";
 
 /**
  * The original photo behind each silhouette, shown when the answer is revealed. Each is cropped to the
@@ -41,10 +55,24 @@ export const MOMENTS: Record<string, StaticImageData> = {
   "yamal-roar": yamalRoar,
   "vini-dance": viniDance,
   "palmer-shrug": palmerShrug,
-  "griezmann-l": griezmannL,
   "pogba-dab": pogbaDab,
   "dybala-mask": dybalaMask,
   "ronaldo-calma": ronaldoCalma,
   "vardy-slide": vardySlide,
   "saka-flag": sakaFlag,
+  "griezmann-l": griezmannL,
+  "gyokeres-mask": gyokeresMask,
+  "vini-eyes": viniEyes,
+  "ronaldo-hush": ronaldoHush,
+  "mbappe-2022": mbappe2022,
+  "olise-hush": oliseHush,
+  "haaland-slide": haalandSlide,
+  "salah-sujood": salahSujood,
+  "messi-sky": messiSky,
+  "kane-arms": kaneArms,
+  "saka-ears": sakaEars,
+  "leao-surf": leaoSurf,
+  "garnacho-overhead": garnachoOverhead,
+  "salah-arms": salahArms,
+  "bellingham-full": bellinghamFull,
 };

@@ -21,9 +21,15 @@ describe("the silhouette bank", () => {
       expect(s.celebration.length).toBeGreaterThan(2);
       expect(s.fact.endsWith(".")).toBe(true);
       expect(s.color).toMatch(/^#[0-9A-Fa-f]{6}$/);
-      expect(s.source.url).toMatch(/^https:\/\//);
+      expect(s.source.name.length).toBeGreaterThan(0);
+      if (s.source.url) expect(s.source.url).toMatch(/^https:\/\//);
       expect(LOOKS[s.player], `${s.player} needs hair and height`).toBeTruthy();
     }
+  });
+
+  it("has a reveal photo for every silhouette", () => {
+    const files = readdirSync("src/assets/play/moments").sort();
+    expect(files).toEqual(SILHOUETTES.map((s) => `${s.id}.jpg`).sort());
   });
 
   it("has a file for every silhouette and none left over", () => {

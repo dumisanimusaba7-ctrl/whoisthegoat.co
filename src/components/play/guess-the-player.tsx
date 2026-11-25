@@ -226,9 +226,13 @@ function Game({ questions, onAgain }: { questions: Question[]; onAgain: () => vo
             <p className="type-headline text-2xl">{correct ? "Yes!" : `It's ${question.silhouette.player}`}</p>
             <p className="mt-1 font-semibold">{question.silhouette.celebration}</p>
             <p className="mt-1 text-sm leading-relaxed text-mute-dark">{question.silhouette.fact}</p>
-            <a href={question.silhouette.source.url} target="_blank" rel="noopener noreferrer" className="link mt-2 inline-block text-sm">
-              Photo: {question.silhouette.source.name}
-            </a>
+            {question.silhouette.source.url ? (
+              <a href={question.silhouette.source.url} target="_blank" rel="noopener noreferrer" className="link mt-2 inline-block text-sm">
+                Photo: {question.silhouette.source.name}
+              </a>
+            ) : (
+              <p className="mt-2 text-sm text-mute-dark">Photo: {question.silhouette.source.name}</p>
+            )}
           </div>
         ) : null}
       </div>

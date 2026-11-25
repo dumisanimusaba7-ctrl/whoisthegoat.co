@@ -5,6 +5,20 @@ import dybala from "@/assets/play/silhouettes/dybala-mask.png";
 import ronaldoCalma from "@/assets/play/silhouettes/ronaldo-calma.png";
 import vardy from "@/assets/play/silhouettes/vardy-slide.png";
 import saka from "@/assets/play/silhouettes/saka-flag.png";
+import gyokeresMask from "@/assets/play/silhouettes/gyokeres-mask.png";
+import viniEyes from "@/assets/play/silhouettes/vini-eyes.png";
+import ronaldoHush from "@/assets/play/silhouettes/ronaldo-hush.png";
+import mbappe2022 from "@/assets/play/silhouettes/mbappe-2022.png";
+import oliseHush from "@/assets/play/silhouettes/olise-hush.png";
+import haalandSlide from "@/assets/play/silhouettes/haaland-slide.png";
+import salahSujood from "@/assets/play/silhouettes/salah-sujood.png";
+import messiSky from "@/assets/play/silhouettes/messi-sky.png";
+import kaneArms from "@/assets/play/silhouettes/kane-arms.png";
+import sakaEars from "@/assets/play/silhouettes/saka-ears.png";
+import leaoSurf from "@/assets/play/silhouettes/leao-surf.png";
+import garnachoOverhead from "@/assets/play/silhouettes/garnacho-overhead.png";
+import salahArms from "@/assets/play/silhouettes/salah-arms.png";
+import bellinghamFull from "@/assets/play/silhouettes/bellingham-full.png";
 import belling from "@/assets/play/silhouettes/bellingham-wide.png";
 import griezmann from "@/assets/play/silhouettes/griezmann-l.png";
 import haaland from "@/assets/play/silhouettes/haaland-zen.png";
@@ -34,8 +48,8 @@ export type Silhouette = {
   image: StaticImageData;
   /** The colour the outline turns when the answer is shown. */
   color: string;
-  /** Where the original photo is, so the answer can link to it instead of the site hosting it. */
-  source: { name: string; url: string };
+  /** Who the photo is from, and the page it is on when there is one. */
+  source: { name: string; url?: string };
 };
 
 export const SILHOUETTES: Silhouette[] = [
@@ -59,6 +73,20 @@ export const SILHOUETTES: Silhouette[] = [
   { id: "vardy-slide", player: "Jamie Vardy", celebration: "The corner flag slide", fact: "December 2020: a late winner at Sheffield United, then a slide into the corner flag.", image: vardy, color: "#0053A0", source: { name: "The Standard", url: "https://www.standard.co.uk/sport/football/sheffield-united-vs-leicester-city-result-jamie-vardy-goal-corner-flag-b193546.html" } },
   { id: "saka-flag", player: "Bukayo Saka", celebration: "The corner flag", fact: "Corner flag in hand after scoring for Arsenal.", image: saka, color: "#EF0107", source: { name: "The Sun", url: "https://www.the-sun.com/sport/7528359/what-does-bukayo-saka-celebration-mean/" } },
   { id: "griezmann-l", player: "Antoine Griezmann", celebration: "Take the L", fact: "The Fortnite dance he brought to the 2018 World Cup final.", image: griezmann, color: "#1E3A8A", source: { name: "Irish Mirror", url: "https://www.irishmirror.ie/sport/soccer/soccer-news/antoine-griezmanns-celebration-against-real-12327481" } },
+  { id: "gyokeres-mask", player: "Viktor Gyökeres", celebration: "The mask", fact: "Both hands over his face, like a mask. His celebration at Sporting.", image: gyokeresMask, color: "#0B7A3B", source: { name: "Supplied by the site owner" } },
+  { id: "vini-eyes", player: "Vinícius Júnior", celebration: "Eyes covered, finger out", fact: "One hand over his eyes and a finger pointing, in Real Madrid's white.", image: viniEyes, color: "#FEBE10", source: { name: "Supplied by the site owner" } },
+  { id: "ronaldo-hush", player: "Cristiano Ronaldo", celebration: "The hush", fact: "Crouched low with a finger to his lips, for Real Madrid.", image: ronaldoHush, color: "#E8322A", source: { name: "Supplied by the site owner" } },
+  { id: "mbappe-2022", player: "Kylian Mbappé", celebration: "The folded arms, Qatar 2022", fact: "The pose he took to the 2022 World Cup, where he won the Golden Boot.", image: mbappe2022, color: "#2B4C9B", source: { name: "Supplied by the site owner" } },
+  { id: "olise-hush", player: "Michael Olise", celebration: "The hush on his knees", fact: "Kneeling with a finger to his lips: Olise's celebration for Bayern Munich.", image: oliseHush, color: "#DC052D", source: { name: "Supplied by the site owner" } },
+  { id: "haaland-slide", player: "Erling Haaland", celebration: "The knee slide", fact: "Arms out, on his knees, in front of the fans: Haaland at Manchester City.", image: haalandSlide, color: "#6CABDD", source: { name: "Supplied by the site owner" } },
+  { id: "salah-sujood", player: "Mohamed Salah", celebration: "The sujood", fact: "He kneels and touches his forehead to the pitch, a Muslim prayer, after scoring for Liverpool.", image: salahSujood, color: "#C8102E", source: { name: "The Conversation", url: "https://theconversation.com/liverpool-fcs-mohamed-salahs-goal-celebrations-a-guide-to-british-muslimness-93084" } },
+  { id: "messi-sky", player: "Lionel Messi", celebration: "Both fingers to the sky", fact: "A tribute to his late grandmother, Celia.", image: messiSky, color: "#75AADB", source: { name: "talkSPORT", url: "https://talksport.com/football/world-cup/1278498/lionel-messi-point-sky-celebration-meaning-argentina-world-cup/" } },
+  { id: "kane-arms", player: "Harry Kane", celebration: "Arms wide", fact: "Arms spread wide, running to the fans: Harry Kane at Bayern Munich.", image: kaneArms, color: "#DC052D", source: { name: "Getty Images", url: "https://www.gettyimages.com/photos/harry-kane-celebrate" } },
+  { id: "saka-ears", player: "Bukayo Saka", celebration: "Hands behind the ears", fact: "Hands cupped behind his ears and tongue out: Saka's taunt to Tottenham fans in the north London derby.", image: sakaEars, color: "#EF0107", source: { name: "Football London", url: "https://www.football.london/arsenal-fc/news/bukayo-saka-taunts-tottenham-fans-29075030" } },
+  { id: "leao-surf", player: "Rafael Leão", celebration: "The surf", fact: "A crouch like riding a wave: Leão's celebration for AC Milan.", image: leaoSurf, color: "#FB090B", source: { name: "The Guardian", url: "https://www.theguardian.com/football/blog/2022/sep/05/rafael-leao-surfs-crest-of-wave-derby-double-and-assist-milan-internazionale" } },
+  { id: "garnacho-overhead", player: "Alejandro Garnacho", celebration: "The overhead kick", fact: "November 2023: his acrobatic goal for Manchester United at Everton, which he followed with a Ronaldo-style celebration.", image: garnachoOverhead, color: "#DA291C", source: { name: "Goal", url: "https://www.goal.com/en-us/lists/alejandro-garnacho-slammed-copying-cristiano-ronaldo-after-scoring-for-man-utd/bltc37aa5f4effd3e9f" } },
+  { id: "salah-arms", player: "Mohamed Salah", celebration: "Arms wide", fact: "Arms out wide after scoring at Anfield.", image: salahArms, color: "#C8102E", source: { name: "Alamy", url: "https://www.alamy.com/stock-photo-liverpools-mohamed-salah-celebrates-scoring-his-sides-second-goal-175614021.html" } },
+  { id: "bellingham-full", player: "Jude Bellingham", celebration: "Arms up, full stretch", fact: "The open-arms pose he took to Real Madrid.", image: bellinghamFull, color: "#EBB700", source: { name: "The Sun", url: "https://www.the-sun.com/sport/9793396/jude-bellingham-madrid-records/" } },
 ];
 
 /**
@@ -100,6 +128,10 @@ export const LOOKS: Record<string, Looks> = {
   "Paulo Dybala": { hair: "styled", height: 177 },
   "Jamie Vardy": { hair: "short", height: 179 },
   "Bukayo Saka": { hair: "curly", height: 178 },
+  "Viktor Gyökeres": { hair: "styled", height: 189 },
+  "Michael Olise": { hair: "long", height: 184 },
+  "Rafael Leão": { hair: "long", height: 188 },
+  "Alejandro Garnacho": { hair: "styled", height: 180 },
   // Players who are never the answer, but could pass for one.
   "Diego Maradona": { hair: "curly", height: 165 },
   Pelé: { hair: "curly", height: 173 },
